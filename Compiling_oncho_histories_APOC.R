@@ -1378,18 +1378,18 @@ define_pre_post_espen_inclusion_func <- function(df) {
   cat(" check labels included/excluded made in 'ESPEN_MDA_history'col:", unique(df$ESPEN_MDA_history), "\n")
   
   # checks (2) :
-  check1 <- dfAPOC_included2 %>%
+  check1 <- df %>%
     filter(
       (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
   cat(" check if any IUs have pre-ESPEN MDA to include BUT no ESPEN MDA to include:", length(unique(check1$IU_ID_MAPPING)), "\n")
   
   
-  check2 <- dfAPOC_included2 %>%
+  check2 <- df %>%
     filter(
       (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
   cat(" check if any IUs have ESPEN MDA to include BUT no pre-ESPEN MDA to include:", length(unique(check2$IU_ID_MAPPING)), "\n")
   
-  check3 <- dfAPOC_included2 %>%
+  check3 <- df %>%
     filter(
       (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
   cat(" check if any IUs are BOTH pre-ESPEN & ESPEN MDA to EXCLUDE (i.e., treatment naive?):", length(unique(check3$IU_ID_MAPPING)), "\n")
@@ -1618,363 +1618,366 @@ row_counts
 # ===================================================================================================================#
 # ===================================================== #
 #   Load in MDA start years based on APOC report (2015) #
-
-# load APOC national coverage data
-dfAPOC_report <- read.csv("C:/Users/mad206/OneDrive/Endgame/APOC/APOC_data_97_13.csv")
-colnames(dfAPOC_report) <- c("ADMIN0", "EpiCov", "Year")
-
-# find national start years
-#dfAPOC=na.omit(dfAPOC)
-NationalStartYear <- data.frame(Year=with(na.omit(dfAPOC_report), tapply(Year, ADMIN0, min)))
-NationalStartYear$ADMIN0 <- row.names(NationalStartYear)
-row.names(NationalStartYear) <- NULL
-
-# ========= #
-# start here #
-
-dfAPOC_included3 <- dfAPOC_included2 # speciy new dataframe so can easily reset
-
-nrow(subset(dfAPOC_included3, Year == 2022)) # check n IUs = 2346; March 2025: 2357 IUs (see below removed 7 TZN IUs)
-length(unique(dfAPOC_included3$IU_ID_MAPPING)) # 2357 IUs (April 25'- because 7 removed from TZN above: before 2364 )
-
-# ======================== #
-#     PROCEED FROM HERE    #
-
-view(dfAPOC_report) # check coverages & start years
-
-dfAPOC_report2 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/APOC/APOC_data_97_13_v2.csv")
-colnames(dfAPOC_report2) <- c("ADMIN0", "EpiCov", "Year")
-
-split_vectors <- setNames(split(dfAPOC_report2$EpiCov, dfAPOC_report2$ADMIN0), unique(dfAPOC_report2$ADMIN0))
-
-dfAPOC_included3$MDA_CDTI <- NA
-
-# ====== #
-# Angola #
-# ====== #
-
-coverages_Angola <- split_vectors$Angola
-coverages_Angola 
-start_year_AGO <- 7
-coverages_Angola <- coverages_Angola[start_year_AGO:length(coverages_Angola)]
-coverages_Angola <- coverages_Angola/100
-coverages_Angola2 <- ifelse(is.na(coverages_Angola), NA, ifelse(coverages_Angola < 0.65, 0.25, 0.65))
-#coverages_Angola2 <- c(0.25, 0.25, 0.25, 0.25, 0.25, 0.65, 0.25, 0.25)
-
-# Your original condition
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "AGO" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2004 & Year < 2013)
-# Get the indices where the condition is true
-indices <- which(condition)
-
-# new #
-# make col for raw Cov values (for final dataframe to publish)
-dfAPOC_included3$MDA_CDTI_raw <- NA_real_
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Angola, length.out = length(indices))
-
-# make col to indcate if cov based on IU-level specific coverage, national-level coverage, assumption, ESPEN - data
-dfAPOC_included3$cov_source <- NA
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# make col to indcate if cov based on IU-level specific coverage, national-level coverage, assumption, ESPEN - data
-dfAPOC_included3$cov_specific_source <- NA
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Angola2, length.out = length(indices))
-
-
-# ========#
-# Burundi #
-# ========#
-
-coverages_Burundi <- split_vectors$Burundi
-coverages_Burundi
-start_year_Burundi <- 7
-coverages_Burundi <- coverages_Burundi[start_year_Burundi:length(coverages_Burundi)]
-coverages_Burundi <- coverages_Burundi/100
-coverages_Burundi2 <- ifelse(is.na(coverages_Burundi), NA, ifelse(coverages_Burundi < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "BDI" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2004 & Year < 2013)
-indices <- which(condition)
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Burundi, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Burundi2, length.out = length(indices))
-
-
-
-# ========= #
-# Cameroon  #
-# ========= #
-coverages_Cameroon <- split_vectors$Cameroon
-coverages_Cameroon
-start_year_Cameroon <- 0
-coverages_Cameroon <- coverages_Cameroon[start_year_Cameroon:length(coverages_Cameroon)]
-coverages_Cameroon <- coverages_Cameroon/100
-coverages_Cameroon2 <- ifelse(is.na(coverages_Cameroon), NA, ifelse(coverages_Cameroon < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "CMR" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Cameroon, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Cameroon2, length.out = length(indices))
-
-# ========= #
-# CAR       #
-# ========= #
-
-coverages_CAR <- split_vectors$`Central African Republic`
-coverages_CAR
-start_year_CAR <- 0
-coverages_CAR <- coverages_CAR[start_year_CAR:length(coverages_CAR)]
-coverages_CAR <- coverages_CAR/100
-coverages_CAR2 <- ifelse(is.na(coverages_CAR), NA, ifelse(coverages_CAR < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "CAF" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_CAR, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_CAR2, length.out = length(indices))
-
-# ========= #
-# Chad (TCD)#
-# ========= #
-
-coverages_TCD <- split_vectors$Chad
-coverages_TCD
-start_year_TCD <- 0
-coverages_TCD <- coverages_TCD[start_year_TCD:length(coverages_TCD)]
-coverages_TCD <- coverages_TCD/100
-coverages_TCD2 <- ifelse(is.na(coverages_TCD), NA, ifelse(coverages_TCD < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "TCD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_CAR, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_CAR2, length.out = length(indices))
-
-# ============ #
-# Congo (COG)  #
-# ============ #
-
-coverages_COG <- split_vectors$Congo
-coverages_COG
-start_year_COG <- 3
-coverages_COG <- coverages_COG[start_year_COG:length(coverages_COG)]
-coverages_COG <- coverages_COG/100
-coverages_COG2 <- ifelse(is.na(coverages_COG), NA, ifelse(coverages_COG < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "COG" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
-indices <- which(condition)
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_COG, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_COG2, length.out = length(indices))
-
-
-# ============ #
-# DRC (COD)  #
-# ========== #
-
-coverages_COD <- split_vectors$`Democratic Republic of the Congo`
-coverages_COD
-start_year_COD <- 3
-coverages_COD <- coverages_COD[start_year_COD:length(coverages_COD)]
-coverages_COD <- coverages_COD/100
-coverages_COD2 <- ifelse(is.na(coverages_COD), NA, ifelse(coverages_COD < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "COD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_COD, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_COD2, length.out = length(indices))
-
-# ================ #
-# Eq Guinea (GNQ)  #
-
-coverages_GNQ <- split_vectors$`Equatorial Guinea`
-coverages_GNQ
-start_year_GNQ <- 0
-coverages_GNQ <- coverages_GNQ[start_year_GNQ:length(coverages_GNQ)]
-coverages_GNQ <- coverages_GNQ/100
-coverages_GNQ2 <- ifelse(is.na(coverages_GNQ), NA, ifelse(coverages_GNQ < 0.65, 0.25, 0.65))
-
-# need to make seperate vectors for the cov_soruce col due to NAs
-cov_source_GNQ <- ifelse(!is.na(coverages_GNQ), "national-level coverage data", NA)
-cov_source_GNQ2 <- ifelse(!is.na(coverages_GNQ), "APOC report, 2015", NA)
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "GNQ" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_GNQ, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep(cov_source_GNQ, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_GNQ2, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_GNQ2, length.out = length(indices))
-
-
-# ================ #
-# Ethiopia (ETH)  #
-
-coverages_ETH <- split_vectors$Ethiopia
-coverages_ETH
-start_year_ETH <- 3
-coverages_ETH <- coverages_ETH[start_year_ETH:length(coverages_ETH)]
-coverages_ETH <- coverages_ETH/100
-coverages_ETH2 <- ifelse(is.na(coverages_ETH), NA, ifelse(coverages_ETH < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "ETH" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_ETH, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_ETH2, length.out = length(indices))
-
-# ================ #
-# Gabon (GAB)     #
-
-coverages_GAB <- split_vectors$Gabon
-coverages_GAB
-start_year_GAB <- 0
-coverages_GAB <- coverages_GAB[start_year_GAB:length(coverages_GAB)]
-coverages_GAB <- coverages_GAB/100
-coverages_GAB2 <- ifelse(is.na(coverages_GAB), NA, ifelse(coverages_GAB < 0.65, 0.25, 0.65))
-
-# need to make seperate vectors for the cov_soruce col due to NAs
-cov_source_GAB <- ifelse(!is.na(coverages_GAB), "national-level coverage data", NA)
-cov_source_GAB2 <- ifelse(!is.na(coverages_GAB), "APOC report, 2015", NA)
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "GAB" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_GAB, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep(cov_source_GAB, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_GAB2, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_GAB2, length.out = length(indices))
-
-# ================ #
-# Liberia (LBR)   #
-
-coverages_LBR <- split_vectors$Liberia
-coverages_LBR
-start_year_LBR <- 0
-coverages_LBR <- coverages_LBR[start_year_LBR:length(coverages_LBR)]
-coverages_LBR <- coverages_LBR/100
-coverages_LBR2 <- ifelse(is.na(coverages_LBR), NA, ifelse(coverages_LBR < 0.65, 0.25, 0.65))
-
-# need to make seperate vectors for the cov_soruce col due to NAs
-cov_source_LBR <- ifelse(!is.na(coverages_LBR), "national-level coverage data", NA)
-cov_source_LBR2 <- ifelse(!is.na(coverages_LBR), "APOC report, 2015", NA)
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "LBR" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_LBR, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep(cov_source_LBR, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_LBR2, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_LBR2, length.out = length(indices))
-
-# ================ #
-# Malawi (MWI)   #
-
-coverages_MWI <- split_vectors$Malawi
-coverages_MWI
-start_year_MWI <- 0
-coverages_MWI <- coverages_MWI[start_year_MWI:length(coverages_MWI)]
-coverages_MWI <- coverages_MWI/100
-coverages_MWI2 <- ifelse(is.na(coverages_MWI), NA, ifelse(coverages_MWI < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "MWI" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_MWI, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_MWI2, length.out = length(indices))
+# 
+# # load APOC national coverage data
+# dfAPOC_report <- read.csv("C:/Users/mad206/OneDrive/Endgame/APOC/APOC_data_97_13.csv")
+# colnames(dfAPOC_report) <- c("ADMIN0", "EpiCov", "Year")
+# 
+# # find national start years
+# #dfAPOC=na.omit(dfAPOC)
+# NationalStartYear <- data.frame(Year=with(na.omit(dfAPOC_report), tapply(Year, ADMIN0, min)))
+# NationalStartYear$ADMIN0 <- row.names(NationalStartYear)
+# row.names(NationalStartYear) <- NULL
+
+# # ========= #
+# # start here #
+# 
+# dfAPOC_included3 <- dfAPOC_included2 # speciy new dataframe so can easily reset
+# 
+# nrow(subset(dfAPOC_included3, Year == 2022)) # check n IUs = 2346; March 2025: 2357 IUs (see below removed 7 TZN IUs)
+# length(unique(dfAPOC_included3$IU_ID_MAPPING)) # 2357 IUs (April 25'- because 7 removed from TZN above: before 2364 )
+# 
+# # ======================== #
+# #     PROCEED FROM HERE    #
+# 
+# #view(dfAPOC_report) # check coverages & start years
+# 
+# # ===================================================== #
+# #   Load in MDA start years based on APOC report (2015) #
+# 
+# dfAPOC_report2 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/APOC/APOC_data_97_13_v2.csv")
+# colnames(dfAPOC_report2) <- c("ADMIN0", "EpiCov", "Year")
+# 
+# split_vectors <- setNames(split(dfAPOC_report2$EpiCov, dfAPOC_report2$ADMIN0), unique(dfAPOC_report2$ADMIN0))
+# 
+# dfAPOC_included3$MDA_CDTI <- NA
+# 
+# # ====== #
+# # Angola #
+# # ====== #
+# 
+# coverages_Angola <- split_vectors$Angola
+# coverages_Angola 
+# start_year_AGO <- 7
+# coverages_Angola <- coverages_Angola[start_year_AGO:length(coverages_Angola)]
+# coverages_Angola <- coverages_Angola/100
+# coverages_Angola2 <- ifelse(is.na(coverages_Angola), NA, ifelse(coverages_Angola < 0.65, 0.25, 0.65))
+# #coverages_Angola2 <- c(0.25, 0.25, 0.25, 0.25, 0.25, 0.65, 0.25, 0.25)
+# 
+# # Your original condition
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "AGO" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2004 & Year < 2013)
+# # Get the indices where the condition is true
+# indices <- which(condition)
+# 
+# # new #
+# # make col for raw Cov values (for final dataframe to publish)
+# dfAPOC_included3$MDA_CDTI_raw <- NA_real_
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Angola, length.out = length(indices))
+# 
+# # make col to indcate if cov based on IU-level specific coverage, national-level coverage, assumption, ESPEN - data
+# dfAPOC_included3$cov_source <- NA
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # make col to indcate if cov based on IU-level specific coverage, national-level coverage, assumption, ESPEN - data
+# dfAPOC_included3$cov_specific_source <- NA
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Angola2, length.out = length(indices))
+# 
+# 
+# # ========#
+# # Burundi #
+# # ========#
+# 
+# coverages_Burundi <- split_vectors$Burundi
+# coverages_Burundi
+# start_year_Burundi <- 7
+# coverages_Burundi <- coverages_Burundi[start_year_Burundi:length(coverages_Burundi)]
+# coverages_Burundi <- coverages_Burundi/100
+# coverages_Burundi2 <- ifelse(is.na(coverages_Burundi), NA, ifelse(coverages_Burundi < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "BDI" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2004 & Year < 2013)
+# indices <- which(condition)
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Burundi, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Burundi2, length.out = length(indices))
+# 
+# 
+# 
+# # ========= #
+# # Cameroon  #
+# # ========= #
+# coverages_Cameroon <- split_vectors$Cameroon
+# coverages_Cameroon
+# start_year_Cameroon <- 0
+# coverages_Cameroon <- coverages_Cameroon[start_year_Cameroon:length(coverages_Cameroon)]
+# coverages_Cameroon <- coverages_Cameroon/100
+# coverages_Cameroon2 <- ifelse(is.na(coverages_Cameroon), NA, ifelse(coverages_Cameroon < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "CMR" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_Cameroon, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_Cameroon2, length.out = length(indices))
+# 
+# # ========= #
+# # CAR       #
+# # ========= #
+# 
+# coverages_CAR <- split_vectors$`Central African Republic`
+# coverages_CAR
+# start_year_CAR <- 0
+# coverages_CAR <- coverages_CAR[start_year_CAR:length(coverages_CAR)]
+# coverages_CAR <- coverages_CAR/100
+# coverages_CAR2 <- ifelse(is.na(coverages_CAR), NA, ifelse(coverages_CAR < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "CAF" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_CAR, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_CAR2, length.out = length(indices))
+# 
+# # ========= #
+# # Chad (TCD)#
+# # ========= #
+# 
+# coverages_TCD <- split_vectors$Chad
+# coverages_TCD
+# start_year_TCD <- 0
+# coverages_TCD <- coverages_TCD[start_year_TCD:length(coverages_TCD)]
+# coverages_TCD <- coverages_TCD/100
+# coverages_TCD2 <- ifelse(is.na(coverages_TCD), NA, ifelse(coverages_TCD < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "TCD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_CAR, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_CAR2, length.out = length(indices))
+# 
+# # ============ #
+# # Congo (COG)  #
+# # ============ #
+# 
+# coverages_COG <- split_vectors$Congo
+# coverages_COG
+# start_year_COG <- 3
+# coverages_COG <- coverages_COG[start_year_COG:length(coverages_COG)]
+# coverages_COG <- coverages_COG/100
+# coverages_COG2 <- ifelse(is.na(coverages_COG), NA, ifelse(coverages_COG < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "COG" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
+# indices <- which(condition)
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_COG, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_COG2, length.out = length(indices))
+# 
+# 
+# # ============ #
+# # DRC (COD)  #
+# # ========== #
+# 
+# coverages_COD <- split_vectors$`Democratic Republic of the Congo`
+# coverages_COD
+# start_year_COD <- 3
+# coverages_COD <- coverages_COD[start_year_COD:length(coverages_COD)]
+# coverages_COD <- coverages_COD/100
+# coverages_COD2 <- ifelse(is.na(coverages_COD), NA, ifelse(coverages_COD < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "COD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_COD, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_COD2, length.out = length(indices))
+# 
+# # ================ #
+# # Eq Guinea (GNQ)  #
+# 
+# coverages_GNQ <- split_vectors$`Equatorial Guinea`
+# coverages_GNQ
+# start_year_GNQ <- 0
+# coverages_GNQ <- coverages_GNQ[start_year_GNQ:length(coverages_GNQ)]
+# coverages_GNQ <- coverages_GNQ/100
+# coverages_GNQ2 <- ifelse(is.na(coverages_GNQ), NA, ifelse(coverages_GNQ < 0.65, 0.25, 0.65))
+# 
+# # need to make seperate vectors for the cov_soruce col due to NAs
+# cov_source_GNQ <- ifelse(!is.na(coverages_GNQ), "national-level coverage data", NA)
+# cov_source_GNQ2 <- ifelse(!is.na(coverages_GNQ), "APOC report, 2015", NA)
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "GNQ" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_GNQ, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep(cov_source_GNQ, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_GNQ2, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_GNQ2, length.out = length(indices))
+# 
+# 
+# # ================ #
+# # Ethiopia (ETH)  #
+# 
+# coverages_ETH <- split_vectors$Ethiopia
+# coverages_ETH
+# start_year_ETH <- 3
+# coverages_ETH <- coverages_ETH[start_year_ETH:length(coverages_ETH)]
+# coverages_ETH <- coverages_ETH/100
+# coverages_ETH2 <- ifelse(is.na(coverages_ETH), NA, ifelse(coverages_ETH < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "ETH" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 2000 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_ETH, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_ETH2, length.out = length(indices))
+# 
+# # ================ #
+# # Gabon (GAB)     #
+# 
+# coverages_GAB <- split_vectors$Gabon
+# coverages_GAB
+# start_year_GAB <- 0
+# coverages_GAB <- coverages_GAB[start_year_GAB:length(coverages_GAB)]
+# coverages_GAB <- coverages_GAB/100
+# coverages_GAB2 <- ifelse(is.na(coverages_GAB), NA, ifelse(coverages_GAB < 0.65, 0.25, 0.65))
+# 
+# # need to make seperate vectors for the cov_soruce col due to NAs
+# cov_source_GAB <- ifelse(!is.na(coverages_GAB), "national-level coverage data", NA)
+# cov_source_GAB2 <- ifelse(!is.na(coverages_GAB), "APOC report, 2015", NA)
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "GAB" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_GAB, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep(cov_source_GAB, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_GAB2, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_GAB2, length.out = length(indices))
+# 
+# # ================ #
+# # Liberia (LBR)   #
+# 
+# coverages_LBR <- split_vectors$Liberia
+# coverages_LBR
+# start_year_LBR <- 0
+# coverages_LBR <- coverages_LBR[start_year_LBR:length(coverages_LBR)]
+# coverages_LBR <- coverages_LBR/100
+# coverages_LBR2 <- ifelse(is.na(coverages_LBR), NA, ifelse(coverages_LBR < 0.65, 0.25, 0.65))
+# 
+# # need to make seperate vectors for the cov_soruce col due to NAs
+# cov_source_LBR <- ifelse(!is.na(coverages_LBR), "national-level coverage data", NA)
+# cov_source_LBR2 <- ifelse(!is.na(coverages_LBR), "APOC report, 2015", NA)
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "LBR" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_LBR, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep(cov_source_LBR, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_LBR2, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_LBR2, length.out = length(indices))
+# 
+# # ================ #
+# # Malawi (MWI)   #
+# 
+# coverages_MWI <- split_vectors$Malawi
+# coverages_MWI
+# start_year_MWI <- 0
+# coverages_MWI <- coverages_MWI[start_year_MWI:length(coverages_MWI)]
+# coverages_MWI <- coverages_MWI/100
+# coverages_MWI2 <- ifelse(is.na(coverages_MWI), NA, ifelse(coverages_MWI < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "MWI" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_MWI, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_MWI2, length.out = length(indices))
 
 
 # ================ #
@@ -2380,65 +2383,65 @@ length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 nrow(check_df)
 
-# ================  #
-# South Sudan (SSD) #
-
-coverages_SSD <- split_vectors$`South Sudan`
-coverages_SSD # NAs found
-start_year_SSD <- 0
-coverages_SSD <- coverages_SSD[start_year_SSD:length(coverages_SSD)]
-coverages_SSD <- coverages_SSD/100
-coverages_SSD2 <- ifelse(is.na(coverages_SSD), NA, ifelse(coverages_SSD < 0.65, 0.25, 0.65))
-
-# need to make seperate vectors for the cov_soruce col due to NAs
-cov_source_SSD <- ifelse(!is.na(coverages_SSD), "national-level coverage data", NA)
-cov_source_SSD2 <- ifelse(!is.na(coverages_SSD), "APOC report, 2015", NA)
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "SSD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_SSD, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep(cov_source_SSD, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_SSD2, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SSD2, length.out = length(indices))
-
-check_df <- subset(dfAPOC_included3, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
-
-# ================  #
-# Tanzania (TZA)    #
-
-coverages_TZA <- split_vectors$`Tanzania (Mainland)`
-coverages_TZA
-start_year_TZA <- 0
-coverages_TZA <- coverages_TZA[start_year_TZA:length(coverages_TZA)]
-coverages_TZA <- coverages_TZA/100
-coverages_TZA2 <- ifelse(is.na(coverages_TZA), NA, ifelse(coverages_TZA < 0.65, 0.25, 0.65))
-
-condition <- with(dfAPOC_included3, ADMIN0ISO3 == "TZA" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_TZA, length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
-
-# Use indexing to assign values based on the condition
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_TZA2, length.out = length(indices))
-
-check_df <- subset(dfAPOC_included3, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
+# # ================  #
+# # South Sudan (SSD) #
+# 
+# coverages_SSD <- split_vectors$`South Sudan`
+# coverages_SSD # NAs found
+# start_year_SSD <- 0
+# coverages_SSD <- coverages_SSD[start_year_SSD:length(coverages_SSD)]
+# coverages_SSD <- coverages_SSD/100
+# coverages_SSD2 <- ifelse(is.na(coverages_SSD), NA, ifelse(coverages_SSD < 0.65, 0.25, 0.65))
+# 
+# # need to make seperate vectors for the cov_soruce col due to NAs
+# cov_source_SSD <- ifelse(!is.na(coverages_SSD), "national-level coverage data", NA)
+# cov_source_SSD2 <- ifelse(!is.na(coverages_SSD), "APOC report, 2015", NA)
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "SSD" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_SSD, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep(cov_source_SSD, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep(cov_source_SSD2, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SSD2, length.out = length(indices))
+# 
+# check_df <- subset(dfAPOC_included3, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
+# 
+# # ================  #
+# # Tanzania (TZA)    #
+# 
+# coverages_TZA <- split_vectors$`Tanzania (Mainland)`
+# coverages_TZA
+# start_year_TZA <- 0
+# coverages_TZA <- coverages_TZA[start_year_TZA:length(coverages_TZA)]
+# coverages_TZA <- coverages_TZA/100
+# coverages_TZA2 <- ifelse(is.na(coverages_TZA), NA, ifelse(coverages_TZA < 0.65, 0.25, 0.65))
+# 
+# condition <- with(dfAPOC_included3, ADMIN0ISO3 == "TZA" & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_TZA, length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+# 
+# # Use indexing to assign values based on the condition
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_TZA2, length.out = length(indices))
+# 
+# check_df <- subset(dfAPOC_included3, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 # ================  #
 # Uganda (UGA)      #
@@ -2751,6 +2754,125 @@ dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info ind
 check_df <- subset(dfAPOC_included3, Year == 2022)
 nrow(check_df) # 2107 IUs 
 length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
+
+
+# =============================================== #
+
+# ===================================================== #
+#   Load in MDA start years based on APOC report (2015) #
+
+dfAPOC_report2 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/APOC/APOC_data_97_13_v2.csv")
+colnames(dfAPOC_report2) <- c("ADMIN0", "EpiCov", "Year")
+
+split_vectors <- setNames(split(dfAPOC_report2$EpiCov, dfAPOC_report2$ADMIN0), unique(dfAPOC_report2$ADMIN0))
+
+# ================================================================================================ #
+#                   Function to process pre-ESPEN MDA for the countries                            #
+# "AGO", "BDI", "CMR", "CAF", "TCD", "COG", "COD", "GNQ", "ETH", "GAB", "LBR", "MWI", "SSD", "TZA" #
+
+
+# Define the function to process MDA coverage assignment for each country
+process_mda_coverage <- function(df, split_vectors, country_code, coverage_data, start_year, condition_year_start, condition_year_end) {
+  
+  # Extract the coverage data for the specific country
+  coverages <- coverage_data
+  coverages <- coverages[start_year:length(coverages)]  # Slice the coverage data based on the start year
+  coverages <- coverages / 100  # Convert to proportion (percentage -> decimal)
+  
+  # Apply the coverage condition
+  coverages2 <- ifelse(is.na(coverages), NA, ifelse(coverages < 0.65, 0.25, 0.65))  # Apply threshold for coverage
+  
+  # Create a condition for the specific country and years
+  condition <- with(df, ADMIN0ISO3 == country_code & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > condition_year_start & Year < condition_year_end)
+  indices <- which(condition)
+  
+  # Create the necessary columns if they don't exist (on first iteration only)
+  if (!"MDA_CDTI_raw" %in% colnames(df)) {
+    df$MDA_CDTI_raw <- NA_real_
+    df$cov_source <- NA
+    df$cov_specific_source <- NA
+    df$MDA_CDTI <- NA_real_
+  }
+  
+  # Use indexing to assign values based on the condition
+  df$MDA_CDTI_raw[indices] <- rep(coverages, length.out = length(indices))
+  df$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  df$MDA_CDTI[indices] <- rep(coverages2, length.out = length(indices))
+  
+  return(df)
+}
+# List of countries and their respective coverage data (country_code, coverage data, and start year for each country)
+country_info <- list(
+  list(country_code = "AGO", coverage_data = split_vectors$Angola, start_year = 7, condition_year_start = 2004, condition_year_end = 2013),
+  list(country_code = "BDI", coverage_data = split_vectors$Burundi, start_year = 7, condition_year_start = 2004, condition_year_end = 2013),
+  list(country_code = "CMR", coverage_data = split_vectors$Cameroon, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "CAF", coverage_data = split_vectors$`Central African Republic`, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "TCD", coverage_data = split_vectors$Chad, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "COG", coverage_data = split_vectors$Congo, start_year = 3, condition_year_start = 2000, condition_year_end = 2013),
+  list(country_code = "COD", coverage_data = split_vectors$`Democratic Republic of the Congo`, start_year = 3, condition_year_start = 2000, condition_year_end = 2013),
+  list(country_code = "GNQ", coverage_data = split_vectors$`Equatorial Guinea`, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "ETH", coverage_data = split_vectors$Ethiopia, start_year = 3, condition_year_start = 2000, condition_year_end = 2013),
+  list(country_code = "GAB", coverage_data = split_vectors$Gabon, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "LBR", coverage_data = split_vectors$Liberia, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "MWI", coverage_data = split_vectors$Malawi, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "SSD", coverage_data = split_vectors$`South Sudan`, start_year = 0, condition_year_start = 1998, condition_year_end = 2013),
+  list(country_code = "TZA", coverage_data = split_vectors$`Tanzania (Mainland)`, start_year = 0, condition_year_start = 1998, condition_year_end = 2013)
+)
+
+# ================================================================== #
+# now use the function and country_info list to update the dataframe #
+
+process_all_countries <- function(dfAPOC_included2, split_vectors, country_info) {
+  
+  # Start with the original dataframe
+  dfAPOC_included3 <- dfAPOC_included2
+  
+  # Loop over all countries in country_info
+  for (country in country_info) {
+    
+    # Run the process_mda_coverage function with the current state of the dataframe
+    dfAPOC_included3 <- process_mda_coverage(
+      dfAPOC_included3,  # Pass the current state of the dataframe (modified by previous countries)
+      split_vectors, 
+      country_code = country$country_code,
+      coverage_data = country$coverage_data, 
+      start_year = country$start_year,
+      condition_year_start = country$condition_year_start,
+      condition_year_end = country$condition_year_end
+    )
+    
+    # If the country is Tanzania (TZA), apply the IU filtering logic (extra step for March 2025)
+    if (country$country_code == "TZA") {
+      dfAPOC_included3 <- dfAPOC_included3[!dfAPOC_included3$IU_CODE_MAPPING %in% c(
+        "TZA0478846626", "TZA0479246628", "TZA0480046634", "TZA0480046635", 
+        "TZA0480346638", "TZA0480846644", "TZA0481146645"
+      ), ]
+    }
+    
+    # After each country is processed, you can either save or further manipulate dfAPOC_included3
+    # For example: store the result or return a list of processed dataframes
+    # For now, we'll just print the number of rows processed for each country:
+    cat("Processed country:", country$country_code, "\n")
+    cat("Rows in 2022:", nrow(subset(dfAPOC_included3, Year == 2022)), "\n")
+    cat("Unique IU_ID_MAPPING count:", length(unique(dfAPOC_included3$IU_ID_MAPPING)), "\n")
+  }
+  
+  # Return the final processed dataframe (after all countries are processed)
+  return(dfAPOC_included3)
+}
+
+dfAPOC_included3 <- process_all_countries(dfAPOC_included2, split_vectors, country_info)
+
+# Check the result
+head(dfAPOC_included3)
+
+
+# ============================================================================== #
+
+
+
+
 
 # =================================== #
 # add in post-2012 histories (ESPEN)  #
