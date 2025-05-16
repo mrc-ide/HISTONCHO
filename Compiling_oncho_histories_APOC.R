@@ -694,13 +694,13 @@ dfAPOC_unknowns_hypoendemic_no_mda <- result$df_hypoendemic_no_mda
 dfAPOC_unknowns_nonendemic <- result$df_nonendemic
 
 
-# Compare the column names
-colnames(dfAPOC_unknowns_nonendemic) # Columns in dfAPOC_unknowns_nonendemic
-colnames(dfAPOC_nonendemic) # Columns in dfAPOC_nonendemic
-
-# Check if there are any columns that are present in one but not the other
-setdiff(colnames(dfAPOC_unknowns_nonendemic), colnames(dfAPOC_nonendemic)) # Columns in dfAPOC_unknowns_nonendemic but not in dfAPOC_nonendemic
-setdiff(colnames(dfAPOC_nonendemic), colnames(dfAPOC_unknowns_nonendemic)) # Columns in dfAPOC_nonendemic but not in dfAPOC_unknowns_nonendemic
+# # Compare the column names
+# colnames(dfAPOC_unknowns_nonendemic) # Columns in dfAPOC_unknowns_nonendemic
+# colnames(dfAPOC_nonendemic) # Columns in dfAPOC_nonendemic
+# 
+# # Check if there are any columns that are present in one but not the other
+# setdiff(colnames(dfAPOC_unknowns_nonendemic), colnames(dfAPOC_nonendemic)) # Columns in dfAPOC_unknowns_nonendemic but not in dfAPOC_nonendemic
+# setdiff(colnames(dfAPOC_nonendemic), colnames(dfAPOC_unknowns_nonendemic)) # Columns in dfAPOC_nonendemic but not in dfAPOC_unknowns_nonendemic
 
 
 # =================================================================================== #
@@ -780,7 +780,7 @@ setdiff(colnames(dfAPOC_nonendemic), colnames(dfAPOC_unknowns_nonendemic)) # Col
 
 
 # Function to combine daaframes on endemicity status and process 
-combine_apoc_data_with_checks <- function(df_endemic, df_unknowns_mesoendemic, df_unknowns_hypoendemic_with_mda,
+combine_apoc_sub_data_with_checks <- function(df_endemic, df_unknowns_mesoendemic, df_unknowns_hypoendemic_with_mda,
                                           df_unknowns_hypoendemic_no_mda, df_unknowns_nonendemic, df_nonendemic) {
   
   # Check the number of rows for the year 2022 in each dataframe
@@ -839,8 +839,8 @@ combine_apoc_data_with_checks <- function(df_endemic, df_unknowns_mesoendemic, d
   return(df_complete)
 }
 
-# Usage example:
-dfAPOC_complete <- combine_apoc_data_with_checks(dfAPOC_endemic, dfAPOC_unknowns_mesoendemic,
+# call function:
+dfAPOC_complete <- combine_apoc_sub_data_with_checks(dfAPOC_endemic, dfAPOC_unknowns_mesoendemic,
                                                  dfAPOC_unknowns_hypoendemic_with_mda, dfAPOC_unknowns_hypoendemic_no_mda,
                                                  dfAPOC_unknowns_nonendemic, dfAPOC_nonendemic)
 
@@ -1022,22 +1022,17 @@ process_apoc_data_with_checks <- function(dfAPOC_complete, ETH_exclude, ETH_excl
   return(list(final_APOC_IUs_vec = unique(final_APOC_IUs_vec), df_APOC_endemic_minimal = df_APOC_endemic_minimal))
 }
 
-# Usage example:
+# call function:
 result <- process_apoc_data_with_checks(dfAPOC_complete, ETH_exclude, ETH_exclude2, ETH_exclude3, ETH_include, SDN_include, TZN_include)
 
 # Output the results
 final_APOC_IUs_vec <- result$final_APOC_IUs_vec
 df_APOC_endemic_minimal <- result$df_APOC_endemic_minimal
 
-# Check the results
-length(final_APOC_IUs_vec) # Check the length of the unique IUs
-nrow(df_APOC_endemic_minimal) # Check the number of rows in the final dataframe
-
-
 # ==================================================== #
 #  Final endemic IUs seelction and do further checks   #
 
-filter_and_check_apoc_data <- function(dfAPOC_complete, final_APOC_IUs_vec) {
+filter_select_ALL_endemicIUs_and_check_func <- function(dfAPOC_complete, final_APOC_IUs_vec) {
   
   # rename one value due to formatting
   dfAPOC_complete$classification <- gsub("unknown with hypoendemic baseline\n  & Cum_MDA = 0 in ESPEN", 
@@ -1137,24 +1132,12 @@ filter_and_check_apoc_data <- function(dfAPOC_complete, final_APOC_IUs_vec) {
   return(list(dfAPOC_included = dfAPOC_included))
 }
 
-# Usage example:
-result <- filter_and_check_apoc_data(dfAPOC_complete, final_APOC_IUs_vec)
+# call function:
+result <- filter_select_ALL_endemicIUs_and_check_func(dfAPOC_complete, final_APOC_IUs_vec)
 
 # Output the results
 dfAPOC_included <- result$dfAPOC_included
 
-# ===================================================== #
-#   Load in MDA start years based on APOC report (2015) #
-
-# load APOC national coverage data
-dfAPOC_report <- read.csv("C:/Users/mad206/OneDrive/Endgame/APOC/APOC_data_97_13.csv")
-colnames(dfAPOC_report) <- c("ADMIN0", "EpiCov", "Year")
-
-# find national start years
-#dfAPOC=na.omit(dfAPOC)
-NationalStartYear <- data.frame(Year=with(na.omit(dfAPOC_report), tapply(Year, ADMIN0, min)))
-NationalStartYear$ADMIN0 <- row.names(NationalStartYear)
-row.names(NationalStartYear) <- NULL
 
 # ============================================ #
 #   Create rows going back to 1975 for each IU #
@@ -1276,7 +1259,7 @@ process_apoc_IUs_tobaseline_func <- function(dfAPOC_included, final_APOC_IUs_vec
   return(dfAPOC_included2_combined)
 }
 
-# Usage example:
+# call function:
 dfAPOC_included2 <- process_apoc_IUs_tobaseline_func(dfAPOC_included, final_APOC_IUs_vec)
 
 # ==================================================================================== #
@@ -1390,6 +1373,27 @@ define_pre_post_espen_inclusion_func <- function(df) {
     ) %>%
     ungroup()  # Remove grouping information
   
+  # checks (1) :
+  cat(" check labels included/excluded made in 'Pre_ESPEN_MDA_history'col:", unique(df$Pre_ESPEN_MDA_history), "\n")
+  cat(" check labels included/excluded made in 'ESPEN_MDA_history'col:", unique(df$ESPEN_MDA_history), "\n")
+  
+  # checks (2) :
+  check1 <- dfAPOC_included2 %>%
+    filter(
+      (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+  cat(" check if any IUs have pre-ESPEN MDA to include BUT no ESPEN MDA to include:", length(unique(check1$IU_ID_MAPPING)), "\n")
+  
+  
+  check2 <- dfAPOC_included2 %>%
+    filter(
+      (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+  cat(" check if any IUs have ESPEN MDA to include BUT no pre-ESPEN MDA to include:", length(unique(check2$IU_ID_MAPPING)), "\n")
+  
+  check3 <- dfAPOC_included2 %>%
+    filter(
+      (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude") ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+  cat(" check if any IUs are BOTH pre-ESPEN & ESPEN MDA to EXCLUDE (i.e., treatment naive?):", length(unique(check3$IU_ID_MAPPING)), "\n")
+
   # Return the updated dataframe
   return(df)
 }
@@ -1397,61 +1401,53 @@ define_pre_post_espen_inclusion_func <- function(df) {
 # Usage example:
 dfAPOC_included2 <- define_pre_post_espen_inclusion_func(dfAPOC_included2)
 
-# Check the result
-head(dfAPOC_included2$Pre_ESPEN_MDA_history)
-head(dfAPOC_included2$ESPEN_MDA_history)
-
-# ============================= #
-#   CONTINUE FROM HERE          #
-
-
-# check if any pre-ESPEN and ESPEN histories not both include
-
-check_histories <- dfAPOC_included2 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
-      (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
-  ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
-
-check_histories2 <- dfAPOC_included2 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
-      (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
-  ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
-
-
-length(unique(check_histories$IU_ID_MAPPING)) # 41 IUs (42 in April 25')
-
-check_histories_trtnaive <- dfAPOC_included2 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
-  ) # Treatment naive n = 586
-
-length(unique(check_histories_trtnaive$IU_ID_MAPPING)) # 586 IUs (596 in April 25')
-
-
-check_histories_trtnaive_lastyr <- subset(check_histories_trtnaive, Year == 2022)
-all_trtnaive_IUs <- ESPEN_IUs_ALL %>%
-  left_join(check_histories_trtnaive_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
-
-# check
-ggplot() +
-  geom_sf(data = all_trtnaive_IUs, aes(fill = endemicity_baseline), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-frequency_trtnaive_endemicity <- table(check_histories_trtnaive_lastyr$endemicity_baseline)
-print(frequency_trtnaive_endemicity)
+# # check if any pre-ESPEN and ESPEN histories not both include
+# 
+# check_histories <- dfAPOC_included2 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
+#       (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
+#   ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+# 
+# check_histories2 <- dfAPOC_included2 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
+#       (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
+#   ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+# 
+# 
+# length(unique(check_histories$IU_ID_MAPPING)) # 41 IUs (42 in April 25')
+# 
+# check_histories_trtnaive <- dfAPOC_included2 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
+#   ) # Treatment naive n = 586
+# 
+# length(unique(check_histories_trtnaive$IU_ID_MAPPING)) # 586 IUs (596 in April 25')
+# 
+# 
+# check_histories_trtnaive_lastyr <- subset(check_histories_trtnaive, Year == 2022)
+# all_trtnaive_IUs <- ESPEN_IUs_ALL %>%
+#   left_join(check_histories_trtnaive_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
+# 
+# # check
+# ggplot() +
+#   geom_sf(data = all_trtnaive_IUs, aes(fill = endemicity_baseline), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# frequency_trtnaive_endemicity <- table(check_histories_trtnaive_lastyr$endemicity_baseline)
+# print(frequency_trtnaive_endemicity)
 
 # ====================================================================================================== #
 #              Subset MAX_Endemicity  == any(endemic) to figure out n's                                  #
@@ -1459,100 +1455,144 @@ print(frequency_trtnaive_endemicity)
 # ====================================================================================================== #
 #              Subset MAX_Endemicity  == any(unknown/reported) to figure out n's                         #
 
-# ========================== #
-# Biannual treatment in APOC #
+# # ========================== #
+# # Biannual treatment in APOC #
+# 
+# Biannual_APOC_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+# 
+# Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+# 
+# Biannual_IUs_vec <- unique(Biannual_APOC_IUs2$IUs_NAME)
+# 
+# # # map these #
+# # biannual_IUs_spatial <- ESPEN_IUs_ALL %>%
+# #   left_join(Biannual_APOC_IUs2, by = c("IUs_NAME" = "IUs_NAME"))
+# # 
+# # biannual_IUs_spatial <- biannual_IUs_spatial[!is.na(biannual_IUs_spatial$Biannual),]
+# # 
+# # #all_IUs$Biannual_MDA_present <- ifelse(dfAPOC_complete_lastyr2$included2 %in% c("included","included as\ntreatment naive/hypoendemic or impact from LF MDA/hypoendemic"),"endemic", "non-endemic")
+# 
+# # ggplot() +
+# #   geom_sf(data = biannual_IUs_spatial, aes(fill = Biannual_startyr), colour = "black", alpha = 0.7) +
+# #   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+# #   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+# #   coord_sf(xlim = c(20, 40), ylim = c(-3, 22)) +
+# #   theme_bw() +
+# #   #scale_fill_manual(values = cbPalette3, na.value = "gray") +
+# #   scale_fill_viridis(option = "C", direction = -1, na.value = "gray") +
+# #   scale_colour_manual(na.value="gray")+
+# #   labs(fill='') +
+# #   theme(
+# #     legend.position = "bottom",  # Place the legend at the bottom
+# #     legend.direction = "horizontal")
+# 
+# # ggplot() +
+# #   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = "gray", alpha = 0.4) +
+# #   geom_sf(data = biannual_IUs_spatial, aes(fill = Biannual_startyr), colour = "black", alpha = 0.9) +
+# #   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+# #   coord_sf(xlim = c(20, 40), ylim = c(-10, 22)) +
+# #   theme_bw() +
+# #   scale_fill_viridis(option = "C", direction = -1) +
+# #   labs(fill='Starting year of biannual MDA') +
+# #   theme(
+# #     legend.position = "bottom",  # Place the legend at the bottom
+# #     legend.direction = "horizontal"
+# #   )
+# # ====================================================================================================== #
+# #    need to manually recode foci (Sudan only?) where "treatment naive" but actually have historical MDA #
+# 
+# Biannual_Sudan_IUs <- subset(Biannual_APOC_IUs2, ADMIN0ISO3 == "SDN")
+# 
+# Biannual_Sudan_IUs_vec <- unique(Biannual_Sudan_IUs$IUs_NAME2)
 
-Biannual_APOC_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
 
-Biannual_IUs_vec <- unique(Biannual_APOC_IUs2$IUs_NAME)
+# Define the function to get Biannual_IUs_vec and Biannual_Sudan_IUs_vec
+get_biannual_ius <- function(file_path) {
+  # Read the Biannual treatment data from the CSV
+  Biannual_APOC_IUs <- read.csv(file_path)
+  
+  # Filter out rows where Biannual is NA
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Create Biannual_IUs_vec
+  Biannual_IUs_vec <- unique(Biannual_APOC_IUs2$IUs_NAME)
+  
+  # Filter Sudan-specific data for Biannual treatment
+  Biannual_Sudan_IUs <- subset(Biannual_APOC_IUs2, ADMIN0ISO3 == "SDN")
+  
+  # Create Biannual_Sudan_IUs_vec
+  Biannual_Sudan_IUs_vec <- unique(Biannual_Sudan_IUs$IUs_NAME2)
+  
+  # Check the results
+  cat(" head of biannual in APOC vector:", unique(head(Biannual_IUs_vec)), "\n")
+  cat(" length of biannual in APOC vector:", length(unique(Biannual_IUs_vec)), "\n")
+  
+  cat(" head of biannual in SDN vector:", unique(head(Biannual_Sudan_IUs_vec)), "\n")
+  cat(" length of biannual in SDN vector:", length(unique(Biannual_Sudan_IUs_vec)), "\n")
+ 
+  # Return the two vectors
+  return(list(Biannual_IUs_vec = Biannual_IUs_vec, Biannual_Sudan_IUs_vec = Biannual_Sudan_IUs_vec))
+}
 
-# map these #
-biannual_IUs_spatial <- ESPEN_IUs_ALL %>%
-  left_join(Biannual_APOC_IUs2, by = c("IUs_NAME" = "IUs_NAME"))
+# call function:
+result <- get_biannual_ius("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-biannual_IUs_spatial <- biannual_IUs_spatial[!is.na(biannual_IUs_spatial$Biannual),]
+# Extract the results
+Biannual_IUs_vec <- result$Biannual_IUs_vec
+Biannual_Sudan_IUs_vec <- result$Biannual_Sudan_IUs_vec
 
-#all_IUs$Biannual_MDA_present <- ifelse(dfAPOC_complete_lastyr2$included2 %in% c("included","included as\ntreatment naive/hypoendemic or impact from LF MDA/hypoendemic"),"endemic", "non-endemic")
 
+# # ========================================================================================== #
+# # check include/ exclude combos in Pre_ESPEN_MDA_history/ ESPEN_MDA_history cols (repeated?) #
+# 
+# dfAPOC_included2$Pre_ESPEN_MDA_history <- ifelse(dfAPOC_included2$IUs_NAME %in% Biannual_Sudan_IUs_vec, "Include", dfAPOC_included2$Pre_ESPEN_MDA_history)
+# dfAPOC_included2$ESPEN_MDA_history <- ifelse(dfAPOC_included2$IUs_NAME %in% Biannual_Sudan_IUs_vec, "Include", dfAPOC_included2$ESPEN_MDA_history)
+# 
+# 
+# # check if any pre-ESPEN and ESPEN histories not both include
+# 
+# check_histories2 <- dfAPOC_included2 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
+#       (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
+#   ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
+# 
+# length(unique(check_histories2$IU_ID_MAPPING)) # 42 IUs (April 25')
+# 
+# check_histories_trtnaive2 <- dfAPOC_included2 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
+#   ) # Treatment naive n = 586
+# 
+# length(unique(check_histories_trtnaive2$IU_ID_MAPPING)) # 590 IUs (April 25')
+# 
+# 
+# check_histories_trtnaive_lastyr2 <- subset(check_histories_trtnaive2, Year == 2022)
+# all_trtnaive_IUs <- ESPEN_IUs_ALL %>%
+#   left_join(check_histories_trtnaive_lastyr2, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
+# 
+# # check
 # ggplot() +
-#   geom_sf(data = biannual_IUs_spatial, aes(fill = Biannual_startyr), colour = "black", alpha = 0.7) +
+#   geom_sf(data = all_trtnaive_IUs, aes(fill = endemicity_baseline), colour = NA, alpha = 0.7) +
 #   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
 #   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-#   coord_sf(xlim = c(20, 40), ylim = c(-3, 22)) +
+#   coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
 #   theme_bw() +
-#   #scale_fill_manual(values = cbPalette3, na.value = "gray") +
-#   scale_fill_viridis(option = "C", direction = -1, na.value = "gray") +
+#   scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
 #   scale_colour_manual(na.value="gray")+
 #   labs(fill='') +
 #   theme(
 #     legend.position = "bottom",  # Place the legend at the bottom
 #     legend.direction = "horizontal")
+# 
+# frequency_trtnaive_endemicity2 <- table(check_histories_trtnaive_lastyr2$endemicity_baseline)
+# print(frequency_trtnaive_endemicity2)
 
-ggplot() +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = "gray", alpha = 0.4) +
-  geom_sf(data = biannual_IUs_spatial, aes(fill = Biannual_startyr), colour = "black", alpha = 0.9) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(20, 40), ylim = c(-10, 22)) +
-  theme_bw() +
-  scale_fill_viridis(option = "C", direction = -1) +
-  labs(fill='Starting year of biannual MDA') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal"
-  )
-# ====================================================================================================== #
-#    need to manually recode foci (Sudan only?) where "treatment naive" but actually have historical MDA #
-
-Biannual_Sudan_IUs <- subset(Biannual_APOC_IUs2, ADMIN0ISO3 == "SDN")
-
-Biannual_Sudan_IUs_vec <- unique(Biannual_Sudan_IUs$IUs_NAME2)
-
-dfAPOC_included2$Pre_ESPEN_MDA_history <- ifelse(dfAPOC_included2$IUs_NAME %in% Biannual_Sudan_IUs_vec, "Include", dfAPOC_included2$Pre_ESPEN_MDA_history)
-dfAPOC_included2$ESPEN_MDA_history <- ifelse(dfAPOC_included2$IUs_NAME %in% Biannual_Sudan_IUs_vec, "Include", dfAPOC_included2$ESPEN_MDA_history)
-
-
-# check if any pre-ESPEN and ESPEN histories not both include
-
-check_histories2 <- dfAPOC_included2 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Exclude") |
-      (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
-  ) # its always "exclude" pre-ESPEN and "include" ESPEN, not otherway ( n = 26 IUs) = IUs where no pre-ESPEN only ESPEN (new?)
-
-length(unique(check_histories2$IU_ID_MAPPING)) # 42 IUs (April 25')
-
-check_histories_trtnaive2 <- dfAPOC_included2 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
-  ) # Treatment naive n = 586
-
-length(unique(check_histories_trtnaive2$IU_ID_MAPPING)) # 590 IUs (April 25')
-
-
-check_histories_trtnaive_lastyr2 <- subset(check_histories_trtnaive2, Year == 2022)
-all_trtnaive_IUs <- ESPEN_IUs_ALL %>%
-  left_join(check_histories_trtnaive_lastyr2, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
-
-# check
-ggplot() +
-  geom_sf(data = all_trtnaive_IUs, aes(fill = endemicity_baseline), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-frequency_trtnaive_endemicity2 <- table(check_histories_trtnaive_lastyr2$endemicity_baseline)
-print(frequency_trtnaive_endemicity2)
+# ============================= #
+#   CONTINUE FROM HERE          #
 
 #====================================================#
 #    Tanzania non-endemic IUs to remove - March 2025 #
@@ -1576,6 +1616,21 @@ row_counts
 # ===================================================================================================================#
 #                             Backfill histories based on pre-ESPEN/ ESPEN inclusion labels                          #
 # ===================================================================================================================#
+# ===================================================== #
+#   Load in MDA start years based on APOC report (2015) #
+
+# load APOC national coverage data
+dfAPOC_report <- read.csv("C:/Users/mad206/OneDrive/Endgame/APOC/APOC_data_97_13.csv")
+colnames(dfAPOC_report) <- c("ADMIN0", "EpiCov", "Year")
+
+# find national start years
+#dfAPOC=na.omit(dfAPOC)
+NationalStartYear <- data.frame(Year=with(na.omit(dfAPOC_report), tapply(Year, ADMIN0, min)))
+NationalStartYear$ADMIN0 <- row.names(NationalStartYear)
+row.names(NationalStartYear) <- NULL
+
+# ========= #
+# start here #
 
 dfAPOC_included3 <- dfAPOC_included2 # speciy new dataframe so can easily reset
 
