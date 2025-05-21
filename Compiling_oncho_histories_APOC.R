@@ -1598,19 +1598,19 @@ Biannual_Sudan_IUs_vec <- result$Biannual_Sudan_IUs_vec
 #    Tanzania non-endemic IUs to remove - March 2025 #
 #====================================================#
 
-# Remove rows where IU_CODE_MAPPING is one of the specified values
-dfAPOC_included2 <- dfAPOC_included2[!dfAPOC_included2$IU_CODE_MAPPING %in% c("TZA0478846626", "TZA0479246628", 
-                                                                              "TZA0480046634", "TZA0480046635", 
-                                                                              "TZA0480346638", "TZA0480846644", 
-                                                                              "TZA0481146645"), ]
-
-
-dfAPOC_included2_NGA <- subset(dfAPOC_included2, ADMIN0ISO3 == "NGA")
-
-row_counts <- dfAPOC_included2_NGA %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(row_count = n())
-row_counts
+# # Remove rows where IU_CODE_MAPPING is one of the specified values
+# dfAPOC_included2 <- dfAPOC_included2[!dfAPOC_included2$IU_CODE_MAPPING %in% c("TZA0478846626", "TZA0479246628", 
+#                                                                               "TZA0480046634", "TZA0480046635", 
+#                                                                               "TZA0480346638", "TZA0480846644", 
+#                                                                               "TZA0481146645"), ]
+# 
+# 
+# dfAPOC_included2_NGA <- subset(dfAPOC_included2, ADMIN0ISO3 == "NGA")
+# 
+# row_counts <- dfAPOC_included2_NGA %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   summarise(row_count = n())
+# row_counts
 
 
 # ===================================================================================================================#
@@ -2019,192 +2019,192 @@ row_counts
 # indices <- which(condition)
 # dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_NGA2, length.out = length(indices))
 
-dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0ISO3 == "NGA")
-
-row_counts <- dfAPOC_included3_NGA %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(row_count = n())
-row_counts
-
-
-# APPROACH 2: based on national oncho snapshot data #
-oncho_snapshot_NGA <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA.csv")
-oncho_snapshot_NGA <- oncho_snapshot_NGA %>%   rename_with(~gsub("^X", "", .), starts_with("X1990"):ends_with("X2021"))
-
-columns_to_update <- as.character(seq(1990, 2021))
-oncho_snapshot_NGA2 <- oncho_snapshot_NGA %>%
-  mutate(across(all_of(columns_to_update),
-                ~ case_when(
-                  . == 0 ~ 0,
-                  . < 65 ~ 0.25,
-                  . >= 65 ~ 0.65,
-                  TRUE ~ .  # Keep the original value if none of the conditions match
-                )
-  ))
-
-dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0 == "Nigeria") # test in this : dfAPOC_included3_NGA
-
-oncho_snapshot_long <- oncho_snapshot_NGA2 %>%
-  pivot_longer(cols = starts_with("1990"):ends_with("2021"),
-               names_to = "Year",
-               values_to = "Coverage_value_tmp") # Reshape the oncho_snapshot_NGA dataframe from wide to long format
-
-# Adding raw coverages and cov data source cols - Feb 2025 #
-# needed for raw cov values #
-oncho_snapshot_long_raw <- oncho_snapshot_NGA %>%
-  pivot_longer(cols = starts_with("1990"):ends_with("2021"),
-               names_to = "Year",
-               values_to = "Coverage_value_tmp") # Reshape the oncho_snapshot_NGA dataframe from wide to long format
-
-oncho_snapshot_long$Coverage_value_tmp_raw <- oncho_snapshot_long_raw$Coverage_value_tmp/100 # new col with raw cov values
-# make cols for cov_source and cov_specific_source with ifelse statements
-oncho_snapshot_long$Coverage_source_temp <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "IU-level coverage", NA)
-oncho_snapshot_long$Coverage_source_temp2 <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "FMOH national oncho snapshot", NA)
-
-# continue as before
-oncho_snapshot_long$Year <- as.numeric(oncho_snapshot_long$Year) # make numeric to merge
-
-dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA %>%
-  left_join(oncho_snapshot_long, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year")) # Merge the dataframes based on common columns
-
-dfAPOC_included3_NGA_merged$MDA_CDTI[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI)] <- dfAPOC_included3_NGA_merged$Coverage_value_tmp[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI)]
-
-# for raw cov and cov data source cols - feb 25
-dfAPOC_included3_NGA_merged$MDA_CDTI_raw[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI_raw)] <- dfAPOC_included3_NGA_merged$Coverage_value_tmp_raw[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI_raw)]
-dfAPOC_included3_NGA_merged$cov_source[is.na(dfAPOC_included3_NGA_merged$cov_source)] <- dfAPOC_included3_NGA_merged$Coverage_source_temp[is.na(dfAPOC_included3_NGA_merged$cov_source)]
-dfAPOC_included3_NGA_merged$cov_specific_source[is.na(dfAPOC_included3_NGA_merged$cov_specific_source)] <- dfAPOC_included3_NGA_merged$Coverage_source_temp2[is.na(dfAPOC_included3_NGA_merged$cov_specific_source)]
-
-#dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA_merged %>% select(1:69) # remove additional new cols from snapshot to same cols as dfAPOC_included3_NGA
-dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA_merged %>% select(1:72) # remove additional new cols from snapshot to same cols as dfAPOC_included3_NGA
-
-rows_to_keep <- dfAPOC_included3 %>%
-  anti_join(dfAPOC_included3_NGA_merged, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year")) # identify rows in dfAPOC_included3 that are not in merged_df
-
-dfAPOC_included3 <- bind_rows(rows_to_keep, dfAPOC_included3_NGA_merged) # update dfAPOC_included3 by including updated nigeria rows with covs
-
-extra_rows <- setdiff(dfAPOC_included3_NGA_merged, dfAPOC_included3_NGA)
-
-check_df <- subset(dfAPOC_included3, Year == 2022)
-nrow(check_df) # 2357 - (April 25')
-length(unique(dfAPOC_included3$IU_ID_MAPPING)) # 2357 in April 25'
-
-# ===================================================================================== #
-#     March 2025 - remove any NGA Ius newly introdcued that are non-endemic in snapshot 
-#    (re-introduced because now have a baseline-endemicity)                             #
-
-#oncho_snapshot_long_nonendemic <- subset(oncho_snapshot_long, Endemic_classification %in% c("Not Endemic", "Not Endemic "))
-oncho_snapshot_long_nonendemic <- subset(
-  oncho_snapshot_long, 
-  Endemic_classification %in% c("Not Endemic", "Not Endemic ") & 
-    !ADMIN2 %in% c("Enugu North", "Yola North") # these two are considered "Non-endemic" in oncho snapshot, 
-                                                # however have values in "Recommended treatment plan" and/or "MDA ever started"/
-                                                # "Year MDA started" + coverage values. Not other "Non-endemic" LGAs have coverage value
-                                                # but Recommended treatment plan" and/or "MDA ever started" do not have values so not
-                                                # included with treatment (Oncho snapshot 2022 check: 07-04-2025)
-)
-NGA_noneendemic <- unique(oncho_snapshot_long_nonendemic$ADMIN2)
-
-missing_values <- setdiff(NGA_noneendemic, dfAPOC_included3$IUs_NAME_MAPPING) # check if any non-endemic IUs in snapshot not found in ESPEN
-missing_values
-# Remove rows where IU_CODE_MAPPING is one of the specified values
-NGA_to_removesubset <- subset(dfAPOC_included3, IUs_NAME_MAPPING %in% NGA_noneendemic)
-IU_ID_NGA_toremove <- unique(NGA_to_removesubset$IU_CODE_MAPPING)
-length(IU_ID_NGA_toremove) # 248 IUs
-
-# find duplicates #
-NGA_to_removesubset_2022 <- subset(NGA_to_removesubset, Year == 2012) # 249 IUs (ITs actually 244 IUs in step below)
-value_counts <- table(NGA_to_removesubset_2022$IUs_NAME_MAPPING)
-value_counts
-
-NGA_noneendemic <- NGA_noneendemic[NGA_noneendemic != "Obi"] # remove this for now
-
-#dfAPOC_included3_NGAtoremove <- dfAPOC_included3[dfAPOC_included3$IUs_NAME_MAPPING %in% NGA_noneendemic, ]
-#dfAPOC_included3_NGAtoremove_2022 <- subset(dfAPOC_included3_NGAtoremove, Year == 2022)
-dfAPOC_included3 <- dfAPOC_included3[!dfAPOC_included3$IUs_NAME_MAPPING %in% NGA_noneendemic, ]
-
-
-
-# extra to remove (names mismatch in ESPEN/snapshot) =- 6 in total 
-extra_to_remove_NGA <- c("Quan'Pam", "Langtan North","Langtan South", "Kanem")
-dfAPOC_included3 <- dfAPOC_included3[!dfAPOC_included3$IUs_NAME_MAPPING %in% extra_to_remove_NGA, ]
-dfAPOC_included3 <- dfAPOC_included3[!(dfAPOC_included3$IUs_NAME_MAPPING == "Obi" & dfAPOC_included3$ADMIN1 == "Nasarawa"), ]
-
-# SO IN TOTAL 244 + 6 removed = 250 IUs in NGA to remove b/c non-endemic in SS
-
-# dfAPOC_included3_NGA_merged_Toungo <- subset(dfAPOC_included3_NGA_merged, ADMIN2 == "Toungo")
-# dfAPOC_included3_NGA_Toungo <- subset(dfAPOC_included3_NGA, ADMIN2 == "Toungo")
-admin2_counts_df <- dfAPOC_included3_NGA_merged %>%
-  group_by(ADMIN2) %>%
-  summarise(Count = n())
+# dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0ISO3 == "NGA")
+# 
+# row_counts <- dfAPOC_included3_NGA %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   summarise(row_count = n())
+# row_counts
+# 
+# 
+# # APPROACH 2: based on national oncho snapshot data #
+# oncho_snapshot_NGA <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA.csv")
+# oncho_snapshot_NGA <- oncho_snapshot_NGA %>%   rename_with(~gsub("^X", "", .), starts_with("X1990"):ends_with("X2021"))
+# 
+# columns_to_update <- as.character(seq(1990, 2021))
+# oncho_snapshot_NGA2 <- oncho_snapshot_NGA %>%
+#   mutate(across(all_of(columns_to_update),
+#                 ~ case_when(
+#                   . == 0 ~ 0,
+#                   . < 65 ~ 0.25,
+#                   . >= 65 ~ 0.65,
+#                   TRUE ~ .  # Keep the original value if none of the conditions match
+#                 )
+#   ))
+# 
+# dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0 == "Nigeria") # test in this : dfAPOC_included3_NGA
+# 
+# oncho_snapshot_long <- oncho_snapshot_NGA2 %>%
+#   pivot_longer(cols = starts_with("1990"):ends_with("2021"),
+#                names_to = "Year",
+#                values_to = "Coverage_value_tmp") # Reshape the oncho_snapshot_NGA dataframe from wide to long format
+# 
+# # Adding raw coverages and cov data source cols - Feb 2025 #
+# # needed for raw cov values #
+# oncho_snapshot_long_raw <- oncho_snapshot_NGA %>%
+#   pivot_longer(cols = starts_with("1990"):ends_with("2021"),
+#                names_to = "Year",
+#                values_to = "Coverage_value_tmp") # Reshape the oncho_snapshot_NGA dataframe from wide to long format
+# 
+# oncho_snapshot_long$Coverage_value_tmp_raw <- oncho_snapshot_long_raw$Coverage_value_tmp/100 # new col with raw cov values
+# # make cols for cov_source and cov_specific_source with ifelse statements
+# oncho_snapshot_long$Coverage_source_temp <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "IU-level coverage", NA)
+# oncho_snapshot_long$Coverage_source_temp2 <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "FMOH national oncho snapshot", NA)
+# 
+# # continue as before
+# oncho_snapshot_long$Year <- as.numeric(oncho_snapshot_long$Year) # make numeric to merge
+# 
+# dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA %>%
+#   left_join(oncho_snapshot_long, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year")) # Merge the dataframes based on common columns
+# 
+# dfAPOC_included3_NGA_merged$MDA_CDTI[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI)] <- dfAPOC_included3_NGA_merged$Coverage_value_tmp[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI)]
+# 
+# # for raw cov and cov data source cols - feb 25
+# dfAPOC_included3_NGA_merged$MDA_CDTI_raw[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI_raw)] <- dfAPOC_included3_NGA_merged$Coverage_value_tmp_raw[is.na(dfAPOC_included3_NGA_merged$MDA_CDTI_raw)]
+# dfAPOC_included3_NGA_merged$cov_source[is.na(dfAPOC_included3_NGA_merged$cov_source)] <- dfAPOC_included3_NGA_merged$Coverage_source_temp[is.na(dfAPOC_included3_NGA_merged$cov_source)]
+# dfAPOC_included3_NGA_merged$cov_specific_source[is.na(dfAPOC_included3_NGA_merged$cov_specific_source)] <- dfAPOC_included3_NGA_merged$Coverage_source_temp2[is.na(dfAPOC_included3_NGA_merged$cov_specific_source)]
+# 
+# #dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA_merged %>% select(1:69) # remove additional new cols from snapshot to same cols as dfAPOC_included3_NGA
+# dfAPOC_included3_NGA_merged <- dfAPOC_included3_NGA_merged %>% select(1:72) # remove additional new cols from snapshot to same cols as dfAPOC_included3_NGA
+# 
+# rows_to_keep <- dfAPOC_included3 %>%
+#   anti_join(dfAPOC_included3_NGA_merged, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year")) # identify rows in dfAPOC_included3 that are not in merged_df
+# 
+# dfAPOC_included3 <- bind_rows(rows_to_keep, dfAPOC_included3_NGA_merged) # update dfAPOC_included3 by including updated nigeria rows with covs
+# 
+# extra_rows <- setdiff(dfAPOC_included3_NGA_merged, dfAPOC_included3_NGA)
+# 
+# check_df <- subset(dfAPOC_included3, Year == 2022)
+# nrow(check_df) # 2357 - (April 25')
+# length(unique(dfAPOC_included3$IU_ID_MAPPING)) # 2357 in April 25'
+# 
+# # ===================================================================================== #
+# #     March 2025 - remove any NGA Ius newly introdcued that are non-endemic in snapshot 
+# #    (re-introduced because now have a baseline-endemicity)                             #
+# 
+# #oncho_snapshot_long_nonendemic <- subset(oncho_snapshot_long, Endemic_classification %in% c("Not Endemic", "Not Endemic "))
+# oncho_snapshot_long_nonendemic <- subset(
+#   oncho_snapshot_long, 
+#   Endemic_classification %in% c("Not Endemic", "Not Endemic ") & 
+#     !ADMIN2 %in% c("Enugu North", "Yola North") # these two are considered "Non-endemic" in oncho snapshot, 
+#                                                 # however have values in "Recommended treatment plan" and/or "MDA ever started"/
+#                                                 # "Year MDA started" + coverage values. Not other "Non-endemic" LGAs have coverage value
+#                                                 # but Recommended treatment plan" and/or "MDA ever started" do not have values so not
+#                                                 # included with treatment (Oncho snapshot 2022 check: 07-04-2025)
+# )
+# NGA_noneendemic <- unique(oncho_snapshot_long_nonendemic$ADMIN2)
+# 
+# missing_values <- setdiff(NGA_noneendemic, dfAPOC_included3$IUs_NAME_MAPPING) # check if any non-endemic IUs in snapshot not found in ESPEN
+# missing_values
+# # Remove rows where IU_CODE_MAPPING is one of the specified values
+# NGA_to_removesubset <- subset(dfAPOC_included3, IUs_NAME_MAPPING %in% NGA_noneendemic)
+# IU_ID_NGA_toremove <- unique(NGA_to_removesubset$IU_CODE_MAPPING)
+# length(IU_ID_NGA_toremove) # 248 IUs
+# 
+# # find duplicates #
+# NGA_to_removesubset_2022 <- subset(NGA_to_removesubset, Year == 2012) # 249 IUs (ITs actually 244 IUs in step below)
+# value_counts <- table(NGA_to_removesubset_2022$IUs_NAME_MAPPING)
+# value_counts
+# 
+# NGA_noneendemic <- NGA_noneendemic[NGA_noneendemic != "Obi"] # remove this for now
+# 
+# #dfAPOC_included3_NGAtoremove <- dfAPOC_included3[dfAPOC_included3$IUs_NAME_MAPPING %in% NGA_noneendemic, ]
+# #dfAPOC_included3_NGAtoremove_2022 <- subset(dfAPOC_included3_NGAtoremove, Year == 2022)
+# dfAPOC_included3 <- dfAPOC_included3[!dfAPOC_included3$IUs_NAME_MAPPING %in% NGA_noneendemic, ]
+# 
+# 
+# 
+# # extra to remove (names mismatch in ESPEN/snapshot) =- 6 in total 
+# extra_to_remove_NGA <- c("Quan'Pam", "Langtan North","Langtan South", "Kanem")
+# dfAPOC_included3 <- dfAPOC_included3[!dfAPOC_included3$IUs_NAME_MAPPING %in% extra_to_remove_NGA, ]
+# dfAPOC_included3 <- dfAPOC_included3[!(dfAPOC_included3$IUs_NAME_MAPPING == "Obi" & dfAPOC_included3$ADMIN1 == "Nasarawa"), ]
+# 
+# # SO IN TOTAL 244 + 6 removed = 250 IUs in NGA to remove b/c non-endemic in SS
+# 
+# # dfAPOC_included3_NGA_merged_Toungo <- subset(dfAPOC_included3_NGA_merged, ADMIN2 == "Toungo")
+# # dfAPOC_included3_NGA_Toungo <- subset(dfAPOC_included3_NGA, ADMIN2 == "Toungo")
+# admin2_counts_df <- dfAPOC_included3_NGA_merged %>%
+#   group_by(ADMIN2) %>%
+#   summarise(Count = n())
 
 # APPROACH 3: based on CC data #  - note APPROACH #2 supplants this
 # load in CC MDA history data #
-NGA_strt_stp_LGA <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_strt_stp_LGA.csv")
-#dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0 == "Nigeria")
-
-# # make sure all LGA names match ADMIN1 names in main dataframe (or find closest matches)
-# # Extract the 'ADMIN2' and 'LGA' columns from the data frames
+# NGA_strt_stp_LGA <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_strt_stp_LGA.csv")
+# #dfAPOC_included3_NGA <- subset(dfAPOC_included3, ADMIN0 == "Nigeria")
+# 
+# # # make sure all LGA names match ADMIN1 names in main dataframe (or find closest matches)
+# # # Extract the 'ADMIN2' and 'LGA' columns from the data frames
+# # NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA_LGAnames.csv")
+# # admin2_values <- na.omit(unique(dfAPOC_included3_NGA$ADMIN2))
+# # lga_values <- na.omit(unique(NGA_strt_stp_LGA$LGA))
+# #
+# # # Function to find the closest match for each 'LGA' value in 'ADMIN2'
+# # find_closest_match <- function(value, choices) {
+# #   distances <- stringdist::stringdistmatrix(value, choices)
+# #   min_index <- which.min(distances)
+# #   return(list(match = choices[min_index], score = 1 - distances[min_index]))
+# # }
+# #
+# # # Create a data frame to store the results
+# # result_df <- data.frame(LGA = character(), Closest_ADMIN2 = character(), Score = numeric(), stringsAsFactors = FALSE)
+# #
+# # # Iterate through each 'LGA' value and find the closest match in 'ADMIN2'
+# # for (lga_value in lga_values) {
+# #   match_info <- find_closest_match(lga_value, admin2_values)
+# #   result_df <- rbind(result_df, c(lga_value, match_info$match, match_info$score))
+# # }
+# #
+# # # Rename the columns in the result data frame
+# # colnames(result_df) <- c('LGA', 'Closest_ADMIN2', 'Score')
+# 
+# # ============================================ #
+# # matching names from the oncho snapshot data  #
 # NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA_LGAnames.csv")
-# admin2_values <- na.omit(unique(dfAPOC_included3_NGA$ADMIN2))
-# lga_values <- na.omit(unique(NGA_strt_stp_LGA$LGA))
-#
-# # Function to find the closest match for each 'LGA' value in 'ADMIN2'
-# find_closest_match <- function(value, choices) {
-#   distances <- stringdist::stringdistmatrix(value, choices)
-#   min_index <- which.min(distances)
-#   return(list(match = choices[min_index], score = 1 - distances[min_index]))
-# }
-#
-# # Create a data frame to store the results
-# result_df <- data.frame(LGA = character(), Closest_ADMIN2 = character(), Score = numeric(), stringsAsFactors = FALSE)
-#
-# # Iterate through each 'LGA' value and find the closest match in 'ADMIN2'
-# for (lga_value in lga_values) {
-#   match_info <- find_closest_match(lga_value, admin2_values)
-#   result_df <- rbind(result_df, c(lga_value, match_info$match, match_info$score))
-# }
-#
-# # Rename the columns in the result data frame
-# colnames(result_df) <- c('LGA', 'Closest_ADMIN2', 'Score')
-
-# ============================================ #
-# matching names from the oncho snapshot data  #
-NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA_LGAnames.csv")
-NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_missing_tocheck.csv")
-# admin2_values <- na.omit(unique(dfAPOC_included3_NGA$ADMIN2))
-# lga_values <- na.omit(unique(NGA_snapshot_LGAnames$LGA))
-# # Function to find the closest match for each 'LGA' value in 'ADMIN2'
-# find_closest_match <- function(value, choices) {
-#   distances <- stringdist::stringdistmatrix(value, choices)
-#   min_index <- which.min(distances)
-#   return(list(match = choices[min_index], score = 1 - distances[min_index]))
-# }
-# # Create a data frame to store the results
-# result_df <- data.frame(LGA = character(), Closest_ADMIN2 = character(), Score = numeric(), stringsAsFactors = FALSE)
-# # Iterate through each 'LGA' value and find the closest match in 'ADMIN2'
-# for (lga_value in lga_values) {
-#   match_info <- find_closest_match(lga_value, admin2_values)
-#   result_df <- rbind(result_df, c(lga_value, match_info$match, match_info$score))
-# }
-# # Rename the columns in the result data frame
-# colnames(result_df) <- c('LGA', 'Closest_ADMIN2', 'Score')
-# # write.csv(result_df, file = "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_closestmatch.csv", row.names = FALSE)
-# # write.csv(result_df, file = "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_closestmatch2.csv", row.names = FALSE)
-
-# # APPROACH 3 USING CC DATA FROM HERE #
-#
-# # group LGAs on basis of MDA start and MDA end years
-NGA_strt_stp_LGA$RB_MDA_Start <- as.numeric(NGA_strt_stp_LGA$RB_MDA_Start)
-NGA_strt_stp_LGA$RB_MDA_End <- as.numeric(NGA_strt_stp_LGA$RB_MDA_End)
-
-NGA_strt_stp_LGA$YearRange <- paste(NGA_strt_stp_LGA$RB_MDA_Start, NGA_strt_stp_LGA$RB_MDA_End, sep = ',')
-
-NGA_grouped_LGA <- NGA_strt_stp_LGA %>%
-  group_by(YearRange) %>%
-  summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
-
-NGA_grouped_LGA <- NGA_grouped_LGA %>%
-  separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
+# NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_missing_tocheck.csv")
+# # admin2_values <- na.omit(unique(dfAPOC_included3_NGA$ADMIN2))
+# # lga_values <- na.omit(unique(NGA_snapshot_LGAnames$LGA))
+# # # Function to find the closest match for each 'LGA' value in 'ADMIN2'
+# # find_closest_match <- function(value, choices) {
+# #   distances <- stringdist::stringdistmatrix(value, choices)
+# #   min_index <- which.min(distances)
+# #   return(list(match = choices[min_index], score = 1 - distances[min_index]))
+# # }
+# # # Create a data frame to store the results
+# # result_df <- data.frame(LGA = character(), Closest_ADMIN2 = character(), Score = numeric(), stringsAsFactors = FALSE)
+# # # Iterate through each 'LGA' value and find the closest match in 'ADMIN2'
+# # for (lga_value in lga_values) {
+# #   match_info <- find_closest_match(lga_value, admin2_values)
+# #   result_df <- rbind(result_df, c(lga_value, match_info$match, match_info$score))
+# # }
+# # # Rename the columns in the result data frame
+# # colnames(result_df) <- c('LGA', 'Closest_ADMIN2', 'Score')
+# # # write.csv(result_df, file = "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_closestmatch.csv", row.names = FALSE)
+# # # write.csv(result_df, file = "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_closestmatch2.csv", row.names = FALSE)
+# 
+# # # APPROACH 3 USING CC DATA FROM HERE #
+# #
+# # # group LGAs on basis of MDA start and MDA end years
+# NGA_strt_stp_LGA$RB_MDA_Start <- as.numeric(NGA_strt_stp_LGA$RB_MDA_Start)
+# NGA_strt_stp_LGA$RB_MDA_End <- as.numeric(NGA_strt_stp_LGA$RB_MDA_End)
+# 
+# NGA_strt_stp_LGA$YearRange <- paste(NGA_strt_stp_LGA$RB_MDA_Start, NGA_strt_stp_LGA$RB_MDA_End, sep = ',')
+# 
+# NGA_grouped_LGA <- NGA_strt_stp_LGA %>%
+#   group_by(YearRange) %>%
+#   summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
+# 
+# NGA_grouped_LGA <- NGA_grouped_LGA %>%
+#   separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
 #
 # # updated vector of coverage values (accounting for CC data from 1992)
 # coverages_NGA <- split_vectors$Nigeria
@@ -2462,298 +2462,298 @@ nrow(check_df)
 # dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA2, length.out = length(indices))
 
 
-UGA_strt_stp <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/UGA_Strt_Stp.csv")
-UGA_strt_stp <- subset(UGA_strt_stp, District_updated != "Obongi") # remove and manually include as the Obongi foci
+# UGA_strt_stp <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/UGA_Strt_Stp.csv")
+# UGA_strt_stp <- subset(UGA_strt_stp, District_updated != "Obongi") # remove and manually include as the Obongi foci
+# 
+# UGA_strt_stp$RB_MDA_Start <- as.numeric(UGA_strt_stp$RB_MDA_Start)
+# UGA_strt_stp$RB_MDA_End <- as.numeric(UGA_strt_stp$RB_MDA_End)
+# 
+# UGA_strt_stp$YearRange <- paste(UGA_strt_stp$RB_MDA_Start, UGA_strt_stp$RB_MDA_End, sep = ',')
+# 
+# UGA_grouped_district <- UGA_strt_stp %>%
+#   group_by(YearRange) %>%
+#   summarise(UniqueDistricts = toString(unique(District_updated))) # group LGAs
+# 
+# UGA_grouped_district <- UGA_grouped_district %>%
+#   separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
+# 
+# UGA_grouped_district
+# 
+# # updated vector of coverage values 
+# coverages_UGA <- split_vectors$Uganda
+# coverages_UGA 
+# start_year_UGA <- 0
+# coverages_UGA <- coverages_UGA[start_year_UGA:length(coverages_UGA)]
+# coverages_UGA <- coverages_UGA/100
+# coverages_UGA_all <- ifelse(is.na(coverages_UGA), NA, ifelse(coverages_UGA < 0.65, 0.25, 0.65))
+# 
+# coverages_UGA1 <- c(rep(0.25, 9), coverages_UGA_all) # add 9 x 0.25 values at front of vector for 1990 - 1998 years (Katabarwa et al. data)
+#                                                      # assume pre-1999 non-CDTI therefore coverages low
+# # find conditions for each combination of RB_start_yr/RB_end_yr by district/ADMIN2
+# # Extract the element at location [1, 3]
+# 
+# # ======================== #
+# # first group of districts #
+# coverages_UGA1 <- c(rep(0.25, 9), coverages_UGA_all) # add 9 x 0.25 values at front of vector for 1990 - 1998 years (Katabarwa et al. data)
+#                                                      # assume pre-1999 non-CDTI therefore coverages low
+# districts1 <- unlist(strsplit(as.character(UGA_grouped_district[1, 3]), ",\\s*")) # Split the string into a character vector
+# condition1 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1989 & Year < 2013 & ADMIN2 %in% districts1)
+# indices <- which(condition1)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA1, length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts1) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1989 & Year < 1999 & ADMIN2 %in% districts1) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # second group of districts #
+# coverages_UGA2 <- coverages_UGA1[-c(1, length(coverages_UGA1))] #remove first and last element
+# districts2 <- unlist(strsplit(as.character(UGA_grouped_district[2, 3]), ",\\s*")) # Split the string into a character vector
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 2012 & ADMIN2 %in% districts2)
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA2, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2012 & ADMIN2 %in% districts2) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts2) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # third group of districts #
+# coverages_UGA3 <- coverages_UGA1[-1] # remove first element
+# districts3a <- unlist(strsplit(as.character(UGA_grouped_district[3, 3]), ",\\s*")) # Split the string into a character vector
+# districts3b <- unlist(strsplit(as.character(UGA_grouped_district[4, 3]), ",\\s*")) # Split the string into a character vector
+# districts3 <- c(districts3a,districts3b)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 2013 & ADMIN2 %in% districts3)
+# indices <- which(condition3)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA3, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts3) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts3) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # fourth group of districts #
+# coverages_UGA4 <- coverages_UGA1[-c(1:3, (length(coverages_UGA1) - 1):length(coverages_UGA1))] # remove first 3 and last 2 elements from cov vector
+# districts4 <- unlist(strsplit(as.character(UGA_grouped_district[5, 3]), ",\\s*")) # Split the string into a character vector
+# condition4 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2011 & ADMIN2 %in% districts4)
+# indices <- which(condition4)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA4, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2011 & ADMIN2 %in% districts4) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts4) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # fifth group of districts #
+# coverages_UGA5 <- coverages_UGA1[-c(1:3)] # remove first 3
+# districts5a <- unlist(strsplit(as.character(UGA_grouped_district[6, 3]), ",\\s*")) # Split the string into a character vector
+# districts5b <- unlist(strsplit(as.character(UGA_grouped_district[7, 3]), ",\\s*")) # Split the string into a character vector
+# districts5 <- c(districts5a,districts5b)
+# condition5 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2013 & ADMIN2 %in% districts5)
+# indices <- which(condition5)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA5, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts5) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts5) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # sixth group of districts #
+# coverages_UGA6 <- coverages_UGA1[-c(1:4)] # remove first 4
+# districts6a <- unlist(strsplit(as.character(UGA_grouped_district[8, 3]), ",\\s*")) # Split the string into a character vector
+# districts6b <- unlist(strsplit(as.character(UGA_grouped_district[9, 3]), ",\\s*")) # Split the string into a character vector
+# districts6 <- c(districts6a, districts6b)
+# condition6 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1993 & Year < 2013 & ADMIN2 %in% districts6)
+# indices <- which(condition6)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA6, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts6) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1993 & Year < 1999 & ADMIN2 %in% districts6) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # seventh group of districts #
+# coverages_UGA7 <- coverages_UGA1[-c(1:7)] # remove first 7
+# districts7 <- unlist(strsplit(as.character(UGA_grouped_district[10, 3]), ",\\s*")) # Split the string into a character vector
+# condition7 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1996 & Year < 2013 & ADMIN2 %in% districts7)
+# indices <- which(condition7)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA7, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts7) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1996 & Year < 1999 & ADMIN2 %in% districts7) # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # ======================== #
+# # eight group of districts #
+# # manually include Obongi focus #
+# coverages_UGA8 <- coverages_UGA1[-c(1:3)]  # remove first 7
+# condition8 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2013 & ADMIN2 == "Obongi")
+# indices <- which(condition8)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA8, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 == "Obongi") # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition2)
+# dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
+# condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 == "Obongi") # valuyes just for 1999 - 2012 from APOC report
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included3, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
-UGA_strt_stp$RB_MDA_Start <- as.numeric(UGA_strt_stp$RB_MDA_Start)
-UGA_strt_stp$RB_MDA_End <- as.numeric(UGA_strt_stp$RB_MDA_End)
-
-UGA_strt_stp$YearRange <- paste(UGA_strt_stp$RB_MDA_Start, UGA_strt_stp$RB_MDA_End, sep = ',')
-
-UGA_grouped_district <- UGA_strt_stp %>%
-  group_by(YearRange) %>%
-  summarise(UniqueDistricts = toString(unique(District_updated))) # group LGAs
-
-UGA_grouped_district <- UGA_grouped_district %>%
-  separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
-
-UGA_grouped_district
-
-# updated vector of coverage values 
-coverages_UGA <- split_vectors$Uganda
-coverages_UGA 
-start_year_UGA <- 0
-coverages_UGA <- coverages_UGA[start_year_UGA:length(coverages_UGA)]
-coverages_UGA <- coverages_UGA/100
-coverages_UGA_all <- ifelse(is.na(coverages_UGA), NA, ifelse(coverages_UGA < 0.65, 0.25, 0.65))
-
-coverages_UGA1 <- c(rep(0.25, 9), coverages_UGA_all) # add 9 x 0.25 values at front of vector for 1990 - 1998 years (Katabarwa et al. data)
-                                                     # assume pre-1999 non-CDTI therefore coverages low
-# find conditions for each combination of RB_start_yr/RB_end_yr by district/ADMIN2
-# Extract the element at location [1, 3]
-
-# ======================== #
-# first group of districts #
-coverages_UGA1 <- c(rep(0.25, 9), coverages_UGA_all) # add 9 x 0.25 values at front of vector for 1990 - 1998 years (Katabarwa et al. data)
-                                                     # assume pre-1999 non-CDTI therefore coverages low
-districts1 <- unlist(strsplit(as.character(UGA_grouped_district[1, 3]), ",\\s*")) # Split the string into a character vector
-condition1 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1989 & Year < 2013 & ADMIN2 %in% districts1)
-indices <- which(condition1)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA1, length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts1) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1989 & Year < 1999 & ADMIN2 %in% districts1) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# second group of districts #
-coverages_UGA2 <- coverages_UGA1[-c(1, length(coverages_UGA1))] #remove first and last element
-districts2 <- unlist(strsplit(as.character(UGA_grouped_district[2, 3]), ",\\s*")) # Split the string into a character vector
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 2012 & ADMIN2 %in% districts2)
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA2, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2012 & ADMIN2 %in% districts2) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts2) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# third group of districts #
-coverages_UGA3 <- coverages_UGA1[-1] # remove first element
-districts3a <- unlist(strsplit(as.character(UGA_grouped_district[3, 3]), ",\\s*")) # Split the string into a character vector
-districts3b <- unlist(strsplit(as.character(UGA_grouped_district[4, 3]), ",\\s*")) # Split the string into a character vector
-districts3 <- c(districts3a,districts3b)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 2013 & ADMIN2 %in% districts3)
-indices <- which(condition3)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA3, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts3) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts3) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# fourth group of districts #
-coverages_UGA4 <- coverages_UGA1[-c(1:3, (length(coverages_UGA1) - 1):length(coverages_UGA1))] # remove first 3 and last 2 elements from cov vector
-districts4 <- unlist(strsplit(as.character(UGA_grouped_district[5, 3]), ",\\s*")) # Split the string into a character vector
-condition4 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2011 & ADMIN2 %in% districts4)
-indices <- which(condition4)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA4, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2011 & ADMIN2 %in% districts4) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts4) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# fifth group of districts #
-coverages_UGA5 <- coverages_UGA1[-c(1:3)] # remove first 3
-districts5a <- unlist(strsplit(as.character(UGA_grouped_district[6, 3]), ",\\s*")) # Split the string into a character vector
-districts5b <- unlist(strsplit(as.character(UGA_grouped_district[7, 3]), ",\\s*")) # Split the string into a character vector
-districts5 <- c(districts5a,districts5b)
-condition5 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2013 & ADMIN2 %in% districts5)
-indices <- which(condition5)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA5, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts5) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts5) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# sixth group of districts #
-coverages_UGA6 <- coverages_UGA1[-c(1:4)] # remove first 4
-districts6a <- unlist(strsplit(as.character(UGA_grouped_district[8, 3]), ",\\s*")) # Split the string into a character vector
-districts6b <- unlist(strsplit(as.character(UGA_grouped_district[9, 3]), ",\\s*")) # Split the string into a character vector
-districts6 <- c(districts6a, districts6b)
-condition6 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1993 & Year < 2013 & ADMIN2 %in% districts6)
-indices <- which(condition6)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA6, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts6) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1993 & Year < 1999 & ADMIN2 %in% districts6) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# seventh group of districts #
-coverages_UGA7 <- coverages_UGA1[-c(1:7)] # remove first 7
-districts7 <- unlist(strsplit(as.character(UGA_grouped_district[10, 3]), ",\\s*")) # Split the string into a character vector
-condition7 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1996 & Year < 2013 & ADMIN2 %in% districts7)
-indices <- which(condition7)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA7, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts7) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1996 & Year < 1999 & ADMIN2 %in% districts7) # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# ======================== #
-# eight group of districts #
-# manually include Obongi focus #
-coverages_UGA8 <- coverages_UGA1[-c(1:3)]  # remove first 7
-condition8 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 2013 & ADMIN2 == "Obongi")
-indices <- which(condition8)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_UGA8, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 == "Obongi") # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition2)
-dfAPOC_included3$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years pre-APOC, 2015 report; Katabarwa indicates cvoerage (assumed non-CDTI)
-condition3 <- with(dfAPOC_included3, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 == "Obongi") # valuyes just for 1999 - 2012 from APOC report
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-check_df <- subset(dfAPOC_included3, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
-
-# ================  #
-# Sudan (SDN)      #
-
-# =========== #
-# first foci #
-#coverages_SDN_foci1 <- c(0.25, 0.25, 0.25, 0.65, 0.25, 0.25, 0.25, 0.65, 0.25, 0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65) # this is from the APOC report (starting at 2012)
-coverages_SDN_foci1 <-c(0.25, 0.25, 0.25, 0.25, 0.65, 0.25, 0.25, 0.25, 0.65, 0.25, 0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65)
-condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 1995 & dfAPOC_included3$Year < 2013
-indices <- which(condition)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci1, length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years covered by APOC, 2015 report
-condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 1998 & dfAPOC_included3$Year < 2013
-indices <- which(condition2)
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for years covered by APOC, 2015 report
-condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 1995 & dfAPOC_included3$Year < 1999
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage, assume non-CDTI", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# =========== #
-# second foci #
-coverages_SDN_foci2 <- c(0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65) # assuming beyond 2012 cov is 65% because 65% before
-condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
-#condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat","El Kurmuk") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2006 & dfAPOC_included3$Year < 2018
-indices <- which(condition)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci2, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2006 & dfAPOC_included3$Year < 2013
-indices <- which(condition2)
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for yearsafter APOC report (2013 - 2017)
-condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2012 & dfAPOC_included3$Year < 2018
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# =========== #
-# third foci #
-coverages_SDN_foci3 <- c(0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65) # assuming beyond 2012 cov is 65% because 65% before
-condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2011
-indices <- which(condition)
-dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci3, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2011 & dfAPOC_included3$Year < 2013
-indices <- which(condition2)
-dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# for yearsafter APOC report (2013 - 2017)
-condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
-  dfAPOC_included3$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included3$Year > 2012
-indices <- which(condition3)
-dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
-
-check_df <- subset(dfAPOC_included3, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
+# # ================  #
+# # Sudan (SDN)      #
+# 
+# # =========== #
+# # first foci #
+# #coverages_SDN_foci1 <- c(0.25, 0.25, 0.25, 0.65, 0.25, 0.25, 0.25, 0.65, 0.25, 0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65) # this is from the APOC report (starting at 2012)
+# coverages_SDN_foci1 <-c(0.25, 0.25, 0.25, 0.25, 0.65, 0.25, 0.25, 0.25, 0.65, 0.25, 0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65)
+# condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 1995 & dfAPOC_included3$Year < 2013
+# indices <- which(condition)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci1, length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 1998 & dfAPOC_included3$Year < 2013
+# indices <- which(condition2)
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for years covered by APOC, 2015 report
+# condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Abu Hamed", "Marawai", "Berber", "El Quresha") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 1995 & dfAPOC_included3$Year < 1999
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage, assume non-CDTI", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # =========== #
+# # second foci #
+# coverages_SDN_foci2 <- c(0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65) # assuming beyond 2012 cov is 65% because 65% before
+# condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
+# #condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat","El Kurmuk") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2006 & dfAPOC_included3$Year < 2018
+# indices <- which(condition)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci2, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2006 & dfAPOC_included3$Year < 2013
+# indices <- which(condition2)
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for yearsafter APOC report (2013 - 2017)
+# condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("Eastern El Qalabat") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2012 & dfAPOC_included3$Year < 2018
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # =========== #
+# # third foci #
+# coverages_SDN_foci3 <- c(0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65) # assuming beyond 2012 cov is 65% because 65% before
+# condition <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2011
+# indices <- which(condition)
+# dfAPOC_included3$MDA_CDTI[indices] <- rep(coverages_SDN_foci3, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# condition2 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2011 & dfAPOC_included3$Year < 2013
+# indices <- which(condition2)
+# dfAPOC_included3$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # for yearsafter APOC report (2013 - 2017)
+# condition3 <- dfAPOC_included3$IUs_NAME_MAPPING %in% c("El Radoom") &
+#   dfAPOC_included3$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included3$Year > 2012
+# indices <- which(condition3)
+# dfAPOC_included3$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included3$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included3, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 
 # =============================================== #
@@ -2867,6 +2867,386 @@ dfAPOC_included3 <- process_all_countries(dfAPOC_included2, split_vectors, count
 # Check the result
 head(dfAPOC_included3)
 
+# ================================== #
+#  write functions for NGA, UGA, SDN #
+
+# =========================================== #
+#   Including Oncho snapshot data for Nigeria #
+
+process_nigeria_data <- function(df, split_vectors, oncho_snapshot_path) {
+  
+  # Subset the dataframe for Nigeria (NGA)
+  df_NGA <- subset(df, ADMIN0ISO3 == "NGA")
+  
+  # APPROACH 1: Count rows by IU_ID_MAPPING
+  row_counts <- df_NGA %>%
+    group_by(IU_ID_MAPPING) %>%
+    summarise(row_count = n())
+  
+  # APPROACH 2: Process national oncho snapshot data
+  oncho_snapshot <- read.csv(oncho_snapshot_path)
+  oncho_snapshot <- oncho_snapshot %>% rename_with(~gsub("^X", "", .), starts_with("X1990"):ends_with("X2021"))
+  
+  columns_to_update <- as.character(seq(1990, 2021))
+  oncho_snapshot <- oncho_snapshot %>%
+    mutate(across(all_of(columns_to_update),
+                  ~ case_when(
+                    . == 0 ~ 0,
+                    . < 65 ~ 0.25,
+                    . >= 65 ~ 0.65,
+                    TRUE ~ .  # Keep the original value if none of the conditions match
+                  )
+    ))
+  
+  oncho_snapshot_long <- oncho_snapshot %>%
+    pivot_longer(cols = starts_with("1990"):ends_with("2021"),
+                 names_to = "Year",
+                 values_to = "Coverage_value_tmp")
+  
+  # Adding raw coverages and cov data source cols
+  oncho_snapshot_long_raw <- oncho_snapshot %>%
+    pivot_longer(cols = starts_with("1990"):ends_with("2021"),
+                 names_to = "Year",
+                 values_to = "Coverage_value_tmp_raw")
+  
+  oncho_snapshot_long$Coverage_value_tmp_raw <- oncho_snapshot_long_raw$Coverage_value_tmp_raw / 100
+  
+  oncho_snapshot_long$Coverage_source_temp <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "IU-level coverage", NA)
+  oncho_snapshot_long$Coverage_source_temp2 <- ifelse(!is.na(oncho_snapshot_long$Coverage_value_tmp_raw), "FMOH national oncho snapshot", NA)
+  
+  oncho_snapshot_long$Year <- as.numeric(oncho_snapshot_long$Year)
+  
+  # Merge with dfAPOC_included_NGA
+  df_NGA_merged <- df_NGA %>%
+    left_join(oncho_snapshot_long, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year"))
+  
+  # Fill missing coverage values
+  df_NGA_merged$MDA_CDTI[is.na(df_NGA_merged$MDA_CDTI)] <- df_NGA_merged$Coverage_value_tmp[is.na(df_NGA_merged$MDA_CDTI)]
+  
+  # For raw coverage values and cov data source columns
+  df_NGA_merged$MDA_CDTI_raw[is.na(df_NGA_merged$MDA_CDTI_raw)] <- df_NGA_merged$Coverage_value_tmp_raw[is.na(df_NGA_merged$MDA_CDTI_raw)]
+  df_NGA_merged$cov_source[is.na(df_NGA_merged$cov_source)] <- df_NGA_merged$Coverage_source_temp[is.na(df_NGA_merged$cov_source)]
+  df_NGA_merged$cov_specific_source[is.na(df_NGA_merged$cov_specific_source)] <- df_NGA_merged$Coverage_source_temp2[is.na(df_NGA_merged$cov_specific_source)]
+  
+  # Remove extra columns from snapshot to match the original dfAPOC_included structure
+  df_NGA_merged <- df_NGA_merged %>% select(1:72)
+  
+  # Identify rows that are in dfAPOC_included but not in the merged dataframe
+  rows_to_keep <- df %>%
+    anti_join(df_NGA_merged, by = c("ADMIN0", "ADMIN1", "ADMIN2", "Year"))
+  
+  # Update the original dataframe by including the merged rows
+  df_updated <- bind_rows(rows_to_keep, df_NGA_merged)
+  
+  # Now handle any extra rows to remove based on conditions
+  oncho_snapshot_long_nonendemic <- subset(
+    oncho_snapshot_long, 
+    Endemic_classification %in% c("Not Endemic", "Not Endemic ") & 
+      !ADMIN2 %in% c("Enugu North", "Yola North")
+  )
+  
+  NGA_noneendemic <- unique(oncho_snapshot_long_nonendemic$ADMIN2)
+  
+  # Remove non-endemic IUs from dfAPOC_included_updated
+  df_updated <- df_updated[!df_updated$IUs_NAME_MAPPING %in% NGA_noneendemic, ]
+  
+  # Additional manual rows to remove
+  extra_to_remove <- c("Quan'Pam", "Langtan North", "Langtan South", "Kanem")
+  df_updated <- df_updated[!df_updated$IUs_NAME_MAPPING %in% extra_to_remove, ]
+  df_updated <- df_updated[!(df_updated$IUs_NAME_MAPPING == "Obi" & df_updated$ADMIN1 == "Nasarawa"), ]
+  
+  # Check number of IUs :
+  cat("Rows in 2022 after processing Nigeria IUs:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing Nigeria IUs:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe for Nigeria
+  return(df_updated)
+}
+
+dfAPOC_included3 <- process_nigeria_data(dfAPOC_included3, split_vectors, 
+                                         "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA.csv")
+
+
+# =========================================== #
+#   Update based on Katabarwa for Nigeria     #
+
+process_uganda_data <- function(df, UGA_strt_stp_path, split_vectors) {
+  
+  # get UGA MDa data from Katabarwa et al. 2018 & group districts:
+  UGA_strt_stp <- read.csv(UGA_strt_stp_path)
+  
+  UGA_strt_stp <- subset(UGA_strt_stp, District_updated != "Obongi") # remove and manually include as the Obongi foci
+  
+  UGA_strt_stp$RB_MDA_Start <- as.numeric(UGA_strt_stp$RB_MDA_Start)
+  UGA_strt_stp$RB_MDA_End <- as.numeric(UGA_strt_stp$RB_MDA_End)
+  
+  UGA_strt_stp$YearRange <- paste(UGA_strt_stp$RB_MDA_Start, UGA_strt_stp$RB_MDA_End, sep = ',')
+  
+  UGA_grouped_district <- UGA_strt_stp %>%
+    group_by(YearRange) %>%
+    summarise(UniqueDistricts = toString(unique(District_updated))) # group LGAs
+  
+  UGA_grouped_district <- UGA_grouped_district %>%
+    separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
+  
+  UGA_grouped_district
+  
+  
+  # Coverage vector and adjustments
+  coverages_UGA <- split_vectors$Uganda
+  coverages_UGA <- coverages_UGA / 100
+  coverages_UGA_all <- ifelse(is.na(coverages_UGA), NA, ifelse(coverages_UGA < 0.65, 0.25, 0.65))
+  
+  # Add 9 x 0.25 values at the start for pre-1999 years
+  coverages_UGA1 <- c(rep(0.25, 9), coverages_UGA_all)
+  
+  # Function to apply coverage to districts
+  apply_coverage <- function(df, districts, coverages, coverage_type, start_year, end_year) {
+    condition <- with(df, ADMIN0ISO3 == "UGA" & Year > start_year & Year < end_year & ADMIN2 %in% districts)
+    indices <- which(condition)
+    df$MDA_CDTI[indices] <- rep(coverages, length.out = length(indices))
+    df$cov_source[indices] <- rep(coverage_type, length.out = length(indices))
+    return(df)
+  }
+  
+  # Apply coverage data for different district groups
+  # First group of districts
+  districts1 <- unlist(strsplit(as.character(UGA_grouped_district[1, 3]), ",\\s*"))
+  df_updated <- apply_coverage(df, districts1, coverages_UGA1, "assumed", 1989, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts1, coverages_UGA, "national-level coverage data", 1998, 2013)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts1)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1989 & Year < 1999 & ADMIN2 %in% districts1)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # ======================== #
+  # second group of districts
+  coverages_UGA2 <- coverages_UGA1[-c(1, length(coverages_UGA1))] # remove first and last element
+  districts2 <- unlist(strsplit(as.character(UGA_grouped_district[2, 3]), ",\\s*"))
+  df_updated <- apply_coverage(df_updated, districts2, coverages_UGA2, "assumed", 1990, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts2, coverages_UGA, "national-level coverage data", 1998, 2013)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts2)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts2)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # ======================== #
+  # third group of districts
+  coverages_UGA3 <- coverages_UGA1[-1] # remove first element
+  districts3a <- unlist(strsplit(as.character(UGA_grouped_district[3, 3]), ",\\s*"))
+  districts3b <- unlist(strsplit(as.character(UGA_grouped_district[4, 3]), ",\\s*"))
+  districts3 <- c(districts3a, districts3b)
+  df_updated <- apply_coverage(df_updated, districts3, coverages_UGA3, "assumed", 1990, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts3, coverages_UGA, "national-level coverage data", 1998, 2013)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts3)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1990 & Year < 1999 & ADMIN2 %in% districts3)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # ======================== #
+  # fourth group of districts
+  coverages_UGA4 <- coverages_UGA1[-c(1:3, (length(coverages_UGA1) - 1):length(coverages_UGA1))] # remove first 3 and last 2 elements from cov vector
+  districts4 <- unlist(strsplit(as.character(UGA_grouped_district[5, 3]), ",\\s*"))
+  df_updated <- apply_coverage(df_updated, districts4, coverages_UGA4, "assumed", 1992, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts4, coverages_UGA, "national-level coverage data", 1998, 2011)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2011 & ADMIN2 %in% districts4)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts4)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # ======================== #
+  # fifth group of districts
+  coverages_UGA5 <- coverages_UGA1[-c(1:3)] # remove first 3
+  districts5a <- unlist(strsplit(as.character(UGA_grouped_district[6, 3]), ",\\s*"))
+  districts5b <- unlist(strsplit(as.character(UGA_grouped_district[7, 3]), ",\\s*"))
+  districts5 <- c(districts5a, districts5b)
+  df_updated <- apply_coverage(df_updated, districts5, coverages_UGA5, "assumed", 1992, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts5, coverages_UGA, "national-level coverage data", 1998, 2013)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts5)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1992 & Year < 1999 & ADMIN2 %in% districts5)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # ======================== #
+  # sixth group of districts
+  coverages_UGA6 <- coverages_UGA1[-c(1:4)] # remove first 4
+  districts6a <- unlist(strsplit(as.character(UGA_grouped_district[8, 3]), ",\\s*"))
+  districts6b <- unlist(strsplit(as.character(UGA_grouped_district[9, 3]), ",\\s*"))
+  districts6 <- c(districts6a, districts6b)
+  df_updated <- apply_coverage(df_updated, districts6, coverages_UGA6, "assumed", 1993, 1999)
+  
+  # Years covered by APOC report (1999-2012)
+  df_updated <- apply_coverage(df_updated, districts6, coverages_UGA, "national-level coverage data", 1998, 2013)
+  
+  # for years covered by APOC, 2015 report
+  condition2 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1998 & Year < 2013 & ADMIN2 %in% districts6)
+  indices <- which(condition2)
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # for years pre-APOC, 2015 report; Katabarwa indicates coverage (assumed non-CDTI)
+  condition3 <- with(df_updated, ADMIN0ISO3 == "UGA" & Year > 1993 & Year < 1999 & ADMIN2 %in% districts6)
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Katabarwa et al. 2018 indicates MDA (no coverage; assumed non-CDTI)", length.out = length(indices))
+  
+  # Check number of IUs :
+  cat("Rows in 2022 after processing Ugandan IUs:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing Ugandan IUs:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(list(df_updated, coverages_UGA2))
+}
+
+# call function:
+
+result <- process_uganda_data(dfAPOC_included3, 
+                                        "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/UGA_Strt_Stp.csv", 
+                                        split_vectors)
+
+dfAPOC_included3 <- result[[1]]
+coverages_UGA2 <- result[[2]] # need this for later
+
+# ============================================= #
+#  Upate Sudan MDA using The Carter Center data #
+
+process_sudan_data <- function(df, split_vectors) {
+  
+  # Coverage vectors for Sudan foci
+  coverages_SDN_foci1 <- c(0.25, 0.25, 0.25, 0.25, 0.65, 0.25, 0.25, 0.25, 0.65, 0.25, 0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65)
+  coverages_SDN_foci2 <- c(0.65, 0.65, 0.25, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65)
+  coverages_SDN_foci3 <- c(0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65)
+  
+  # Helper function to apply coverage for a specific foci
+  apply_coverage_sudan <- function(df, districts, coverages, coverage_type, start_year, end_year) {
+    condition <- df$ADMIN0ISO3 == "SDN" & df$Year > start_year & df$Year < end_year & df$IUs_NAME_MAPPING %in% districts
+    indices <- which(condition)
+    df$MDA_CDTI[indices] <- rep(coverages, length.out = length(indices))
+    df$cov_source[indices] <- rep(coverage_type, length.out = length(indices))
+    return(df)
+  }
+  
+  # Apply coverage for first foci (e.g., Abu Hamed, Marawai, Berber, El Quresha)
+  districts1 <- c("Abu Hamed", "Marawai", "Berber", "El Quresha")
+  df_updated <- apply_coverage_sudan(df, districts1, coverages_SDN_foci1, "assumed", 1995, 1999) # Pre-APOC
+  df_updated <- apply_coverage_sudan(df_updated, districts1, coverages_SDN_foci1, "national-level coverage data", 1999, 2013) # Years covered by APOC
+  
+  # Specific coverage source for foci1
+  condition2 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 1998 & df_updated$Year < 2013 & df_updated$IUs_NAME_MAPPING %in% districts1
+  indices <- which(condition2)
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # Assumed coverage for pre-APOC
+  condition3 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 1995 & df_updated$Year < 1999 & df_updated$IUs_NAME_MAPPING %in% districts1
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage, assume non-CDTI", length.out = length(indices))
+  
+  # Apply coverage for second foci (e.g., Eastern El Qalabat)
+  districts2 <- c("Eastern El Qalabat")
+  df_updated <- apply_coverage_sudan(df_updated, districts2, coverages_SDN_foci2, "assumed", 2006, 2018)
+  
+  # For years covered by APOC report
+  df_updated <- apply_coverage_sudan(df_updated, districts2, coverages_SDN_foci2, "national-level coverage data", 2006, 2013)
+  
+  # Specific coverage source for foci2
+  condition2 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 2006 & df_updated$Year < 2013 & df_updated$IUs_NAME_MAPPING %in% districts2
+  indices <- which(condition2)
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # Assumed coverage after APOC report (2013-2017)
+  condition3 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 2012 & df_updated$Year < 2018 & df_updated$IUs_NAME_MAPPING %in% districts2
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))
+  
+  # Apply coverage for third foci (e.g., El Radoom)
+  districts3 <- c("El Radoom")
+  df_updated <- apply_coverage_sudan(df_updated, districts3, coverages_SDN_foci3, "assumed", 2011, 2018)
+  
+  # For years covered by APOC report
+  df_updated <- apply_coverage_sudan(df_updated, districts3, coverages_SDN_foci3, "national-level coverage data", 2011, 2013)
+  
+  # Specific coverage source for foci3
+  condition2 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 2011 & df_updated$Year < 2013 & df_updated$IUs_NAME_MAPPING %in% districts3
+  indices <- which(condition2)
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # Assumed coverage after APOC report (2013-2017)
+  condition3 <- df_updated$ADMIN0ISO3 == "SDN" & df_updated$Year > 2012 & df_updated$Year < 2018 & df_updated$IUs_NAME_MAPPING %in% districts3
+  indices <- which(condition3)
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))
+  
+  # Check number of IUs :
+  cat("Rows in 2022 after processing Sudanese IUs:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing Sudanese IUs:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  return(df_updated)
+}
+
+# call function
+dfAPOC_included3 <- process_sudan_data(dfAPOC_included3, split_vectors)
+
 
 # ============================================================================== #
 
@@ -2874,371 +3254,573 @@ head(dfAPOC_included3)
 
 
 
-# =================================== #
-# add in post-2012 histories (ESPEN)  #
-
-dfAPOC_included4 <- dfAPOC_included3 # RESET HERE
-
-nrow(subset(dfAPOC_included4, Year == 2022)) # check n = 2346 IUs (old); 
-                                             # check n = 2107 IUs (April 2025)
+# # =================================== #
+# # add in post-2012 histories (ESPEN)  #
+# 
+# dfAPOC_included4 <- dfAPOC_included3 # RESET HERE
+# 
+# nrow(subset(dfAPOC_included4, Year == 2022)) # check n = 2346 IUs (old); 
+#                                              # check n = 2107 IUs (April 2025)
 
 # ================================================================================= #
 #  UPDATE - MAY 2024: new 2022 updated MDA data from ESPEN (uploaded in Q1 of 2024) #
 
-# =============== #
-#     DRC         #
+# # =============== #
+# #     DRC         #
+# 
+# DRC_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-COD-Oncho-iu-2022.csv")
+# DRC_MDA_2022 <- subset(DRC_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+# 
+# dfAPOC_DRC_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "COD" & Year == 2022 & EpiCov > 0)
+# 
+# set1 <- unique(DRC_MDA_2022$IU_ID)
+# set2 <- unique(dfAPOC_DRC_2022$IU_ID_MAPPING)
+# 
+# # Check if sets are equal
+# if(all(sort(set1) == sort(set2))) {
+#   print("The character vectors have the same characters.")
+# } else {
+#   print("The character vectors do not have the same characters.")
+# }
+# 
+# # ============================= #
+# #              ETH              #
+# # now moved to start of script! #
+# 
+# # ETH_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-ETH-Oncho-iu-2022.csv")
+# # ETH_MDA_2022 <- subset(ETH_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+# #
+# # dfAPOC_ETH_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "ETH" & Year == 2022 & EpiCov > 0)
+# #
+# # # 1) first, update exisiting IUs with 2022 EpiCov from new ESPEN
+# # dfAPOC_included4_subset <- dfAPOC_included4[dfAPOC_included4$Year == 2022, ] # Subset dfAPOC_included4 to get only the rows where Year is equal to 2022
+# # matching_indices <- match(dfAPOC_included4_subset$IU_ID_MAPPING, ETH_MDA_2022$IU_ID)
+# # #any(!is.na(matching_indices))
+# #
+# # # Update EpiCov column in dfAPOC_included4_subset with values from EpiCov column in ETH_MDA_2022
+# # matching_indices_not_na <- !is.na(matching_indices)
+# # dfAPOC_included4_subset$EpiCov[matching_indices_not_na] <- ETH_MDA_2022$EpiCov[matching_indices[matching_indices_not_na]]
+# #
+# # dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset # Update the original dfAPOC_included4 with the updated values
+# #
+# # # 2) now need to do this for the endemicity, CUM_MDA and cov columns (replace the new ESPEN claissification in dfAPOC_included4)
+# # dfAPOC_included4_subset$Endemicity[matching_indices_not_na] <- ETH_MDA_2022$Endemicity[matching_indices[matching_indices_not_na]]
+# # dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
+# #
+# # dfAPOC_included4_subset$Cum_MDA[matching_indices_not_na] <- ETH_MDA_2022$Cum_MDA[matching_indices[matching_indices_not_na]]
+# # dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
+# #
+# # dfAPOC_included4_subset$Cov[matching_indices_not_na] <- ETH_MDA_2022$Cov[matching_indices[matching_indices_not_na]]
+# # dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
+# 
+# # # 3) need to check if any existing IUs starting MDA for first time in 2022 & whether can be included (baseline fitted mf prev?)
+# # new_MDA_ETH_2022 <- subset(ETH_MDA_2022, Cum_MDA == 1)
+# # new_IUs_ETH <- new_MDA_ETH_2022$IU_ID
+# # new_IUs_ETH_name <- new_MDA_ETH_2022$ADMIN3
+# # 
+# # dfAPOC_included4_subset_ETH2022 <- dfAPOC_included4[dfAPOC_included4$Year == 2022 & dfAPOC_included4$ADMIN0ISO3 == "ETH", ] # which Ius already included in 2022 in ETH
+# # dfAPOC_included4_subset_ETH2022_IUs <- dfAPOC_included4_subset_ETH2022$IU_ID_MAPPING # currently in histories
+# # 
+# # # are they in the histories currently?
+# # new_IUs_ETH # all IUs with MDA for first time in ETH
+# # IU_ID_notinhistories <- setdiff(new_IUs_ETH, dfAPOC_included4_subset_ETH2022_IUs) # find Ius that are not in the histories currently for 2022
+# # IU_ID_notinhistories
+# # 
+# # # those not found after update (but should be included?) : c(Hidabu Abote, Gerar Jarso, Degeluna Tijo, Quarit, East Esite, Ensaro, West Esite)
+# # # those not found after update (but should be included?) : c(18905, 18871, 18833, 18651, 18592, 18591, 18537)
+# # 
+# # # no baseline for: c(18755, 18502)
+# # 
+# # # make a vector of new IUs (minus those without baseline mf prev)
+# # IU_ID_new_toinclude_ETH <- setdiff(new_IUs_ETH, IU_ID_notinhistories)
+# # IU_ID_new_toinclude_ETH
+# # # do they have fitted baseline mf prev values?
+# # new_IUs_ETH_code <- new_MDA_ETH_2022$IU_CODE
+# # new_IUs_ETH_code
+# # ius_fitted <- summaries_apoc[,1]
+# # notinfitting <- setdiff(new_IUs_ETH_code, ius_fitted)
+# # notinfitting
+# #
+# # IU_ID_nobaseline <- substr(notinfitting, nchar(notinfitting) - 4, nchar(notinfitting))
+# # IU_ID_nobaseline
+# #
+# # # now remove these from IU_ID to include as new Ius in 2022 (because no baseline mf prev)
+# # IU_ID_new_toinclude <- setdiff(IU_ID_notinhistories, IU_ID_nobaseline)
+# # IU_ID_new_toinclude
+# 
+# #setdiff(new_IUs_ETH, dfAPOC_included4_subset_ETH2022_IUs) # find Ius that are not in the histories currently for 2022
+# 
+# # dfAPOC_endemic # check if in first
+# # summaries_apoc # check if IUs in baseline fitting
+# # final_df_oncho_Parent_Child # check if mapped to a parent IU
+# 
+# # =============================== #
+# #     COG (republic of congo)     #
+# 
+# COG_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-COG-Oncho-iu-2022.csv")
+# COG_MDA_2022 <- subset(COG_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+# nrow(COG_MDA_2022) # 19 Ius with MDA in 2022 in ESPEN
+# IUs_2022_COG_withMDA_ESPEN <- COG_MDA_2022$IU_ID
+# 
+# dfAPOC_COG_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "COG" & Year == 2022 & EpiCov > 0)
+# nrow(dfAPOC_COG_2022)
+# IUs_2022_COG_withMDA_histories <- dfAPOC_COG_2022$IU_ID # 19 IUs with MDA in histories so matches!
+# 
+# check_sameIUs_COG <- setdiff(IUs_2022_COG_withMDA_ESPEN, IUs_2022_COG_withMDA_histories)
+# check_sameIUs_COG
+# 
+# # checked and 19 Ius (the same) in both
+# 
+# # =============================== #
+# #         Uganda (UGA)            #
+# # now moved to start of script! #
+# 
+# UGA_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-UG-Oncho-iu-2022.csv")
+# UGA_MDA_2022 <- subset(UGA_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+# nrow(UGA_MDA_2022) # 19 Ius with MDA in 2022 in ESPEN
+# IUs_2022_UGA_withMDA_ESPEN <- UGA_MDA_2022$IU_ID
+# IUs_2022_UGA_withMDA_ESPEN
+# 
+# IUs_2022_UGA_withMDA_ESPEN_IUname <- UGA_MDA_2022$ADMIN2
+# IUs_2022_UGA_withMDA_ESPEN_IUname
+# 
+# # any IUs in current histories with MDA in 2022 in UGA?
+# dfAPOC_UGA_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "UGA" & Year == 2022 & EpiCov > 0)
+# nrow(dfAPOC_UGA_2022)
+# IUs_2022_UGA_withMDA_histories <- dfAPOC_UGA_2022$IU_ID # 0 IUs with MDA in histories -
+# 
+# # check if 12 IUs with MDA in ESPEN are in our histories currently
+# dfAPOC_UGA_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "UGA" & Year == 2022)
+# nrow(dfAPOC_UGA_2022)
+# IUs_2022_UGA_histories <- dfAPOC_UGA_2022$IU_ID # 0 IUs with MDA in histories -
+# 
+# check_diffIUs_UGA <- setdiff(IUs_2022_UGA_withMDA_ESPEN, IUs_2022_UGA_histories)
+# check_diffIUs_UGA # 0 so no new IUs with MDA i.e., all present in 2022 in histories just without MDA at the moment
+# 
+# # checked and 12 Ius (the same) in both
+# check_sameIUs_UGA <- setdiff(IUs_2022_UGA_withMDA_ESPEN, IUs_2022_UGA_withMDA_histories)
+# check_sameIUs_UGA
+# 
+# # ========================================================================= #
+# # make new col to indicate new IUs for 2022 with MDA (NOT NEWLY CREATED IUs)
+# 
+# # for ETH
+# dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% IU_ID_new_toinclude_ETH, "ESPEN update: first MDA round in 2022", "no update")
+# 
+# # for NGA
+# dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% NGA_MDA_2022_withMDA_ESPEN, "ESPEN update: MDA present in 2022 with prior MDA", dfAPOC_included4$new_MDA_IUs_2022)
+# 
+# # for UGA
+# dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% IUs_2022_UGA_withMDA_ESPEN, "ESPEN update: MDA present in 2022 with prior MDA", dfAPOC_included4$new_MDA_IUs_2022)
+# 
+# nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2346; 
+#                                              # n = 2107 IUs (April 2025)
 
-DRC_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-COD-Oncho-iu-2022.csv")
-DRC_MDA_2022 <- subset(DRC_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+# # ====================================== #
+# #     END OF MAY 2024 (ESPEN update)     #
+# 
+# # ======================= #
+# # Now fill in 2013 - 2022 #
+# 
+# # epi cov > 65%
+# condition <- dfAPOC_included4$EpiCov >= 65 &
+#   dfAPOC_included4$Year %in% 2013:2022 &
+#   dfAPOC_included4$ADMIN0ISO3 != "SDN"
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
+# 
+# # add columns for raw coverage, and source of info
+# dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("ESPEN", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # epi cov < 25%
+# condition <- dfAPOC_included4$EpiCov > 0 &
+#   dfAPOC_included4$EpiCov < 65 &
+#   dfAPOC_included4$Year %in% 2013:2022 &
+#   dfAPOC_included4$ADMIN0ISO3 != "SDN"
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(0.25, length.out = length(indices))
+# 
+# # add columns for raw coverage, and source of info
+# dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("ESPEN", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
-dfAPOC_DRC_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "COD" & Year == 2022 & EpiCov > 0)
+# ====================================================== #
+#  Function to update MDA cov in ESPEN years (2013-2022) #
 
-set1 <- unique(DRC_MDA_2022$IU_ID)
-set2 <- unique(dfAPOC_DRC_2022$IU_ID_MAPPING)
-
-# Check if sets are equal
-if(all(sort(set1) == sort(set2))) {
-  print("The character vectors have the same characters.")
-} else {
-  print("The character vectors do not have the same characters.")
+update_espen_mda_years <- function(df) {
+  
+  df_updated <- df # df to update
+  
+  # Update for epi coverage > 65%
+  condition_high_cov <- df_updated$EpiCov >= 65 &
+    df_updated$Year %in% 2013:2022 &
+    df_updated$ADMIN0ISO3 != "SDN"
+  indices_high_cov <- which(condition_high_cov)
+  
+  df_updated$MDA_CDTI[indices_high_cov] <- rep(0.65, length.out = length(indices_high_cov))
+  df_updated$MDA_CDTI_raw[indices_high_cov] <- df_updated$EpiCov[indices_high_cov] / 100
+  df_updated$cov_source[indices_high_cov] <- rep("IU-level coverage", length.out = length(indices_high_cov))
+  df_updated$cov_specific_source[indices_high_cov] <- rep("ESPEN", length.out = length(indices_high_cov))
+  
+  # Update for epi coverage < 65% and > 0%
+  condition_low_cov <- df_updated$EpiCov > 0 &
+    df_updated$EpiCov < 65 &
+    df_updated$Year %in% 2013:2022 &
+    df_updated$ADMIN0ISO3 != "SDN"
+  indices_low_cov <- which(condition_low_cov)
+  
+  df_updated$MDA_CDTI[indices_low_cov] <- rep(0.25, length.out = length(indices_low_cov))
+  df_updated$MDA_CDTI_raw[indices_low_cov] <- df_updated$EpiCov[indices_low_cov] / 100
+  df_updated$cov_source[indices_low_cov] <- rep("IU-level coverage", length.out = length(indices_low_cov))
+  df_updated$cov_specific_source[indices_low_cov] <- rep("ESPEN", length.out = length(indices_low_cov))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (filling MDA in ESPEN  years 2013-22):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (filling MDA in ESPEN  years 2013-22):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(df_updated)
 }
 
-# ============================= #
-#              ETH              #
-# now moved to start of script! #
+# call function
+dfAPOC_included4 <- update_espen_mda_years(dfAPOC_included3)
 
-# ETH_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-ETH-Oncho-iu-2022.csv")
-# ETH_MDA_2022 <- subset(ETH_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
-#
-# dfAPOC_ETH_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "ETH" & Year == 2022 & EpiCov > 0)
-#
-# # 1) first, update exisiting IUs with 2022 EpiCov from new ESPEN
-# dfAPOC_included4_subset <- dfAPOC_included4[dfAPOC_included4$Year == 2022, ] # Subset dfAPOC_included4 to get only the rows where Year is equal to 2022
-# matching_indices <- match(dfAPOC_included4_subset$IU_ID_MAPPING, ETH_MDA_2022$IU_ID)
-# #any(!is.na(matching_indices))
-#
-# # Update EpiCov column in dfAPOC_included4_subset with values from EpiCov column in ETH_MDA_2022
-# matching_indices_not_na <- !is.na(matching_indices)
-# dfAPOC_included4_subset$EpiCov[matching_indices_not_na] <- ETH_MDA_2022$EpiCov[matching_indices[matching_indices_not_na]]
-#
-# dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset # Update the original dfAPOC_included4 with the updated values
-#
-# # 2) now need to do this for the endemicity, CUM_MDA and cov columns (replace the new ESPEN claissification in dfAPOC_included4)
-# dfAPOC_included4_subset$Endemicity[matching_indices_not_na] <- ETH_MDA_2022$Endemicity[matching_indices[matching_indices_not_na]]
-# dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
-#
-# dfAPOC_included4_subset$Cum_MDA[matching_indices_not_na] <- ETH_MDA_2022$Cum_MDA[matching_indices[matching_indices_not_na]]
-# dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
-#
-# dfAPOC_included4_subset$Cov[matching_indices_not_na] <- ETH_MDA_2022$Cov[matching_indices[matching_indices_not_na]]
-# dfAPOC_included4[dfAPOC_included4$Year == 2022, ] <- dfAPOC_included4_subset
 
-# 3) need to check if any existing IUs starting MDA for first time in 2022 & whether can be included (baseline fitted mf prev?)
-new_MDA_ETH_2022 <- subset(ETH_MDA_2022, Cum_MDA == 1)
-new_IUs_ETH <- new_MDA_ETH_2022$IU_ID
-new_IUs_ETH_name <- new_MDA_ETH_2022$ADMIN3
-
-dfAPOC_included4_subset_ETH2022 <- dfAPOC_included4[dfAPOC_included4$Year == 2022 & dfAPOC_included4$ADMIN0ISO3 == "ETH", ] # which Ius already included in 2022 in ETH
-dfAPOC_included4_subset_ETH2022_IUs <- dfAPOC_included4_subset_ETH2022$IU_ID_MAPPING # currently in histories
-
-# are they in the histories currently?
-new_IUs_ETH # all IUs with MDA for first time in ETH
-IU_ID_notinhistories <- setdiff(new_IUs_ETH, dfAPOC_included4_subset_ETH2022_IUs) # find Ius that are not in the histories currently for 2022
-IU_ID_notinhistories
-
-# those not found after update (but should be included?) : c(Hidabu Abote, Gerar Jarso, Degeluna Tijo, Quarit, East Esite, Ensaro, West Esite)
-# those not found after update (but should be included?) : c(18905, 18871, 18833, 18651, 18592, 18591, 18537)
-
-# no baseline for: c(18755, 18502)
-
-# make a vector of new IUs (minus those without baseline mf prev)
-IU_ID_new_toinclude_ETH <- setdiff(new_IUs_ETH, IU_ID_notinhistories)
-IU_ID_new_toinclude_ETH
-# # do they have fitted baseline mf prev values?
-# new_IUs_ETH_code <- new_MDA_ETH_2022$IU_CODE
-# new_IUs_ETH_code
-# ius_fitted <- summaries_apoc[,1]
-# notinfitting <- setdiff(new_IUs_ETH_code, ius_fitted)
-# notinfitting
-#
-# IU_ID_nobaseline <- substr(notinfitting, nchar(notinfitting) - 4, nchar(notinfitting))
-# IU_ID_nobaseline
-#
-# # now remove these from IU_ID to include as new Ius in 2022 (because no baseline mf prev)
-# IU_ID_new_toinclude <- setdiff(IU_ID_notinhistories, IU_ID_nobaseline)
-# IU_ID_new_toinclude
-
-#setdiff(new_IUs_ETH, dfAPOC_included4_subset_ETH2022_IUs) # find Ius that are not in the histories currently for 2022
-
-# dfAPOC_endemic # check if in first
-# summaries_apoc # check if IUs in baseline fitting
-# final_df_oncho_Parent_Child # check if mapped to a parent IU
-
-# =============================== #
-#     COG (republic of congo)     #
-
-COG_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-COG-Oncho-iu-2022.csv")
-COG_MDA_2022 <- subset(COG_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
-nrow(COG_MDA_2022) # 19 Ius with MDA in 2022 in ESPEN
-IUs_2022_COG_withMDA_ESPEN <- COG_MDA_2022$IU_ID
-
-dfAPOC_COG_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "COG" & Year == 2022 & EpiCov > 0)
-nrow(dfAPOC_COG_2022)
-IUs_2022_COG_withMDA_histories <- dfAPOC_COG_2022$IU_ID # 19 IUs with MDA in histories so matches!
-
-check_sameIUs_COG <- setdiff(IUs_2022_COG_withMDA_ESPEN, IUs_2022_COG_withMDA_histories)
-check_sameIUs_COG
-
-# checked and 19 Ius (the same) in both
-
-# =============================== #
-#         Uganda (UGA)            #
-# now moved to start of script! #
-
-UGA_2022_EPSEN <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-UG-Oncho-iu-2022.csv")
-UGA_MDA_2022 <- subset(UGA_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
-nrow(UGA_MDA_2022) # 19 Ius with MDA in 2022 in ESPEN
-IUs_2022_UGA_withMDA_ESPEN <- UGA_MDA_2022$IU_ID
-IUs_2022_UGA_withMDA_ESPEN
-
-IUs_2022_UGA_withMDA_ESPEN_IUname <- UGA_MDA_2022$ADMIN2
-IUs_2022_UGA_withMDA_ESPEN_IUname
-
-# any IUs in current histories with MDA in 2022 in UGA?
-dfAPOC_UGA_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "UGA" & Year == 2022 & EpiCov > 0)
-nrow(dfAPOC_UGA_2022)
-IUs_2022_UGA_withMDA_histories <- dfAPOC_UGA_2022$IU_ID # 0 IUs with MDA in histories -
-
-# check if 12 IUs with MDA in ESPEN are in our histories currently
-dfAPOC_UGA_2022 <- subset(dfAPOC_included4, ADMIN0ISO3 == "UGA" & Year == 2022)
-nrow(dfAPOC_UGA_2022)
-IUs_2022_UGA_histories <- dfAPOC_UGA_2022$IU_ID # 0 IUs with MDA in histories -
-
-check_diffIUs_UGA <- setdiff(IUs_2022_UGA_withMDA_ESPEN, IUs_2022_UGA_histories)
-check_diffIUs_UGA # 0 so no new IUs with MDA i.e., all present in 2022 in histories just without MDA at the moment
-
-# checked and 12 Ius (the same) in both
-check_sameIUs_UGA <- setdiff(IUs_2022_UGA_withMDA_ESPEN, IUs_2022_UGA_withMDA_histories)
-check_sameIUs_UGA
-
-# ========================================================================= #
-# make new col to indicate new IUs for 2022 with MDA (NOT NEWLY CREATED IUs)
-
-# for ETH
-dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% IU_ID_new_toinclude_ETH, "ESPEN update: first MDA round in 2022", "no update")
-
-# for NGA
-dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% NGA_MDA_2022_withMDA_ESPEN, "ESPEN update: MDA present in 2022 with prior MDA", dfAPOC_included4$new_MDA_IUs_2022)
-
-# for UGA
-dfAPOC_included4$new_MDA_IUs_2022 <- ifelse(dfAPOC_included4$IU_ID %in% IUs_2022_UGA_withMDA_ESPEN, "ESPEN update: MDA present in 2022 with prior MDA", dfAPOC_included4$new_MDA_IUs_2022)
-
-nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2346; 
-                                             # n = 2107 IUs (April 2025)
-
-# ====================================== #
-#     END OF MAY 2024 (ESPEN update)     #
-
-# ======================= #
-# Now fill in 2013 - 2022 #
-
-# epi cov > 65%
-condition <- dfAPOC_included4$EpiCov >= 65 &
-  dfAPOC_included4$Year %in% 2013:2022 &
-  dfAPOC_included4$ADMIN0ISO3 != "SDN"
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
-
-# add columns for raw coverage, and source of info
-dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("ESPEN", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# epi cov < 25%
-condition <- dfAPOC_included4$EpiCov > 0 &
-  dfAPOC_included4$EpiCov < 65 &
-  dfAPOC_included4$Year %in% 2013:2022 &
-  dfAPOC_included4$ADMIN0ISO3 != "SDN"
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.25, length.out = length(indices))
-
-# add columns for raw coverage, and source of info
-dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("ESPEN", length.out = length(indices))# Use indexing to assign values based on the condition
-
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
-
-# ======================================================================= #
-# if 2013 or 2014 and "not reported" and "included" in ESPEN_MDA_history  #
-
-# check if any IUs with Cum_MDA > 0 but not EpiCov > 0 during 2013 - 2022
-result <- dfAPOC_included4 %>%
-  filter(Year >= 2013 & Year <= 2022) %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(has_positive_Cum_MDA = any(Cum_MDA > 0),
-            no_positive_EpiCov = all(EpiCov == 0))
-
-# Filter rows where Cum_MDA > 0 but no positive EpiCov
-result_filtered <- result %>%
-  filter(has_positive_Cum_MDA & no_positive_EpiCov)
-
-unique_check_vec <- result_filtered$IU_ID_MAPPING
-length(unique_check_vec)
-#subset_check <- subset(dfAPOC_included4, IU_ID_MAPPING %in% unique_check_vec)
-
-# check IUs where no EpiCoV values from 2013
-result_noEpiCovs <- result %>%
-  filter(no_positive_EpiCov)
-unique_noEpiCov_vec <- result_noEpiCovs$IU_ID_MAPPING
-
-# # # All countries that need 65% in 2013 or 2014 according to APOC Table 2015 #
+# # ======================================================================= #
+# # if 2013 or 2014 and "not reported" and "included" in ESPEN_MDA_history  #
+# 
+# # check if any IUs with Cum_MDA > 0 but not EpiCov > 0 during 2013 - 2022
+# result <- dfAPOC_included4 %>%
+#   filter(Year >= 2013 & Year <= 2022) %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   summarise(has_positive_Cum_MDA = any(Cum_MDA > 0),
+#             no_positive_EpiCov = all(EpiCov == 0))
+# 
+# # Filter rows where Cum_MDA > 0 but no positive EpiCov
+# result_filtered <- result %>%
+#   filter(has_positive_Cum_MDA & no_positive_EpiCov)
+# 
+# unique_check_vec <- result_filtered$IU_ID_MAPPING
+# length(unique_check_vec)
+# #subset_check <- subset(dfAPOC_included4, IU_ID_MAPPING %in% unique_check_vec)
+# 
+# # check IUs where no EpiCoV values from 2013
+# result_noEpiCovs <- result %>%
+#   filter(no_positive_EpiCov)
+# unique_noEpiCov_vec <- result_noEpiCovs$IU_ID_MAPPING
+# 
+# # # # All countries that need 65% in 2013 or 2014 according to APOC Table 2015 #
+# # condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
+# #   (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
+# #   (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
+# #   (dfAPOC_included4$ADMIN0ISO3 == "BDI" | dfAPOC_included4$ADMIN0ISO3 == "CMR" | dfAPOC_included4$ADMIN0ISO3 == "TCD" |
+# #      dfAPOC_included4$ADMIN0ISO3 == "COG" | dfAPOC_included4$ADMIN0ISO3 == "COD" | dfAPOC_included4$ADMIN0ISO3 == "ETH" |
+# #      dfAPOC_included4$ADMIN0ISO3 == "LBR" | dfAPOC_included4$ADMIN0ISO3 == "MWI" | dfAPOC_included4$ADMIN0ISO3 == "NGA" |
+# #      dfAPOC_included4$ADMIN0ISO3 == "TZA" | dfAPOC_included4$ADMIN0ISO3 == "UGA")
+# # indices <- which(condition)
+# # dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
+# # #check <- dfAPOC_included4[75831,]
+# #
+# # # # All countries that need 25% in 2013 or 2014 according to APOC Table 2015 #
+# # condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
+# #   (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
+# #   (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
+# #   (dfAPOC_included4$ADMIN0ISO3 == "GNQ" | dfAPOC_included4$ADMIN0ISO3 == "SSD")
+# # indices <- which(condition)
+# # dfAPOC_included4$MDA_CDTI[indices] <- rep(0.25, length.out = length(indices))
+# 
+# # same as above but excluding IUs where no Epi_cov values > 0 in 2013 onwards #
 # condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
 #   (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
 #   (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
-#   (dfAPOC_included4$ADMIN0ISO3 == "BDI" | dfAPOC_included4$ADMIN0ISO3 == "CMR" | dfAPOC_included4$ADMIN0ISO3 == "TCD" |
-#      dfAPOC_included4$ADMIN0ISO3 == "COG" | dfAPOC_included4$ADMIN0ISO3 == "COD" | dfAPOC_included4$ADMIN0ISO3 == "ETH" |
-#      dfAPOC_included4$ADMIN0ISO3 == "LBR" | dfAPOC_included4$ADMIN0ISO3 == "MWI" | dfAPOC_included4$ADMIN0ISO3 == "NGA" |
-#      dfAPOC_included4$ADMIN0ISO3 == "TZA" | dfAPOC_included4$ADMIN0ISO3 == "UGA")
+#   (dfAPOC_included4$ADMIN0ISO3 %in% c("BDI", "CMR", "TCD", "COG", "COD", "ETH", "LBR", "MWI", "NGA", "TZA", "UGA")) &
+#   !(dfAPOC_included4$IU_ID_MAPPING %in% unique_noEpiCov_vec)
 # indices <- which(condition)
 # dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
 # #check <- dfAPOC_included4[75831,]
-#
-# # # All countries that need 25% in 2013 or 2014 according to APOC Table 2015 #
+# 
+# # add columns for raw coverage, and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("assumed (continuous MDA in 2013 and/or 2014)", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # # # All countries that need 25% in 2013 or 2014 according to APOC Table 2015 #
 # condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
 #   (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
 #   (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
-#   (dfAPOC_included4$ADMIN0ISO3 == "GNQ" | dfAPOC_included4$ADMIN0ISO3 == "SSD")
+#   (dfAPOC_included4$ADMIN0ISO3 == "GNQ" | dfAPOC_included4$ADMIN0ISO3 == "SSD") &
+#   !(dfAPOC_included4$IU_ID_MAPPING %in% unique_noEpiCov_vec)
 # indices <- which(condition)
 # dfAPOC_included4$MDA_CDTI[indices] <- rep(0.25, length.out = length(indices))
-
-# same as above but excluding IUs where no Epi_cov values > 0 in 2013 onwards #
-condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
-  (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
-  (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
-  (dfAPOC_included4$ADMIN0ISO3 %in% c("BDI", "CMR", "TCD", "COG", "COD", "ETH", "LBR", "MWI", "NGA", "TZA", "UGA")) &
-  !(dfAPOC_included4$IU_ID_MAPPING %in% unique_noEpiCov_vec)
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
-#check <- dfAPOC_included4[75831,]
-
-# add columns for raw coverage, and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("assumed (continuous MDA in 2013 and/or 2014)", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# # # All countries that need 25% in 2013 or 2014 according to APOC Table 2015 #
-condition <- dfAPOC_included4$ESPEN_MDA_history == "Include" &
-  (dfAPOC_included4$Year == 2013 | dfAPOC_included4$Year == 2014) &
-  (dfAPOC_included4$Endemicity == "Not reported" | dfAPOC_included4$Endemicity == "Augmented") &
-  (dfAPOC_included4$ADMIN0ISO3 == "GNQ" | dfAPOC_included4$ADMIN0ISO3 == "SSD") &
-  !(dfAPOC_included4$IU_ID_MAPPING %in% unique_noEpiCov_vec)
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.25, length.out = length(indices))
-
-# add columns for raw coverage, and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs  (April 25')
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
-
-# ================ #
-# Nigeria in ESPEN #
-
-# NOTE: IDEALLY NATIONAL ONCHO SNAPSHOT UPDATE FOR 2022 WOULD SUPERCEDE USING SS AND TCT DATA BELOW WHEN AVAILABLE!
-# CURRENTLY TCT and SS data supercedes using espen 2022 where available.
-
-# ESPEN 2022 update (May 2024) #
-#  check whether same IUs with MDA in ESPEN in old histories for 2022 #
-unique(NGA_MDA_2022$ADMIN2)
-unique(NGA_MDA_2022$ADMIN1) # are Benue, Kogi, Kwara included?
-
-#check individual rows for these 3:
-dfAPOC_NGA_2022_3states <- subset(dfAPOC_included4, ADMIN0ISO3 == "NGA" & ADMIN1 %in% c("Benue", "Kogi", "Kwara") & Year == 2022)
-
-dfAPOC_NGA_2022_Benue <- subset(dfAPOC_NGA_2022_3states, ADMIN1 == "Benue")
-IUs_Benue <- unique(dfAPOC_NGA_2022_Benue$ADMIN2)
-
-# IUs1_tocheck <- as.vector(NGA_grouped_LGA[3, 3])
-# any(IUs_Benue %in% IUs1_tocheck)
-#
-# IUs2_tocheck <- as.vector(NGA_grouped_LGA[6, 3])
-# any(IUs_Benue %in% IUs2_tocheck)
-#
-# IUs2_tocheck <- as.vector(NGA_grouped_LGA[6, 3])
+# 
+# # add columns for raw coverage, and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs  (April 25')
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 
-# update NGA for 2022 & 2023 based on CC data (as most/all coded "MDA not delivered" according to ESPEN) - assume 65% cov until CC return with covs
-# 2022
-LGAs1_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[3, 3]), ",\\s*"))
-LGAs2_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[6, 3]), ",\\s*"))
-LGAs3_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[8, 3]), ",\\s*"))
-LGAs4_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[10, 3]), ",\\s*"))
-LGAs_22_MDA <- c(LGAs1_22, LGAs2_22, LGAs3_22, LGAs4_22)
+# ================================================= #
+# Function to update MDA in years 2013/14           #
 
-# check if any IUs in the ESPEN 2022 update with MDA (with cov < 65%) and in our LGA 2022 data to update below (w/ 65% cov)
-NGA_2022_ESPEN_covless65 <- subset(NGA_2022_EPSEN, EpiCov > 0 & EpiCov < 65)
-IUs_covless65_NGA_2022 <- unique(NGA_2022_ESPEN_covless65$ADMIN2)
-any(IUs_covless65_NGA_2022 %in% LGAs_22_MDA) # are there any IUs in ESPEN with <65% (non-zero) that are in our LGA_22 vector from SS?
-to_remove <- intersect(IUs_covless65_NGA_2022, LGAs_22_MDA) # which IUs match? = Esan West - remove from LGAs_22_MDA (as already have an ESPEN which is <65%)
-to_remove
+update_mda_coverage_2013_2014 <- function(df) {
+  
+  df_updated <- df #
+  
+  # Check for IUs with Cum_MDA > 0 but no EpiCov > 0 during 2013-2022
+  result <- df_updated %>%
+    filter(Year >= 2013 & Year <= 2022) %>%
+    group_by(IU_ID_MAPPING) %>%
+    summarise(has_positive_Cum_MDA = any(Cum_MDA > 0),
+              no_positive_EpiCov = all(EpiCov == 0))
+  
+  # Filter rows where Cum_MDA > 0 but no positive EpiCov
+  result_filtered <- result %>%
+    filter(has_positive_Cum_MDA & no_positive_EpiCov)
+  
+  unique_noEpiCov_vec <- result_filtered$IU_ID_MAPPING
+  
+  # ESPEN MDA years (2013 and 2014) for countries that need 65% coverage
+  condition_65 <- df_updated$ESPEN_MDA_history == "Include" &
+    (df_updated$Year == 2013 | df_updated$Year == 2014) &
+    (df_updated$Endemicity == "Not reported" | df_updated$Endemicity == "Augmented") &
+    (df_updated$ADMIN0ISO3 %in% c("BDI", "CMR", "TCD", "COG", "COD", "ETH", "LBR", "MWI", "NGA", "TZA", "UGA")) &
+    !(df_updated$IU_ID_MAPPING %in% unique_noEpiCov_vec)
+  
+  indices_65 <- which(condition_65)
+  df_updated$MDA_CDTI[indices_65] <- rep(0.65, length.out = length(indices_65))
+  
+  # Add columns for raw coverage, and source of info
+  df_updated$cov_source[indices_65] <- rep("assumed", length.out = length(indices_65))
+  df_updated$cov_specific_source[indices_65] <- rep("assumed (continuous MDA in 2013 and/or 2014)", length.out = length(indices_65))
+  
+  # ESPEN MDA years (2013 and 2014) for countries that need 25% coverage
+  condition_25 <- df_updated$ESPEN_MDA_history == "Include" &
+    (df_updated$Year == 2013 | df_updated$Year == 2014) &
+    (df_updated$Endemicity == "Not reported" | df_updated$Endemicity == "Augmented") &
+    (df_updated$ADMIN0ISO3 %in% c("GNQ", "SSD")) &
+    !(df_updated$IU_ID_MAPPING %in% unique_noEpiCov_vec)
+  
+  indices_25 <- which(condition_25)
+  df_updated$MDA_CDTI[indices_25] <- rep(0.25, length.out = length(indices_25))
+  
+  # Add columns for raw coverage, and source of info for 25% coverage
+  df_updated$cov_source[indices_25] <- rep("national-level coverage data", length.out = length(indices_25))
+  df_updated$cov_specific_source[indices_25] <- rep("APOC report, 2015", length.out = length(indices_25))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (updating 2013/2014 MDA years):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (updating 2013/2014 MDA years):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(df_updated)
+}
 
-length(LGAs_22_MDA)
-LGAs_22_MDA <- LGAs_22_MDA[!LGAs_22_MDA %in% to_remove]
-length(LGAs_22_MDA) #check length (should be minus 1)
-intersect(IUs_covless65_NGA_2022, LGAs_22_MDA) # check now none present = now can use LGAs_22_MDA
+dfAPOC_included4 <- update_mda_coverage_2013_2014(dfAPOC_included4)
 
-# now update with CC data
-condition_MDA22_NGA <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year == 2022 & ADMIN2 %in% LGAs_22_MDA)
-indices <- which(condition_MDA22_NGA)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
 
-# add columns for raw coverage (if applicable), and source of info
-dfAPOC_included4$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# # ================ #
+# # Nigeria in ESPEN #
+# 
+# # NOTE: IDEALLY NATIONAL ONCHO SNAPSHOT UPDATE FOR 2022 WOULD SUPERCEDE USING SS AND TCT DATA BELOW WHEN AVAILABLE!
+# # CURRENTLY TCT and SS data supercedes using espen 2022 where available.
+# 
+# # ESPEN 2022 update (May 2024) #
+# #  check whether same IUs with MDA in ESPEN in old histories for 2022 #
+# unique(NGA_MDA_2022$ADMIN2)
+# unique(NGA_MDA_2022$ADMIN1) # are Benue, Kogi, Kwara included?
+# 
+# #check individual rows for these 3:
+# dfAPOC_NGA_2022_3states <- subset(dfAPOC_included4, ADMIN0ISO3 == "NGA" & ADMIN1 %in% c("Benue", "Kogi", "Kwara") & Year == 2022)
+# 
+# dfAPOC_NGA_2022_Benue <- subset(dfAPOC_NGA_2022_3states, ADMIN1 == "Benue")
+# IUs_Benue <- unique(dfAPOC_NGA_2022_Benue$ADMIN2)
+# 
+# # IUs1_tocheck <- as.vector(NGA_grouped_LGA[3, 3])
+# # any(IUs_Benue %in% IUs1_tocheck)
+# #
+# # IUs2_tocheck <- as.vector(NGA_grouped_LGA[6, 3])
+# # any(IUs_Benue %in% IUs2_tocheck)
+# #
+# # IUs2_tocheck <- as.vector(NGA_grouped_LGA[6, 3])
+# NGA_strt_stp_LGA <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_strt_stp_LGA.csv")
+# # ============================================ #
+# # matching names from the oncho snapshot data  #
+# NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA_LGAnames.csv")
+# NGA_snapshot_LGAnames <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_missing_tocheck.csv")
+# 
+# # # APPROACH 3 USING CC DATA FROM HERE #
+# #
+# # # group LGAs on basis of MDA start and MDA end years
+# NGA_strt_stp_LGA$RB_MDA_Start <- as.numeric(NGA_strt_stp_LGA$RB_MDA_Start)
+# NGA_strt_stp_LGA$RB_MDA_End <- as.numeric(NGA_strt_stp_LGA$RB_MDA_End)
+# 
+# NGA_strt_stp_LGA$YearRange <- paste(NGA_strt_stp_LGA$RB_MDA_Start, NGA_strt_stp_LGA$RB_MDA_End, sep = ',')
+# 
+# NGA_grouped_LGA <- NGA_strt_stp_LGA %>%
+#   group_by(YearRange) %>%
+#   summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
+# 
+# NGA_grouped_LGA <- NGA_grouped_LGA %>%
+#   separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
+# 
+# 
+# # update NGA for 2022 & 2023 based on CC data (as most/all coded "MDA not delivered" according to ESPEN) - assume 65% cov until CC return with covs
+# # 2022
+# LGAs1_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[3, 3]), ",\\s*"))
+# LGAs2_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[6, 3]), ",\\s*"))
+# LGAs3_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[8, 3]), ",\\s*"))
+# LGAs4_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[10, 3]), ",\\s*"))
+# LGAs_22_MDA <- c(LGAs1_22, LGAs2_22, LGAs3_22, LGAs4_22)
+# 
+# # check if any IUs in the ESPEN 2022 update with MDA (with cov < 65%) and in our LGA 2022 data to update below (w/ 65% cov)
+# NGA_2022_ESPEN_covless65 <- subset(NGA_2022_EPSEN, EpiCov > 0 & EpiCov < 65)
+# IUs_covless65_NGA_2022 <- unique(NGA_2022_ESPEN_covless65$ADMIN2)
+# any(IUs_covless65_NGA_2022 %in% LGAs_22_MDA) # are there any IUs in ESPEN with <65% (non-zero) that are in our LGA_22 vector from SS?
+# to_remove <- intersect(IUs_covless65_NGA_2022, LGAs_22_MDA) # which IUs match? = Esan West - remove from LGAs_22_MDA (as already have an ESPEN which is <65%)
+# to_remove
+# 
+# length(LGAs_22_MDA)
+# LGAs_22_MDA <- LGAs_22_MDA[!LGAs_22_MDA %in% to_remove]
+# length(LGAs_22_MDA) #check length (should be minus 1)
+# intersect(IUs_covless65_NGA_2022, LGAs_22_MDA) # check now none present = now can use LGAs_22_MDA
+# 
+# # now update with CC data
+# condition_MDA22_NGA <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year == 2022 & ADMIN2 %in% LGAs_22_MDA)
+# indices <- which(condition_MDA22_NGA)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
+# 
+# # add columns for raw coverage (if applicable), and source of info
+# dfAPOC_included4$cov_source[indices] <- rep("assumed", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# # dfAPOC_NGA_2022_3states <- subset(dfAPOC_included4, ADMIN0ISO3 == "NGA" & ADMIN1 %in% c("Benue", "Kogi", "Kwara") & Year == 2022) # check
+# 
+# # Sightsavers information for MDA 3 regions/ 60 LGAs in Nigeria in 2022
+# # dfAPOC_included4_sightsavers_NGA <- subset(dfAPOC_included4, ADMIN1 %in% c("Benue", "Kogi", "Kwara"))
+# # unique(dfAPOC_included4_sightsavers_NGA$ADMIN2)
+# NGA_sightsavers_2022 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/Sightsavers_2022_LGA_covs.csv")
+# LGAs_2022_SS <- NGA_sightsavers_2022$LGA_mappable
+# 
+# # check if any of SS IUs above already included in ESPEN (and covs matching?) - May 2024 update #
+# IUs_allcovs_NGA_2022 <- NGA_MDA_2022$ADMIN2
+# IUs_allcovs_NGA_2022
+# any(IUs_allcovs_NGA_2022 %in% LGAs_2022_SS)
+# to_check <- intersect(IUs_allcovs_NGA_2022, LGAs_2022_SS) # which IUs match? = Esan West - remove from LGAs_22_MDA (as already have an ESPEN which is <65%)
+# to_check
+# 
+# # NGA_sightsavers_2022_check <- subset(NGA_sightsavers_2022, LGA_mappable %in% to_check) # no Ius with 0 epicov
+# # ESPEN_2022_NGA_tocheck <- subset(NGA_2022_EPSEN, ADMIN2 %in% to_check) # 3 IUs with 0 epicov - use SS data to update 2022 for these IUs
+# # dfAPOC_included4_NGA_tocheck <- subset(dfAPOC_included4, ADMIN2 %in% to_check & Year == 2022) # confirmed: need SS data to update
+# 
+# # continue updating with SS 2022 data
+# condition <- (dfAPOC_included4$Year == 2022) &
+#    (dfAPOC_included4$ADMIN0ISO3 == "NGA") &
+#    (dfAPOC_included4$ADMIN1 %in% c("Benue", "Kogi", "Kwara"))
+#    (dfAPOC_included4$IUs_NAME_MAPPING %in% LGAs_2022_SS)
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices)) # all epi.covs are > 0.6499 for 2022 from sightsavers data
+# 
+# # dfAPOC_included4_NGA_tocheck <- subset(dfAPOC_included4, ADMIN2 %in% to_check & Year == 2022) # confirmed: need SS data to update
+# 
+# # add columns for raw coverage (if applicable), and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("Sightsavers info", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs (April 25')
 
-# dfAPOC_NGA_2022_3states <- subset(dfAPOC_included4, ADMIN0ISO3 == "NGA" & ADMIN1 %in% c("Benue", "Kogi", "Kwara") & Year == 2022) # check
+# ====================================================================== #
+# function to update IUs in Nigeria for 2022 with TCC & Sightsavers info #
 
-# Sightsavers information for MDA 3 regions/ 60 LGAs in Nigeria in 2022
-# dfAPOC_included4_sightsavers_NGA <- subset(dfAPOC_included4, ADMIN1 %in% c("Benue", "Kogi", "Kwara"))
-# unique(dfAPOC_included4_sightsavers_NGA$ADMIN2)
-NGA_sightsavers_2022 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/Sightsavers_2022_LGA_covs.csv")
-LGAs_2022_SS <- NGA_sightsavers_2022$LGA_mappable
+update_nigeria_2022_data <- function(df, NGA_strt_stp_LGA_path, NGA_snapshot_LGAnames_path, Sightsavers_data_path, NGA_2022_EPSEN_path) {
+  
+  df_updated <- df 
+  
+  # Load data
+  NGA_strt_stp_LGA <- read.csv(NGA_strt_stp_LGA_path)
+  NGA_snapshot_LGAnames <- read.csv(NGA_snapshot_LGAnames_path)
+  NGA_sightsavers_2022 <- read.csv(Sightsavers_data_path)
+  NGA_2022_EPSEN <- read.csv(NGA_2022_EPSEN_path)
 
-# check if any of SS IUs above already included in ESPEN (and covs matching?) - May 2024 update #
-IUs_allcovs_NGA_2022 <- NGA_MDA_2022$ADMIN2
-IUs_allcovs_NGA_2022
-any(IUs_allcovs_NGA_2022 %in% LGAs_2022_SS)
-to_check <- intersect(IUs_allcovs_NGA_2022, LGAs_2022_SS) # which IUs match? = Esan West - remove from LGAs_22_MDA (as already have an ESPEN which is <65%)
-to_check
+  # Convert MDA start and end years to numeric
+  NGA_strt_stp_LGA$RB_MDA_Start <- as.numeric(NGA_strt_stp_LGA$RB_MDA_Start)
+  NGA_strt_stp_LGA$RB_MDA_End <- as.numeric(NGA_strt_stp_LGA$RB_MDA_End)
+  
+  # Create YearRange for grouping
+  NGA_strt_stp_LGA$YearRange <- paste(NGA_strt_stp_LGA$RB_MDA_Start, NGA_strt_stp_LGA$RB_MDA_End, sep = ',')
+  
+  # Group LGAs
+  NGA_grouped_LGA <- NGA_strt_stp_LGA %>%
+    group_by(YearRange) %>%
+    summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
+  
+  NGA_grouped_LGA <- NGA_grouped_LGA %>%
+    separate(YearRange, into = c("RB_strt_yr", "RB_end_yr"), sep = ",", convert = TRUE) # split into 2 numeric val columns for strt and end yr
+  
+  # Set LGAs for 2022
+  LGAs1_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[3, 3]), ",\\s*"))
+  LGAs2_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[6, 3]), ",\\s*"))
+  LGAs3_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[8, 3]), ",\\s*"))
+  LGAs4_22 <- unlist(strsplit(as.character(NGA_grouped_LGA[10, 3]), ",\\s*"))
+  LGAs_22_MDA <- c(LGAs1_22, LGAs2_22, LGAs3_22, LGAs4_22)
+  
+  # Check for IUs with Cum_MDA > 0 but no EpiCov > 0 in 2022 (ESPEN)
+  NGA_2022_ESPEN_covless65 <- subset(NGA_2022_EPSEN, EpiCov > 0 & EpiCov < 65)
+  IUs_covless65_NGA_2022 <- unique(NGA_2022_ESPEN_covless65$ADMIN2)
+  
+  # Remove IUs already in ESPEN data with coverage < 65%
+  to_remove <- intersect(IUs_covless65_NGA_2022, LGAs_22_MDA)
+  LGAs_22_MDA <- LGAs_22_MDA[!LGAs_22_MDA %in% to_remove]
+  
+  # Update MDA with CC data (2022)
+  condition_MDA22_NGA <- with(df_updated, ADMIN0ISO3 == "NGA" & Year == 2022 & ADMIN2 %in% LGAs_22_MDA)
+  indices <- which(condition_MDA22_NGA)
+  df_updated$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices))
+  
+  # Add coverage columns
+  df_updated$cov_source[indices] <- rep("assumed", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("The Carter Centre info indicates MDA: no coverage in ESPEN, assume CDTI with 65% total population coverage", length.out = length(indices))
+  
+  # Update with Sightsavers data (2022)
+  LGAs_2022_SS <- NGA_sightsavers_2022$LGA_mappable
+  condition <- (df_updated$Year == 2022) &
+    (df_updated$ADMIN0ISO3 == "NGA") &
+    (df_updated$ADMIN1 %in% c("Benue", "Kogi", "Kwara")) &
+    (df_updated$IUs_NAME_MAPPING %in% LGAs_2022_SS)
+  indices <- which(condition)
+  df_updated$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices)) # All EpiCov > 0.6499 for 2022 from Sightsavers data
+  
+  # Add coverage columns for Sightsavers data
+  df_updated$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("Sightsavers info", length.out = length(indices))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (updating 2022 MDA in Nigeria with TCC/Sightsavers data):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (updating 2022 MDA in Nigeria with TCC/Sightsavers data):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(df_updated)
+}
 
-# NGA_sightsavers_2022_check <- subset(NGA_sightsavers_2022, LGA_mappable %in% to_check) # no Ius with 0 epicov
-# ESPEN_2022_NGA_tocheck <- subset(NGA_2022_EPSEN, ADMIN2 %in% to_check) # 3 IUs with 0 epicov - use SS data to update 2022 for these IUs
-# dfAPOC_included4_NGA_tocheck <- subset(dfAPOC_included4, ADMIN2 %in% to_check & Year == 2022) # confirmed: need SS data to update
-
-# continue updating with SS 2022 data
-condition <- (dfAPOC_included4$Year == 2022) &
-   (dfAPOC_included4$ADMIN0ISO3 == "NGA") &
-   (dfAPOC_included4$ADMIN1 %in% c("Benue", "Kogi", "Kwara"))
-   (dfAPOC_included4$IUs_NAME_MAPPING %in% LGAs_2022_SS)
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(0.65, length.out = length(indices)) # all epi.covs are > 0.6499 for 2022 from sightsavers data
-
-# dfAPOC_included4_NGA_tocheck <- subset(dfAPOC_included4, ADMIN2 %in% to_check & Year == 2022) # confirmed: need SS data to update
-
-# add columns for raw coverage (if applicable), and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("IU-level coverage", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("Sightsavers info", length.out = length(indices))# Use indexing to assign values based on the condition
-
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs (April 25')
+# call function #
+dfAPOC_included4 <- update_nigeria_2022_data(dfAPOC_included4, 
+                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_strt_stp_LGA.csv", 
+                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_missing_tocheck.csv", 
+                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/Sightsavers_2022_LGA_covs.csv",
+                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-NGA-Oncho-iu-2022.csv")
 
 # # 2023 # no 2023 here
 # LGAs_23_MDA <- unlist(strsplit(as.character(NGA_grouped_LGA[9, 3]), ",\\s*"))
@@ -3248,38 +3830,101 @@ length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs (April 25')
 
 #check <- dfAPOC_included4[101559,]
 
-# new col for Cov.in2
-dfAPOC_included4$Cov.in2 <- dfAPOC_included4$MDA_CDTI
+# # new col for Cov.in2
+# dfAPOC_included4$Cov.in2 <- dfAPOC_included4$MDA_CDTI
+# 
+# # need to remove MDA in 2013 or 2014 where dfAPOC_included4$new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022" (only an issue in ETH)
+# 
+# #dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & Year %in% c(2013,2014) & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
+# condition <- (dfAPOC_included4$Year %in% c(2013)) &
+#   (dfAPOC_included4$ADMIN0ISO3 == "ETH") &
+#  (dfAPOC_included4$new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022")
+# indices <- which(condition)
+# dfAPOC_included4$Cov.in2[indices] <- rep(NA, length.out = length(indices)) # all epi.covs are > 0.6499 for 2022 from sightsavers data
+# #dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & Year %in% c(2013,2014) & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
+# #dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
+# 
+# dfAPOC_included4$cov_source[indices] <- rep(NA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep(NA, length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs (April 25')
+# 
+# # =========================================#
+# # Next steps:                              #
+# # =========================================#
+# 
+# # ===================================================== #
+# # 1) code variable to state if annual CDTI in each year #
+# dfAPOC_included4$MDA_CDTI <- NA
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
 
-# need to remove MDA in 2013 or 2014 where dfAPOC_included4$new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022" (only an issue in ETH)
 
-#dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & Year %in% c(2013,2014) & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
-condition <- (dfAPOC_included4$Year %in% c(2013)) &
-  (dfAPOC_included4$ADMIN0ISO3 == "ETH") &
- (dfAPOC_included4$new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022")
-indices <- which(condition)
-dfAPOC_included4$Cov.in2[indices] <- rep(NA, length.out = length(indices)) # all epi.covs are > 0.6499 for 2022 from sightsavers data
-#dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & Year %in% c(2013,2014) & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
-#dfAPOC_included4_ETH_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 =="ETH" & new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022") # confirmed: need SS data to update
+# =================================================================== #
+#  function to create new coverage (Cov.in2) col and update CDTI cols #
 
-dfAPOC_included4$cov_source[indices] <- rep(NA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep(NA, length.out = length(indices))# Use indexing to assign values based on the condition
+update_mda_coverage <- function(df, ETH_2022_EPSEN_path) {
+  
+  df_updated <- df
+  
+  # Create new column for Cov.in2 based on MDA_CDTI
+  df_updated$Cov.in2 <- df_updated$MDA_CDTI
+  
+  # first find new IUs in EtHiopia with latest 2022 data indicating first MDA round in 2022 
+  ETH_2022_EPSEN <- read.csv(ETH_2022_EPSEN_path)
+  ETH_MDA_2022 <- subset(ETH_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
+  
+  new_MDA_ETH_2022 <- subset(ETH_MDA_2022, Cum_MDA == 1)
+  new_IUs_ETH <- new_MDA_ETH_2022$IU_ID
+  new_IUs_ETH_name <- new_MDA_ETH_2022$ADMIN3
+  
+  dfAPOC_included4_subset_ETH2022 <- dfAPOC_included4[dfAPOC_included4$Year == 2022 & dfAPOC_included4$ADMIN0ISO3 == "ETH", ] # which Ius already included in 2022 in ETH
+  dfAPOC_included4_subset_ETH2022_IUs <- dfAPOC_included4_subset_ETH2022$IU_ID_MAPPING # currently in histories
+  
+  # check if they arein the histories currently?
+  new_IUs_ETH # all IUs with MDA for first time in ETH
+  IU_ID_notinhistories <- setdiff(new_IUs_ETH, dfAPOC_included4_subset_ETH2022_IUs) # find Ius that are not in the histories currently for 2022
+  IU_ID_notinhistories
 
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs (April 25')
+  # make a vector of new IUs (minus those without baseline mf prev)
+  IU_ID_new_toinclude_ETH <- setdiff(new_IUs_ETH, IU_ID_notinhistories)
+  IU_ID_new_toinclude_ETH
+  
+  # Remove MDA in 2013 or 2014 where new_MDA_IUs_2022 == "ESPEN update: first MDA round in 2022" for ETH
+  condition <- (df_updated$Year %in% c(2013)) &
+    (df_updated$ADMIN0ISO3 == "ETH") &
+    (df_updated$IU_ID %in% IU_ID_new_toinclude_ETH)
+  indices <- which(condition)
+  df_updated$Cov.in2[indices] <- rep(NA, length.out = length(indices))
+  
+  # Remove coverage source and specific source for these indices
+  df_updated$cov_source[indices] <- rep(NA, length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep(NA, length.out = length(indices))
+  
+  # 1) Update MDA_CDTI to state if annual CDTI in each year
+  df_updated$MDA_CDTI <- NA  # Reset MDA_CDTI column to NA
+  
+  # Set MDA_CDTI to 1 where Cov.in2 > 0
+  condition <- df_updated$Cov.in2 > 0
+  indices <- which(condition)
+  df_updated$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (updating 2022 MDA in ETH & general coverage cols e.g. Cov.in2):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (updating 2022 MDA in ETH & general coverage cols e.g. Cov.in2):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(df_updated)
+}
 
-# =========================================#
-# Next steps:                              #
-# =========================================#
+# call function
+dfAPOC_included4 <- update_mda_coverage(dfAPOC_included4, 
+                                        "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-ETH-Oncho-iu-2022.csv")
 
-# ===================================================== #
-# 1) code variable to state if annual CDTI in each year #
-dfAPOC_included4$MDA_CDTI <- NA
-
-condition <- dfAPOC_included4$Cov.in2 > 0
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
 
 # ============================================================================ #
 # 2) code variable to state if biannual CDTI in each year: ETH, NGA, SSD, TZA  #
@@ -3287,108 +3932,231 @@ dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
 Biannual_APOC_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
 
-#=======#
-# Uganda #
-unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "UGA")
-
-unique_IUs_UGA_vec <- as.vector(unique_IUs_UGA$IUs_NAME)
-
-#unique_IUs_UGA <- subset(unique_IUs_UGA, IUs_NAME2 != "Obongi")
-
-grouped_IUs_biannual_UGA <- unique_IUs_UGA %>%
-  group_by(Biannual) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
-
-grouped_IUs_biannual_UGA_vec <- grouped_IUs_biannual_UGA$unique_IUs
-
-dfAPOC_included4$MDA_CDTI_Biannual <- NA # only need this once to create empty col
-
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2005 & dfAPOC_included4$Year < 2011 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[1]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2013 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[2]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
-# no treatment indicated for KIBAALE in ESPEN
-
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2014 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[3]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[4]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[5]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
-
-# condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
+# #=======#
+# # Uganda #
+# unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "UGA")
+# 
+# unique_IUs_UGA_vec <- as.vector(unique_IUs_UGA$IUs_NAME)
+# 
+# #unique_IUs_UGA <- subset(unique_IUs_UGA, IUs_NAME2 != "Obongi")
+# 
+# grouped_IUs_biannual_UGA <- unique_IUs_UGA %>%
+#   group_by(Biannual) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_biannual_UGA_vec <- grouped_IUs_biannual_UGA$unique_IUs
+# 
+# dfAPOC_included4$MDA_CDTI_Biannual <- NA # only need this once to create empty col
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2005 & dfAPOC_included4$Year < 2011 &
 #   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-#   dfAPOC_included4$IU_CODE_MAPPING == "UGA0512349836"
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[1]]
 # indices <- which(condition)
 # dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2013 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[2]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# # no treatment indicated for KIBAALE in ESPEN
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2014 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[3]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[4]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[5]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# # condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
+# #   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+# #   dfAPOC_included4$IU_CODE_MAPPING == "UGA0512349836"
+# # indices <- which(condition)
+# # dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2012 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[6]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[7]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2012 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[6]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# ========================================== #
+#  Function to update biannual MDA in Uganda #
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[7]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+update_biannual_uganda_mda <- function(df, biannual_file_path) {
+  
+  df_updated <- df 
+  
+  # Load the Biannual MDA data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter data for Uganda
+  unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "UGA")
+  
+  unique_IUs_UGA_vec <- as.vector(unique_IUs_UGA$IUs_NAME)
+  
+  # Group Uganda IUs by Biannual years
+  grouped_IUs_biannual_UGA <- unique_IUs_UGA %>%
+    group_by(Biannual) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME))) # Group IUs by Biannual years
+  
+  grouped_IUs_biannual_UGA_vec <- grouped_IUs_biannual_UGA$unique_IUs
+  
+  # Create a new column for Biannual MDA coverage
+  df_updated$MDA_CDTI_Biannual <- NA  # Only need this once to create an empty column
+  
+  # Define the year ranges for each biannual group manually
+  year_ranges <- list(
+    c(2006, 2011),
+    c(2007, 2012),
+    c(2007, 2013),
+    c(2007, 2022),
+    c(2011, 2022),
+    c(2012, 2022),
+    c(2014, 2022)
+  )
+  
+  # Loop through each group of biannual IUs and apply the conditions
+  for (i in 1:length(grouped_IUs_biannual_UGA_vec)) {
+    condition <- df_updated$Cov.in2 > 0 &
+      df_updated$Year > year_ranges[[i]][1] & df_updated$Year < year_ranges[[i]][2] &
+      df_updated$ADMIN0ISO3 == "UGA" &
+      df_updated$IUs_NAME_MAPPING %in% grouped_IUs_biannual_UGA_vec[[i]]
+    
+    indices <- which(condition)
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in Uganda):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in Uganda):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
+
+# call function 
+dfAPOC_included4 <- update_biannual_uganda_mda(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+
+
 
 # to check:
 # dfAPOC_included4_UGA_tocheck <- subset(dfAPOC_included4, ADMIN2 %in% unique_IUs_UGA_vec & Year == 2022) # confirmed: need SS data to update
 # IUs_2022_UGA_withMDA_ESPEN_IUname
 # 11 of 12 IUs with 2022 MDA have biannual aswell in UGA now
 
-#=======#
-# ETH   #
-unique_IUs_ETH <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "ETH")
+# #=======#
+# # ETH   #
+# unique_IUs_ETH <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "ETH")
+# 
+# grouped_IUs_biannual_ETH <- unique_IUs_ETH %>%
+#   group_by(Biannual) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_biannual_ETH_vec <- grouped_IUs_biannual_ETH$unique_IUs
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2013 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "ETH" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_ETH_vec[[1]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "ETH" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_ETH_vec[[2]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-grouped_IUs_biannual_ETH <- unique_IUs_ETH %>%
-  group_by(Biannual) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# ============================================ #
+#  Function to update biannual MDA in Ethiopia #
 
-grouped_IUs_biannual_ETH_vec <- grouped_IUs_biannual_ETH$unique_IUs
+update_biannual_ethiopia_mda <- function(df, biannual_file_path) {
+  
+  df_updated <- df
+  
+  # Load the Biannual MDA data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter data for Ethiopia
+  unique_IUs_ETH <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "ETH")
+  
+  # Group Ethiopia IUs by Biannual years
+  grouped_IUs_biannual_ETH <- unique_IUs_ETH %>%
+    group_by(Biannual) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME))) # Group IUs by Biannual years
+  
+  grouped_IUs_biannual_ETH_vec <- grouped_IUs_biannual_ETH$unique_IUs
+  
+  # Create a new column for Biannual MDA coverage
+  df_updated$MDA_CDTI_Biannual <- NA  # Only need this once to create an empty column
+  
+  # Define the year ranges for each biannual group
+  year_ranges <- list(
+    c(2013, 2023),
+    c(2014, 2023)
+  )
+  
+  # Loop through each group of biannual IUs and apply the conditions
+  for (i in 1:length(grouped_IUs_biannual_ETH_vec)) {
+    condition <- df_updated$Cov.in2 > 0 &
+      df_updated$Year > year_ranges[[i]][1] & df_updated$Year < year_ranges[[i]][2] &
+      df_updated$ADMIN0ISO3 == "ETH" &
+      df_updated$IUs_NAME_MAPPING %in% grouped_IUs_biannual_ETH_vec[[i]]
+    
+    # Extract the IUs for the current biannual group
+    years <- as.numeric(year_ranges[[i]])
+    IUs <- grouped_IUs_biannual_ETH_vec[[i]] # for label
+    
+    indices <- which(condition)
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+    # Print a label for the biannual IUs (grouped by years and IUs)
+    cat("Biannual IUs for years", paste(years, collapse = "-"), ":", paste(IUs, collapse = "; "), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in Ethiopia):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in Ethiopia):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2013 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "ETH" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_ETH_vec[[1]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+dfAPOC_included4 <- update_biannual_ethiopia_mda(dfAPOC_included4, 
+                                                 "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "ETH" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_ETH_vec[[2]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
 # to check (now with 2022 update):
 # unique_IUs_ETH_vec <- as.vector(unique_IUs_ETH$IUs_NAME)
@@ -3417,45 +4185,114 @@ dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indice
 # indices <- which(condition)
 # dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-# based on CC data #
-NGA_post2017 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_post2017.csv")
-columns_to_update <- names(NGA_post2017)[6:21]
-new_column_names <- sub("^.", "", columns_to_update)
-names(NGA_post2017)[6:21] <- new_column_names # Rename the columns
+# # based on CC data #
+# NGA_post2017 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_post2017.csv")
+# columns_to_update <- names(NGA_post2017)[6:21]
+# new_column_names <- sub("^.", "", columns_to_update)
+# names(NGA_post2017)[6:21] <- new_column_names # Rename the columns
+# 
+# NGA_grouped_LGA_biannual <- NGA_post2017 %>%
+#   group_by(biannual_years) %>%
+#   summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
+# 
+# # first group of LGAs
+# LGAs1 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[1, 2]), ",\\s*")) # Split the string into a character vector
+# condition1 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2016, 2017, 2018, 2021, 2022) & ADMIN2 %in% LGAs1)
+# indices <- which(condition1)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# # 2nd group of LGAs
+# LGAs2 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[2, 2]), ",\\s*")) # Split the string into a character vector
+# condition2 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017) & ADMIN2 %in% LGAs2)
+# indices <- which(condition2)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# # 3rd group of LGAs
+# LGAs3 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[3, 2]), ",\\s*")) # Split the string into a character vector
+# condition3 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017, 2018) & ADMIN2 %in% LGAs3)
+# indices <- which(condition3)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# # 4th group of LGAs
+# LGAs4 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[4, 2]), ",\\s*")) # Split the string into a character vector
+# condition4 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017, 2018, 2021, 2022) & ADMIN2 %in% LGAs4)
+# indices <- which(condition4)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# # 5th group of LGAs
+# LGAs5 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[5, 2]), ",\\s*")) # Split the string into a character vector
+# condition5 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2018) & ADMIN2 %in% LGAs5)
+# indices <- which(condition5)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-NGA_grouped_LGA_biannual <- NGA_post2017 %>%
-  group_by(biannual_years) %>%
-  summarise(UniqueLGAs = toString(unique(LGA_updated))) # group LGAs
+# =========================================== #
+#  Function to update biannual MDA in Nigeria #
 
-# first group of LGAs
-LGAs1 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[1, 2]), ",\\s*")) # Split the string into a character vector
-condition1 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2016, 2017, 2018, 2021, 2022) & ADMIN2 %in% LGAs1)
-indices <- which(condition1)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+update_biannual_nigeria_mda <- function(df, cc_data_file_path) {
+  
+  df_updated <- df
+  
+  # Load the CC data for Nigeria (post 2017)
+  NGA_post2017 <- read.csv(cc_data_file_path)
+  
+  # Rename the columns from the CC data
+  columns_to_update <- names(NGA_post2017)[6:21]
+  new_column_names <- sub("^.", "", columns_to_update)
+  names(NGA_post2017)[6:21] <- new_column_names # Rename the columns
+  
+  # Group the LGAs by biannual years
+  NGA_grouped_LGA_biannual <- NGA_post2017 %>%
+    group_by(biannual_years) %>%
+    summarise(UniqueLGAs = toString(unique(LGA_updated))) # Group LGAs
+  
+  # Manually define the year ranges for each biannual group
+  biannual_years <- list(
+    c(2016, 2017, 2018, 2021, 2022),
+    c(2017),
+    c(2017, 2018),
+    c(2017, 2018, 2021, 2022),
+    c(2018),
+    c(2022)
+  )
+  
+  # Loop through each biannual group to update MDA_CDTI_Biannual
+  for (i in 1:nrow(NGA_grouped_LGA_biannual)) {
+    # Extract the LGAs for the current biannual group
+    LGAs <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[i, 2]), ",\\s*"))
+    
+    # Get the year range for the current group
+    years <- biannual_years[[i]]
+    
+    # Create the condition for filtering
+    condition <- with(df_updated, 
+                      ADMIN0ISO3 == "NGA" & 
+                        Year %in% years & 
+                        ADMIN2 %in% LGAs)
+    
+    # Find the indices of the rows that meet the condition
+    indices <- which(condition)
+    
+    # Update the MDA_CDTI_Biannual column for the filtered rows
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+    
+    # Print a label for the biannual IUs (grouped by LGAs)
+    cat("Biannual LGAs for years", paste(years, collapse = "-"), ":", paste(LGAs, collapse = "; "), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in Nigeria):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in Nigeria):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-# 2nd group of LGAs
-LGAs2 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[2, 2]), ",\\s*")) # Split the string into a character vector
-condition2 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017) & ADMIN2 %in% LGAs2)
-indices <- which(condition2)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-# 3rd group of LGAs
-LGAs3 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[3, 2]), ",\\s*")) # Split the string into a character vector
-condition3 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017, 2018) & ADMIN2 %in% LGAs3)
-indices <- which(condition3)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# call function:
+dfAPOC_included4 <- update_biannual_nigeria_mda(dfAPOC_included4, 
+                                          "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_post2017.csv")
 
-# 4th group of LGAs
-LGAs4 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[4, 2]), ",\\s*")) # Split the string into a character vector
-condition4 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2017, 2018, 2021, 2022) & ADMIN2 %in% LGAs4)
-indices <- which(condition4)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-# 5th group of LGAs
-LGAs5 <- unlist(strsplit(as.character(NGA_grouped_LGA_biannual[5, 2]), ",\\s*")) # Split the string into a character vector
-condition5 <- with(dfAPOC_included4, ADMIN0ISO3 == "NGA" & Year %in% c(2018) & ADMIN2 %in% LGAs5)
-indices <- which(condition5)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
 # look at NGA :
 # dfAPOC_included4_NGA <- subset(dfAPOC_included4, ADMIN0 == "Nigeria")
@@ -3464,263 +4301,682 @@ dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indice
 # check:
 # dfAPOC_included4_NGA_tocheck <- subset(dfAPOC_included4, ADMIN0ISO3 == "NGA" & MDA_CDTI_Biannual == 1 & Year == 2022)
 
-#======#
-#  SDN #
-unique_IUs_SDN <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "SDN")
+# #======#
+# #  SDN #
+# unique_IUs_SDN <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "SDN")
+# 
+# grouped_IUs_biannual_SDN <- unique_IUs_SDN %>%
+#   group_by(Biannual) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_biannual_SDN_vec <- grouped_IUs_biannual_SDN$unique_IUs
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2013 &
+#   dfAPOC_included4$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[1]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2009 & dfAPOC_included4$Year < 2018 &
+#   dfAPOC_included4$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[2]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2021 &
+#   dfAPOC_included4$ADMIN0ISO3 == "SDN" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[3]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-grouped_IUs_biannual_SDN <- unique_IUs_SDN %>%
-  group_by(Biannual) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# =========================================== #
+#  Function to update biannual MDA in Sudan   #
 
-grouped_IUs_biannual_SDN_vec <- grouped_IUs_biannual_SDN$unique_IUs
+update_biannual_mda_sudan <- function(df, biannual_data_file_path) {
+  
+  df_updated <- df
+  
+  # Load the Biannual APOC IUs data for Sudan
+  Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter and group unique IUs by their biannual years
+  unique_IUs_SDN <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "SDN")
+  
+  grouped_IUs_biannual_SDN <- unique_IUs_SDN %>%
+    group_by(Biannual) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME))) # Find grouping of unique IUs with same biannual years
+  
+  # Extract the vectors of grouped IUs for each biannual group
+  grouped_IUs_biannual_SDN_vec <- grouped_IUs_biannual_SDN$unique_IUs
+  
+  # Manually define the year ranges for each biannual group in Sudan
+  biannual_years <- list(
+    c(2006, 2012),    # First group of IUs
+    c(2009, 2017),    # Second group of IUs
+    c(2021, 2022)     # Third group of IUs
+  )
+  
+  # Loop through each biannual group and update MDA_CDTI_Biannual for the corresponding IUs
+  for (i in 1:nrow(grouped_IUs_biannual_SDN)) {
+    # Extract the IUs for the current biannual group
+    IUs <- unlist(strsplit(as.character(grouped_IUs_biannual_SDN[i, 2]), ",\\s*"))
+    
+    # Get the year range for the current biannual group
+    years <- biannual_years[[i]]
+    
+    # Create the condition for filtering based on the biannual group
+    condition <- with(df_updated, 
+                      ADMIN0ISO3 == "SDN" & 
+                        Year %in% years & 
+                        IUs_NAME_MAPPING %in% IUs)
+    
+    # Find the indices of the rows that meet the condition
+    indices <- which(condition)
+    
+    # Update the MDA_CDTI_Biannual column for the filtered rows
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+    
+    cat("Biannual IUs in Sudan:\n", paste(years, collapse = "-"), paste(unlist(grouped_IUs_biannual_SDN_vec[[1]]), collapse = "; "), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in Sudan):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in Sudan):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2013 &
-  dfAPOC_included4$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[1]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# call function:
+dfAPOC_included4 <- update_biannual_mda_sudan(dfAPOC_included4, 
+                                              "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2009 & dfAPOC_included4$Year < 2018 &
-  dfAPOC_included4$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[2]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# #==== #
+# # TZN #
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2021 &
-  dfAPOC_included4$ADMIN0ISO3 == "SDN" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SDN_vec[[3]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# unique_IUs_TZA <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "TZA")
+# 
+# grouped_IUs_biannual_TZA <- unique_IUs_TZA %>%
+#   group_by(Biannual) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_biannual_TZA_vec <- grouped_IUs_biannual_TZA$unique_IUs
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2018 &
+#   dfAPOC_included4$ADMIN0ISO3 == "TZA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_TZA_vec[[1]]
+# 
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2018 &
+#   dfAPOC_included4$ADMIN0ISO3 == "TZA" &
+#   dfAPOC_included4$IUs_NAME == "Malinyi"
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-#==== #
-# TZN #
-unique_IUs_TZA <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "TZA")
+# ============================================= #
+#  Function to update biannual MDA in Tanzania  #
 
-grouped_IUs_biannual_TZA <- unique_IUs_TZA %>%
-  group_by(Biannual) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+update_biannual_mda_tanzania <- function(df, biannual_file_path) {
+  
+  df_updated <- df
+  
+  # Read in the Biannual data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter for unique IUs in Tanzania (TZA)
+  unique_IUs_TZA <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "TZA")
+  
+  # Group by Biannual years
+  grouped_IUs_biannual_TZA <- unique_IUs_TZA %>%
+    group_by(Biannual) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME)))  # Group unique IUs by Biannual
+  
+  # Get the vector of IUs
+  grouped_IUs_biannual_TZA_vec <- grouped_IUs_biannual_TZA$unique_IUs
+  
+  # Loop through the groups and update MDA_CDTI_Biannual for each group
+  for (i in 1:length(grouped_IUs_biannual_TZA_vec)) {
 
-grouped_IUs_biannual_TZA_vec <- grouped_IUs_biannual_TZA$unique_IUs
+        # Apply conditions for each biannual group
+    condition <- df_updated$Cov.in2 > 0 &
+      df_updated$Year > 2018 &
+      df_updated$ADMIN0ISO3 == "TZA" &
+      df_updated$IUs_NAME_MAPPING %in% grouped_IUs_biannual_TZA_vec[[i]]
+    
+    indices <- which(condition)
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+    
+    # Print the label with the years and IU names
+    cat("Biannual IUs for years", paste("> 2018"), ":", 
+        paste(grouped_IUs_biannual_TZA_vec[[i]], collapse = "; "), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in Tanzania):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in Tanzania):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2018 &
-  dfAPOC_included4$ADMIN0ISO3 == "TZA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_TZA_vec[[1]]
+# call function:
+dfAPOC_included4 <- update_biannual_mda_tanzania(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-condition <- dfAPOC_included4$Year > 2018 &
-  dfAPOC_included4$ADMIN0ISO3 == "TZA" &
-  dfAPOC_included4$IUs_NAME == "Malinyi"
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
 
-#==== #
-# SSD #
-unique_IUs_SSD <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "SSD")
+# #==== #
+# # SSD #
+# unique_IUs_SSD <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "SSD")
+# 
+# grouped_IUs_biannual_SSD <- unique_IUs_SSD %>%
+#   group_by(Biannual) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_biannual_SSD_vec <- grouped_IUs_biannual_SSD$unique_IUs
+# 
+# condition <- dfAPOC_included4$Cov.in2 > 0 &
+#   dfAPOC_included4$Year > 2020 &
+#   dfAPOC_included4$ADMIN0ISO3 == "SSD" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SSD_vec[[1]]
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# 
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
-grouped_IUs_biannual_SSD <- unique_IUs_SSD %>%
-  group_by(Biannual) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# ================================================ #
+#  Function to update biannual MDA in South Sudan  #
 
-grouped_IUs_biannual_SSD_vec <- grouped_IUs_biannual_SSD$unique_IUs
+update_biannual_mda_southsudan <- function(df, biannual_file_path) {
+  
+  df_updated <- df
+  
+  # Read in the Biannual data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter for unique IUs in South Sudan (SSD)
+  unique_IUs_SSD <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "SSD")
+  
+  # Group by Biannual years
+  grouped_IUs_biannual_SSD <- unique_IUs_SSD %>%
+    group_by(Biannual) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME)))  # Group unique IUs by Biannual
+  
+  # Get the vector of IUs
+  grouped_IUs_biannual_SSD_vec <- grouped_IUs_biannual_SSD$unique_IUs
+  
+  # Loop through the groups and update MDA_CDTI_Biannual for each group
+  for (i in 1:length(grouped_IUs_biannual_SSD_vec)) {
+    
+    # Apply conditions for each biannual group
+    condition <- df_updated$Cov.in2 > 0 &
+      df_updated$Year > 2020 &
+      df_updated$ADMIN0ISO3 == "SSD" &
+      df_updated$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SSD_vec[[i]]
+    
+    indices <- which(condition)
+    df_updated$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+    
+    # Print the label with the years and IU names
+    cat("Biannual IUs for years", paste("> 2020"), ":", 
+        paste(grouped_IUs_biannual_SSD_vec[[i]], collapse = "; "), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (biannual MDA in South Sudan):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (biannual MDA in South Sudan):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-condition <- dfAPOC_included4$Cov.in2 > 0 &
-  dfAPOC_included4$Year > 2020 &
-  dfAPOC_included4$ADMIN0ISO3 == "SSD" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_biannual_SSD_vec[[1]]
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI_Biannual[indices] <- rep(1, length.out = length(indices))
+# Call the function 
+dfAPOC_included4 <- update_biannual_mda_southsudan(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 #===================================================#
 # 3) code variable to state if vector control : UGA #
 
-# TO DO: find foci in UGA where "Vector eliminated" and reduce ABR to 0 after VC in these IUs
-
-unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
-  filter(ADMIN0ISO3 == "UGA")
-
-grouped_IUs_vectorcntrl_UGA <- unique_IUs_UGA %>%
-  group_by(vector_control) %>%
-  summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
-
-grouped_IUs_vectorcntrl_UGA_vec <- grouped_IUs_vectorcntrl_UGA$unique_IUs
-
-dfAPOC_included4$vector_control <- NA # only need this once to create empty col
-
-# UGA foci 1 with VC (Mpamba-Nkusi); 2003-2007 VC and vector elimination after 2007
-condition <- dfAPOC_included4$Year > 2002 & dfAPOC_included4$Year < 2008 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[2]] # Mpamba-Nkusi foci (Kibaale) VC
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2007 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[2]] # Mpamba-Nkusi foci (Kibaale) VE
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# UGA foci 2 with VC (# Mt Elgon foci); 2006-2009 VC and vector elimination after 2009
-condition <- dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2010 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[3]] # Mt Elgon foci (Mbale etc) VC
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2009 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[3]] # Mt Elgon foci (Mbale etc) VE
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# UGA foci 3 with VC (# Kashoya-Kitomi & Wambabya-Rwamarongo foci); 2008-2010 VC and vector elimination after 2010
-condition <- dfAPOC_included4$Year > 2007 & dfAPOC_included4$Year < 2011 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[4]] # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[4]] # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# UGA foci 4 with VC (# Nyagak-Bondo foci); 2012-2013 VC and vector elimination after 2013
-condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2014 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[5]] # Nyagak-Bondo foci (Zombo etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2013 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[5]] # Nyagak-Bondo foci (Zombo etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# UGA foci 5 with VC (# Budongo foci); 2012-2014 VC and vector elimination after 2014
-condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2015 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[6]] # Budongo foci (Masindi etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[6]] # Budongo foci (Masindi etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# UGA foci 6 with VC (# Madi Mid North foci); 2012-current VC and NO vector elimination
-condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[7]] # Madi Mid North foci (Gulu etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-# UGA foci 7 with VC (# Lhubirha foci); 2015-current VC and NO vector elimination
-condition <- dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[8]] # Lhubirha foci (Kasese; not also Nyamugasani foci here)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-# UGA foci 8 with VC (# Itwara foci); 1993 - 2003 VC and vector elimination after 2003
-condition <- dfAPOC_included4$Year > 1992 & dfAPOC_included4$Year < 2004 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% c("Bunyangabu", "KABAROLE", "KYENJOJO") # Itwara foci (Kabarole etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-condition <- dfAPOC_included4$Year > 2003 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% c("Bunyangabu", "KABAROLE", "KYENJOJO") # Itwara foci (Kabarole etc)
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-#====================================================================================================#
-# 3) code variable to state if vector control : Equatorial Guinea (Bioke Island; vector elimination) #
-
-# info from Herrador et al. 2018
-# more specifics from Traore et al. 2009 - VC attempts in 2001, 2003 and 2005, elimination in 2006 ("last biting S. damnosum s.l. was caught in March 2005")
-# https://www.sciencedirect.com/science/article/pii/S0001706X09000618?via%3Dihub
-
-# 2001 - 2005 - vector control (ABR 80% proportional reduction = 1 ) #
-condition <- dfAPOC_included4$Year > 2000 & dfAPOC_included4$Year < 2006 &
-  dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
-  dfAPOC_included4$ADMIN1 %in% c("Bioko Norte", "Bioko Sur") #
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
-
-# 2006 - 2022 - vector elimination (ABR to 0 = 2) #
-condition <- dfAPOC_included4$Year > 2005 & dfAPOC_included4$Year < 2023 &
-  dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
-  dfAPOC_included4$ADMIN1 %in% c("Bioko Norte", "Bioko Sur") #
-indices <- which(condition)
-dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
-
-# ================================================================== #
-#    Also need to update Bioko MDA info according to Herrador et al. #
-
-# should all start from 1989 on Bioko to 1998 according to ernández González et al. 2016 : https://parasitesandvectors.biomedcentral.com/articles/10.1186/s13071-016-1779-8
-# assume low pre-APOC voerage of 25% total pop cov
-condition <- dfAPOC_included4$Year > 1988 & dfAPOC_included4$Year < 1999 &
-  dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% c("Malabo", "Baney", "Luba", "Riaba") #
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
-dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
-# (< 65% total pop coverage on average) = 25% coverage used for these years
-
-# add columns for raw coverage (if applicable), and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
+# # TO DO: find foci in UGA where "Vector eliminated" and reduce ABR to 0 after VC in these IUs
+# 
+# unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
+#   filter(ADMIN0ISO3 == "UGA")
+# 
+# grouped_IUs_vectorcntrl_UGA <- unique_IUs_UGA %>%
+#   group_by(vector_control) %>%
+#   summarise(unique_IUs = list(unique(IUs_NAME))) # find grouping of unique IUs with same biannual years
+# 
+# grouped_IUs_vectorcntrl_UGA_vec <- grouped_IUs_vectorcntrl_UGA$unique_IUs
+# 
+# dfAPOC_included4$vector_control <- NA # only need this once to create empty col
+# 
+# # UGA foci 1 with VC (Mpamba-Nkusi); 2003-2007 VC and vector elimination after 2007
+# condition <- dfAPOC_included4$Year > 2002 & dfAPOC_included4$Year < 2008 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[2]] # Mpamba-Nkusi foci (Kibaale) VC
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2007 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[2]] # Mpamba-Nkusi foci (Kibaale) VE
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # UGA foci 2 with VC (# Mt Elgon foci); 2006-2009 VC and vector elimination after 2009
+# condition <- dfAPOC_included4$Year > 2006 & dfAPOC_included4$Year < 2010 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[3]] # Mt Elgon foci (Mbale etc) VC
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2009 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[3]] # Mt Elgon foci (Mbale etc) VE
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # UGA foci 3 with VC (# Kashoya-Kitomi & Wambabya-Rwamarongo foci); 2008-2010 VC and vector elimination after 2010
+# condition <- dfAPOC_included4$Year > 2007 & dfAPOC_included4$Year < 2011 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[4]] # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[4]] # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # UGA foci 4 with VC (# Nyagak-Bondo foci); 2012-2013 VC and vector elimination after 2013
+# condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2014 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[5]] # Nyagak-Bondo foci (Zombo etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2013 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[5]] # Nyagak-Bondo foci (Zombo etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # UGA foci 5 with VC (# Budongo foci); 2012-2014 VC and vector elimination after 2014
+# condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2015 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[6]] # Budongo foci (Masindi etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[6]] # Budongo foci (Masindi etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # UGA foci 6 with VC (# Madi Mid North foci); 2012-current VC and NO vector elimination
+# condition <- dfAPOC_included4$Year > 2011 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[7]] # Madi Mid North foci (Gulu etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# # UGA foci 7 with VC (# Lhubirha foci); 2015-current VC and NO vector elimination
+# condition <- dfAPOC_included4$Year > 2014 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% grouped_IUs_vectorcntrl_UGA_vec[[8]] # Lhubirha foci (Kasese; not also Nyamugasani foci here)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# # UGA foci 8 with VC (# Itwara foci); 1993 - 2003 VC and vector elimination after 2003
+# condition <- dfAPOC_included4$Year > 1992 & dfAPOC_included4$Year < 2004 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% c("Bunyangabu", "KABAROLE", "KYENJOJO") # Itwara foci (Kabarole etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# condition <- dfAPOC_included4$Year > 2003 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% c("Bunyangabu", "KABAROLE", "KYENJOJO") # Itwara foci (Kabarole etc)
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
 
 
-# extend MDA (annual ) from 2011 to 2016 for 3 IUs #
-condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2017 &
-  dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% c("Baney", "Luba", "Riaba") #
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
-dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
-                                                                            # (< 65% total pop coverage on average) = 25% coverage used for these years
-# add columns for raw coverage (if applicable), and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
+# ======================================================== #
+# Write a function to include vector control in Uganda     #
+
+update_vector_control_UGA <- function(df, biannual_file_path) {
+  
+  df_updated <- df
+  
+  # Read in the Biannual data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Filter for unique IUs in Uganda (UGA)
+  unique_IUs_UGA <- Biannual_APOC_IUs2 %>%
+    filter(ADMIN0ISO3 == "UGA")
+  
+  # Group by vector control
+  grouped_IUs_vectorcntrl_UGA <- unique_IUs_UGA %>%
+    group_by(vector_control) %>%
+    summarise(unique_IUs = list(unique(IUs_NAME)))  # Group unique IUs by vector control
+  
+  # Get the vector of IUs
+  grouped_IUs_vectorcntrl_UGA_vec <- grouped_IUs_vectorcntrl_UGA$unique_IUs
+  
+  df_updated$vector_control <- NA # only need this once to create empty col
+  
+  # Update vector control for each foci manually specifying years
+  
+  # Foci 1: Mpamba-Nkusi; 2003-2007 VC and vector elimination after 2007
+  years_foci_1 <- 2003:2007
+  IUs_foci_1 <- grouped_IUs_vectorcntrl_UGA_vec[[2]]
+  cat("Foci 1 - Mpamba-Nkusi IUs:", paste(IUs_foci_1, collapse = "; "), "Years:", paste(years_foci_1, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_1 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_1 # Mpamba-Nkusi foci (Kibaale) VC
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+
+  condition <- df_updated$Year > 2007 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_1 # Mpamba-Nkusi foci (Kibaale) VE
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # Foci 2: Mt Elgon; 2006-2009 VC and vector elimination after 2009
+  years_foci_2 <- 2006:2009
+  IUs_foci_2 <- grouped_IUs_vectorcntrl_UGA_vec[[3]]
+  cat("Foci 2 - Mt Elgon IUs:", paste(IUs_foci_2, collapse = "; "), "Years:", paste(years_foci_2, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_2 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_2 # Mt Elgon foci (Mbale etc) VC
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  condition <- df_updated$Year > 2009 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_2 # Mt Elgon foci (Mbale etc) VE
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # Foci 3: Kashoya-Kitomi & Wambabya-Rwamarongo; 2008-2010 VC and vector elimination after 2010
+  years_foci_3 <- 2008:2010
+  IUs_foci_3 <- grouped_IUs_vectorcntrl_UGA_vec[[4]]
+  cat("Foci 3 - Kashoya-Kitomi & Wambabya-Rwamarongo IUs:", paste(IUs_foci_3, collapse = "; "), "Years:", paste(years_foci_3, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_3 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_3 # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  condition <- df_updated$Year > 2010 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_3 # Kashoya-Kitomi foci (Ibanda etc) & Wambabya-Rwamarongo (Hoima)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # Foci 4: Nyagak-Bondo; 2012-2013 VC and vector elimination after 2013
+  years_foci_4 <- 2012:2013
+  IUs_foci_4 <- grouped_IUs_vectorcntrl_UGA_vec[[5]]
+  cat("Foci 4 - Nyagak-Bondo IUs:", paste(IUs_foci_4, collapse = "; "), "Years:", paste(years_foci_4, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_4 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_4 # Nyagak-Bondo foci (Zombo etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  condition <- df_updated$Year > 2013 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_4 # Nyagak-Bondo foci (Zombo etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # Foci 5: Budongo; 2012-2014 VC and vector elimination after 2014
+  years_foci_5 <- 2012:2014
+  IUs_foci_5 <- grouped_IUs_vectorcntrl_UGA_vec[[6]]
+  cat("Foci 5 - Budongo IUs:", paste(IUs_foci_5, collapse = "; "), "Years:", paste(years_foci_5, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_5 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_5 # Budongo foci (Masindi etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  condition <- df_updated$Year > 2014 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_5 # Budongo foci (Masindi etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # Foci 6: Madi Mid North; 2012-current VC and NO vector elimination
+  years_foci_6 <- 2012:2022
+  IUs_foci_6 <- grouped_IUs_vectorcntrl_UGA_vec[[7]]
+  cat("Foci 6 - Madi Mid North IUs:", paste(IUs_foci_6, collapse = "; "), "Years:", paste(years_foci_6, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_6 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_6 # Madi Mid North foci (Gulu etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  # Foci 7: Lhubirha; 2015-current VC and NO vector elimination
+  years_foci_7 <- 2015:2022
+  IUs_foci_7 <- grouped_IUs_vectorcntrl_UGA_vec[[8]]
+  cat("Foci 7 - Lhubirha IUs:", paste(IUs_foci_7, collapse = "; "), "Years:", paste(years_foci_7, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_7 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_7 # Lhubirha foci (Kasese; not also Nyamugasani foci here)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  # Foci 8: Itwara; 1993 - 2003 VC and vector elimination after 2003
+  years_foci_8 <- 1993:2003
+  IUs_foci_8 <- c("Bunyangabu", "KABAROLE", "KYENJOJO")  # Itwara foci (Kabarole etc)
+  cat("Foci 8 - Itwara IUs:", paste(IUs_foci_8, collapse = "; "), "Years:", paste(years_foci_8, collapse = "-"), "\n")
+  condition <- df_updated$Year %in% years_foci_8 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_8 # Itwara foci (Kabarole etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(1, length.out = length(indices))
+  
+  condition <- df_updated$Year > 2003 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "UGA" &
+    df_updated$IUs_NAME_MAPPING %in% IUs_foci_8 # Itwara foci (Kabarole etc)
+  indices <- which(condition)
+  df_updated$vector_control[indices] <- rep(2, length.out = length(indices))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (vector control in Uganda):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (vector control in Uganda):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  return(df_updated)
+}
+
+# call function:
+dfAPOC_included4 <- update_vector_control_UGA(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
 
 
-condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2013 &
-  dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
-  dfAPOC_included4$IUs_NAME_MAPPING %in% c("Malabo") #
-indices <- which(condition)
-dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
-dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
-                                                                             # (< 65% total pop coverage on average) = 25% coverage used for these years
-#dfAPOC_included4$Year_tmp <- dfAPOC_included4$Year
-# add columns for raw coverage (if applicable), and source of info
-#dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
-dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
+# #====================================================================================================#
+# # 3) code variable to state if vector control : Equatorial Guinea (Bioke Island; vector elimination) #
+# 
+# # info from Herrador et al. 2018
+# # more specifics from Traore et al. 2009 - VC attempts in 2001, 2003 and 2005, elimination in 2006 ("last biting S. damnosum s.l. was caught in March 2005")
+# # https://www.sciencedirect.com/science/article/pii/S0001706X09000618?via%3Dihub
+# 
+# # 2001 - 2005 - vector control (ABR 80% proportional reduction = 1 ) #
+# condition <- dfAPOC_included4$Year > 2000 & dfAPOC_included4$Year < 2006 &
+#   dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
+#   dfAPOC_included4$ADMIN1 %in% c("Bioko Norte", "Bioko Sur") #
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(1, length.out = length(indices))
+# 
+# # 2006 - 2022 - vector elimination (ABR to 0 = 2) #
+# condition <- dfAPOC_included4$Year > 2005 & dfAPOC_included4$Year < 2023 &
+#   dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
+#   dfAPOC_included4$ADMIN1 %in% c("Bioko Norte", "Bioko Sur") #
+# indices <- which(condition)
+# dfAPOC_included4$vector_control[indices] <- rep(2, length.out = length(indices))
+# 
+# # ================================================================== #
+# #    Also need to update Bioko MDA info according to Herrador et al. #
+# 
+# # should all start from 1989 on Bioko to 1998 according to ernández González et al. 2016 : https://parasitesandvectors.biomedcentral.com/articles/10.1186/s13071-016-1779-8
+# # assume low pre-APOC voerage of 25% total pop cov
+# condition <- dfAPOC_included4$Year > 1988 & dfAPOC_included4$Year < 1999 &
+#   dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% c("Malabo", "Baney", "Luba", "Riaba") #
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
+# dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
+# # (< 65% total pop coverage on average) = 25% coverage used for these years
+# 
+# # add columns for raw coverage (if applicable), and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# 
+# # extend MDA (annual ) from 2011 to 2016 for 3 IUs #
+# condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2017 &
+#   dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% c("Baney", "Luba", "Riaba") #
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
+# dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
+#                                                                             # (< 65% total pop coverage on average) = 25% coverage used for these years
+# # add columns for raw coverage (if applicable), and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
+# 
+# 
+# condition <- dfAPOC_included4$Year > 2010 & dfAPOC_included4$Year < 2013 &
+#   dfAPOC_included4$ADMIN0ISO3 == "GNQ" &
+#   dfAPOC_included4$IUs_NAME_MAPPING %in% c("Malabo") #
+# indices <- which(condition)
+# dfAPOC_included4$MDA_CDTI[indices] <- rep(1, length.out = length(indices))
+# dfAPOC_included4$Cov.in2[indices] <- rep(0.25, length.out = length(indices)) # Hernández González et al. 2016 indicate total eligible coverage < 80%
+#                                                                              # (< 65% total pop coverage on average) = 25% coverage used for these years
+# #dfAPOC_included4$Year_tmp <- dfAPOC_included4$Year
+# # add columns for raw coverage (if applicable), and source of info
+# #dfAPOC_included4$MDA_CDTI_raw[indices] <- dfAPOC_included4$EpiCov[indices]/100
+# dfAPOC_included4$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included4$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))# Use indexing to assign values based on the condition
 
-check_df <- subset(dfAPOC_included4, Year == 2022)
-nrow(check_df) # 2107 IUs 
-length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
+
+# =============================================== #
+#   Function for vector control in Eq. Guinea     #
+
+update_vector_control_mda_GNQ <- function(df, biannual_file_path) {
+  
+  df_updated <- df
+  
+  # Read in the Biannual data
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
+  
+  # Vector Control (VC) from 2001-2005
+  # Vector control (ABR 80% proportional reduction = 1)
+  condition <- df_updated$Year > 2000 & df_updated$Year < 2006 &
+    df_updated$ADMIN0ISO3 == "GNQ" &
+    df_updated$ADMIN1 %in% c("Bioko Norte", "Bioko Sur")
+  indices <- which(condition)
+  if (length(indices) > 0) {
+    df_updated$vector_control[indices] <- 1
+    cat("Vector Control for Bioko Norte / Bioko Sur (2001-2005):\n", 
+        paste(df_updated$IUs_NAME_MAPPING[indices], collapse = "; "), 
+        "\nYears:", paste(min(df_updated$Year[indices]), max(df_updated$Year[indices]), sep = "-"), "\n")
+  }
+  
+  # Vector Elimination (ABR to 0 = 2) from 2006-2022
+  condition <- df_updated$Year > 2005 & df_updated$Year < 2023 &
+    df_updated$ADMIN0ISO3 == "GNQ" &
+    df_updated$ADMIN1 %in% c("Bioko Norte", "Bioko Sur")
+  indices <- which(condition)
+  if (length(indices) > 0) {
+    df_updated$vector_control[indices] <- 2
+    cat("Vector Elimination for Bioko Norte / Bioko Sur (2006-2022):\n", 
+        paste(df_updated$IUs_NAME_MAPPING[indices], collapse = "; "), 
+        "\nYears:", paste(min(df_updated$Year[indices]), max(df_updated$Year[indices]), sep = "-"), "\n")
+  }
+  
+  # Bioko MDA information from 1989 to 1998 (low coverage = 25%)
+  condition <- df_updated$Year > 1988 & df_updated$Year < 1999 &
+    df_updated$ADMIN0ISO3 == "GNQ" &
+    df_updated$IUs_NAME_MAPPING %in% c("Malabo", "Baney", "Luba", "Riaba")
+  indices <- which(condition)
+  if (length(indices) > 0) {
+    df_updated$MDA_CDTI[indices] <- 1
+    df_updated$Cov.in2[indices] <- 0.25
+    df_updated$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))
+    df_updated$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))
+    cat("Bioko MDA (1989-1998):\n", 
+        paste(df_updated$IUs_NAME_MAPPING[indices], collapse = "; "), 
+        "\nYears:", paste(min(df_updated$Year[indices]), max(df_updated$Year[indices]), sep = "-"), "\n")
+  }
+  
+  # Extend MDA from 2011-2016 for 3 IUs (Baney, Luba, Riaba)
+  condition <- df_updated$Year > 2010 & df_updated$Year < 2017 &
+    df_updated$ADMIN0ISO3 == "GNQ" &
+    df_updated$IUs_NAME_MAPPING %in% c("Baney", "Luba", "Riaba")
+  indices <- which(condition)
+  if (length(indices) > 0) {
+    df_updated$MDA_CDTI[indices] <- 1
+    df_updated$Cov.in2[indices] <- 0.25
+    df_updated$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))
+    df_updated$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))
+    cat("Bioko MDA (2011-2016):\n", 
+        paste(df_updated$IUs_NAME_MAPPING[indices], collapse = "; "), 
+        "\nYears:", paste(min(df_updated$Year[indices]), max(df_updated$Year[indices]), sep = "-"), "\n")
+  }
+  
+  # Update MDA for Malabo from 2010-2012
+  condition <- df_updated$Year > 2010 & df_updated$Year < 2013 &
+    df_updated$ADMIN0ISO3 == "GNQ" &
+    df_updated$IUs_NAME_MAPPING %in% c("Malabo")
+  indices <- which(condition)
+  if (length(indices) > 0) {
+    df_updated$MDA_CDTI[indices] <- 1
+    df_updated$Cov.in2[indices] <- 0.25
+    df_updated$cov_source[indices] <- rep("Subnational coverage data (literature)", length.out = length(indices))
+    df_updated$cov_specific_source[indices] <- rep("Hernández González et al. 2016", length.out = length(indices))
+    cat("Malabo MDA (2010-2012):\n", 
+        paste(df_updated$IUs_NAME_MAPPING[indices], collapse = "; "), 
+        "\nYears:", paste(min(df_updated$Year[indices]), max(df_updated$Year[indices]), sep = "-"), "\n")
+  }
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (vector control in Eq. Guinea):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (vector control in Eq. Guinea):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Returning the updated dataframe
+  return(df_updated)
+}
+
+# call function:
+dfAPOC_included4 <- update_vector_control_mda_GNQ(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+
+# check_df <- subset(dfAPOC_included4, Year == 2022)
+# nrow(check_df) # 2107 IUs 
+# length(unique(check_df$IU_ID_MAPPING)) # 2107 IUs
 
 # map VC and biannual again?
 
@@ -3748,57 +5004,111 @@ dfAPOC_included4 <- dfAPOC_included4 %>%
     )
   )
 
-biannualVC_df_lastyr <- subset(dfAPOC_included4, Year == 2021)
+# ===================================================================== #
+#   Function to produce intervention label column (biannual_VC_mapping) #
 
-all_MDA_VC_trtnaive_IUs <- ESPEN_IUs_ALL %>%
-  left_join(biannualVC_df_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+update_intervention_mapping <- function(df) {
+  
+  df_updated <- df
+  
+  # Group by IU_ID_MAPPING and calculate biannual_included (if MDA_CDTI_Biannual == 1 exists)
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(biannual_included = any(MDA_CDTI_Biannual == 1))
+  
+  # Group by IU_ID_MAPPING and calculate VC_included (if vector_control == 1 exists)
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(VC_included = any(vector_control == 1))
+  
+  # Group by IU_ID_MAPPING and calculate annual_only_included (if biannual_included is NA and MDA_CDTI == 1 exists)
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(annual_only_included = all(is.na(biannual_included)) & any(MDA_CDTI == 1))
+  
+  # Group by IU_ID_MAPPING and calculate biannual_VC_mapping using case_when
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      biannual_VC_mapping = case_when(
+        all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(is.na(VC_included | VC_included == FALSE)) ~ "biannual",
+        all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(VC_included) ~ "biannual & vector control",
+        all(is.na(biannual_included)) & all(annual_only_included) & (all(is.na(VC_included | VC_included == FALSE)) | all(VC_included == FALSE)) ~ "annual only",
+        all(is.na(biannual_included)) & all(annual_only_included) & all(VC_included) ~ "annual & vector control",
+        TRUE ~ "treatment naive"
+      )
+    )
+  
+  # Print frequency of each label in biannual_VC_mapping
+  cat("Frequency of each biannual_VC_mapping label:\n")
+  freq_table <- table(subset(df_updated, Year == 2022)$biannual_VC_mapping)
+  print(freq_table)
+  
+  cat("Sum across biannual_VC_mapping label:\n")
+  print(sum(freq_table))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after creating biannual_VC_mapping column:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after creating biannual_VC_mapping column:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  return(df_updated)
+}
 
-#all_MDA_VC_trtnaive_IUs$biannual_VC_mapping <- ifelse(is.na(all_MDA_VC_trtnaive_IUs$biannual_VC_mapping), "non-endemic", all_MDA_VC_trtnaive_IUs$biannual_VC_mapping)
+# call function:
+dfAPOC_included4 <- update_intervention_mapping(dfAPOC_included4)
 
-cbPalette_MDAVC <- c("#CC79A7","#E69F00","#009E73","#F0E442","#0072B2")
 
-# check
-ggplot() +
-  geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-# check Bioko island (Eq Guinea) - now with VC
-ggplot() +
-  geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(8, 10), ylim = c(3, 5)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-# plot for south sudan (Maridi focus)
-ggplot() +
-  geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", linewidth = 1.2) +
-  coord_sf(xlim = c(24.5, 35), ylim = c(4, 12)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
+# biannualVC_df_lastyr <- subset(dfAPOC_included4, Year == 2021)
+# 
+# all_MDA_VC_trtnaive_IUs <- ESPEN_IUs_ALL %>%
+#   left_join(biannualVC_df_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# #all_MDA_VC_trtnaive_IUs$biannual_VC_mapping <- ifelse(is.na(all_MDA_VC_trtnaive_IUs$biannual_VC_mapping), "non-endemic", all_MDA_VC_trtnaive_IUs$biannual_VC_mapping)
+# 
+# cbPalette_MDAVC <- c("#CC79A7","#E69F00","#009E73","#F0E442","#0072B2")
+# 
+# # check
+# ggplot() +
+#   geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# # check Bioko island (Eq Guinea) - now with VC
+# ggplot() +
+#   geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(8, 10), ylim = c(3, 5)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# # plot for south sudan (Maridi focus)
+# ggplot() +
+#   geom_sf(data = all_MDA_VC_trtnaive_IUs, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", linewidth = 1.2) +
+#   coord_sf(xlim = c(24.5, 35), ylim = c(4, 12)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
 
 
 # # just eq.guinea
@@ -3816,139 +5126,182 @@ ggplot() +
 #     legend.direction = "horizontal")
 
 
-# check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)
+# # check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)
+# 
+# problem_IUS_2013 <- dfAPOC_included4 %>%
+#   filter(MDA_CDTI == 1) %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(n_distinct(Year) == 1 & Year == 2013) %>%
+#   ungroup() %>%
+#   distinct(IU_ID_MAPPING)
+# 
+# problem_IUS_2013
+# 
+# nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2346 (old) # 2460 now (March 25 - all mapped samples added)
+#                                              # 2107 IUs (April 2025)
 
-problem_IUS_2013 <- dfAPOC_included4 %>%
-  filter(MDA_CDTI == 1) %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(n_distinct(Year) == 1 & Year == 2013) %>%
-  ungroup() %>%
-  distinct(IU_ID_MAPPING)
+# # ============================================================================ #
+# #    filter out non-endemics (from baseline mapping) as cannot fit at baseline #
+# 
+# no_baseline_IUs <- load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/no_map_samples.Rdata")
+# 
+# non_endemic_IUs <- dfAPOC_included4 %>%
+#   filter(endemicity_baseline == "non-endemic") %>%
+#   select(IUs_NAME_MAPPING, Endemicity, MAX_Endemicity, MAX_Endemicity_Parent, endemicity_baseline, mean) %>%
+#   distinct()
+# 
+# non_endemic_IUs
+# 
+# non_endemic_IUs_baseline_vec <-  non_endemic_IUs$IUs_NAME_MAPPING
+# 
+# length(unique(non_endemic_IUs$IUs_NAME_MAPPING)) # IT ACTUALLY 62 IUs (April 25') - unique names/codes
+# 
+# test_df <- subset(dfAPOC_included4, !(IUs_NAME_MAPPING %in% non_endemic_IUs_baseline_vec))
+# test_df_lastyr <- subset(test_df, Year == 2021)
+# 
+# length(unique(test_df_lastyr$IU_ID_MAPPING)) # 2045 IUs (April 25')
+# 
+# all_endemic_with_baseline_IUs <- ESPEN_IUs_ALL %>%
+#   left_join(test_df_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
+# 
+# 
+# # check
+# ggplot() +
+#   geom_sf(data = all_endemic_with_baseline_IUs, aes(fill = endemicity_reclassified), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# # take these out of the main "endemic" dataframe
+# 
+# dfAPOC_included4 <- subset(dfAPOC_included4, !(IUs_NAME_MAPPING %in% non_endemic_IUs_baseline_vec))
+# nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2280 (reduced from 2346 IUs)
+#                                              # April 25' = 2045 IUs reduced from 2107
 
-problem_IUS_2013
 
-nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2346 (old) # 2460 now (March 25 - all mapped samples added)
-                                             # 2107 IUs (April 2025)
+# ====================================================== #
+# Function to remove IUs without baseline mapped samples #
 
-# ============================================================================ #
-#    filter out non-endemics (from baseline mapping) as cannot fit at baseline #
+remove_non_endemic_IUs <- function(df, baseline_file_path) {
+  
+  # store pre-processed number of IUs
+  pre_processed_nIUs <- length(unique(df$IU_ID_MAPPING))
+  
+  # Load the "no_baseline_IUs" Rdata file
+  load(baseline_file_path)
+  
+  # Filter non-endemic IUs and select required columns
+  non_endemic_IUs <- df %>%
+    filter(endemicity_baseline == "non-endemic") %>%
+    select(IUs_NAME_MAPPING, Endemicity, MAX_Endemicity, MAX_Endemicity_Parent, endemicity_baseline, mean) %>%
+    distinct()
+  
+  # Get the list of IUs to remove
+  non_endemic_IUs_baseline_vec <- non_endemic_IUs$IUs_NAME_MAPPING
+  
+  # Remove non-endemic IUs from the dataframe
+  df_updated <- df %>%
+    filter(!(IUs_NAME_MAPPING %in% non_endemic_IUs_baseline_vec))
+  
+  # Check the number of IUs remaining in 2022
+  cat("Number of IUs  2022 before processing: ", pre_processed_nIUs, "\n")
+  
+  cat("Number of IUs remaining (after removing those without baseline mapped samples): ", nrow(subset(df_updated, Year == 2022)), "\n")
+  
+  cat("Number of IUs  2022 removed b/c no baseline mapped samples: ", pre_processed_nIUs - nrow(subset(df_updated, Year == 2022)), "\n")
+  
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-no_baseline_IUs <- load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/no_map_samples.Rdata")
+# call function
+dfAPOC_included4 <- remove_non_endemic_IUs(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/no_map_samples.Rdata")
 
-non_endemic_IUs <- dfAPOC_included4 %>%
-  filter(endemicity_baseline == "non-endemic") %>%
-  select(IUs_NAME_MAPPING, Endemicity, MAX_Endemicity, MAX_Endemicity_Parent, endemicity_baseline, mean) %>%
-  distinct()
-
-non_endemic_IUs
-
-non_endemic_IUs_baseline_vec <-  non_endemic_IUs$IUs_NAME_MAPPING
-
-length(unique(non_endemic_IUs$IUs_NAME_MAPPING)) # IT ACTUALLY 62 IUs (April 25') - unique names/codes
-
-test_df <- subset(dfAPOC_included4, !(IUs_NAME_MAPPING %in% non_endemic_IUs_baseline_vec))
-test_df_lastyr <- subset(test_df, Year == 2021)
-
-length(unique(test_df_lastyr$IU_ID_MAPPING)) # 2045 IUs (April 25')
-
-all_endemic_with_baseline_IUs <- ESPEN_IUs_ALL %>%
-  left_join(test_df_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-cbPalette_endemicity <- c("#CC79A7","#E69F00","#009E73")
-
-
-# check
-ggplot() +
-  geom_sf(data = all_endemic_with_baseline_IUs, aes(fill = endemicity_reclassified), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_endemicity, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-# take these out of the main "endemic" dataframe
-
-dfAPOC_included4 <- subset(dfAPOC_included4, !(IUs_NAME_MAPPING %in% non_endemic_IUs_baseline_vec))
-nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2280 (reduced from 2346 IUs)
-                                             # April 25' = 2045 IUs reduced from 2107
 
 # NOTE : in the flowchart, this is the same as removing these "non-endemic" in Zoure from those that are 
 # ever "Endemic" in ESPEN (creating the 1463 --> 1437 IUs - 62 = 1375 IUs)
 # Old total was : 1437 + 151 + 301 + 475 = 2364 IUs
 # New total is  : 1375 + 151 + 301 + 475  = 2302 IUs
 
-biannualVC_df_lastyr_upd <- subset(dfAPOC_included4, Year == 2021)
-
-length(unique(biannualVC_df_lastyr_upd$IU_ID_MAPPING))
-
-all_MDA_VC_trtnaive_IUs2 <- ESPEN_IUs_ALL %>%
-  left_join(biannualVC_df_lastyr_upd, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-ggplot() +
-  geom_sf(data = all_MDA_VC_trtnaive_IUs2, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-# ======================= #
-# check new IUs included - March 25
-
-# Find common elements between the two columns
-common_IU_codes <- intersect(APOC_baseline_additional$IU_CODE, dfAPOC_included4$IU_CODE)
-
-common_IU_codes # Print the common IU_CODE values
-
-# additional IUs found for NGA
-missing_IU_codes_NGA <- setdiff(APOC_baseline_additional$IU_CODE, APOC_baseline$IU_CODE)
-
-missing_IU_codes_NGA
 
 
-nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2280 (reduced from 2346 IUs)
-                                             # April 25' : 2045 IUs reduced from 2107
+# biannualVC_df_lastyr_upd <- subset(dfAPOC_included4, Year == 2021)
+# 
+# length(unique(biannualVC_df_lastyr_upd$IU_ID_MAPPING))
+# 
+# all_MDA_VC_trtnaive_IUs2 <- ESPEN_IUs_ALL %>%
+#   left_join(biannualVC_df_lastyr_upd, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# ggplot() +
+#   geom_sf(data = all_MDA_VC_trtnaive_IUs2, aes(fill = biannual_VC_mapping), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_APOC, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 50), ylim = c(38, -35)) +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette_MDAVC, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
 
-# ========================================================================= #
-#    too many NGA IUs (non-endemic in snapshot) - need to filter these out) #
-#                          March 2025                                       #
-
-NGA_subset <- subset(dfAPOC_included4, IU_CODE %in% missing_IU_codes_NGA)
-NGA_subset_IUsnames <- unique(NGA_subset$IUs_NAME)
-
-length(NGA_subset_IUsnames)
-length(common_IU_codes)
-length(missing_IU_codes_NGA)
-
-# check in oncho snapshot #
-oncho_snapshot_subset <- subset(oncho_snapshot_long_raw, ADMIN2 %in% NGA_subset_IUsnames)
-length(unique(oncho_snapshot_subset$LGA))
-
-missing_IUs_check <- setdiff(NGA_subset_IUsnames, oncho_snapshot_long_raw$ADMIN2)
-missing_IUs_check # 14 IU names in espen but not found in oncho snapshot so ommitted
-
-# find those that are endemic #
-unique(oncho_snapshot_subset$Endemic_classification)
-
-oncho_snapshot_subset_endemic <- subset(oncho_snapshot_subset, Endemic_classification == "Endemic ")
-
-endemic_NGA_extraIUs <- unique(oncho_snapshot_subset_endemic$ADMIN2)
-endemic_NGA_extraIUs # 3 extra IUs found for Nigeria (because of missing in original APOC_Baseline values) - Surulere in Lagos to be removed next!
-
-# remove  and rows with both"Surulere" in ADMIN2 & "Lagos" ADMIN1
-dfAPOC_included4 <- dfAPOC_included4 %>% filter(!(ADMIN2 == "Surulere" & ADMIN1 == "Lagos"))
-
-nrow(subset(dfAPOC_included4, Year == 2022)) # 2044 (1 removed from NGA) = now a total of 251 NGA IUs removed because non-endemic
+# # ======================= #
+# # check new IUs included - March 25
+# 
+# # Find common elements between the two columns
+# common_IU_codes <- intersect(APOC_baseline_additional$IU_CODE, dfAPOC_included4$IU_CODE)
+# 
+# common_IU_codes # Print the common IU_CODE values
+# 
+# # additional IUs found for NGA
+# missing_IU_codes_NGA <- setdiff(APOC_baseline_additional$IU_CODE, APOC_baseline$IU_CODE)
+# 
+# missing_IU_codes_NGA
+# 
+# 
+# nrow(subset(dfAPOC_included4, Year == 2022)) # check n IUs = 2280 (reduced from 2346 IUs)
+#                                              # April 25' : 2045 IUs reduced from 2107
+# 
+# # ========================================================================= #
+# #    too many NGA IUs (non-endemic in snapshot) - need to filter these out) #
+# #                          March 2025                                       #
+# 
+# NGA_subset <- subset(dfAPOC_included4, IU_CODE %in% missing_IU_codes_NGA)
+# NGA_subset_IUsnames <- unique(NGA_subset$IUs_NAME)
+# 
+# length(NGA_subset_IUsnames)
+# length(common_IU_codes)
+# length(missing_IU_codes_NGA)
+# 
+# # check in oncho snapshot #
+# oncho_snapshot_subset <- subset(oncho_snapshot_long_raw, ADMIN2 %in% NGA_subset_IUsnames)
+# length(unique(oncho_snapshot_subset$LGA))
+# 
+# missing_IUs_check <- setdiff(NGA_subset_IUsnames, oncho_snapshot_long_raw$ADMIN2)
+# missing_IUs_check # 14 IU names in espen but not found in oncho snapshot so ommitted
+# 
+# # find those that are endemic #
+# unique(oncho_snapshot_subset$Endemic_classification)
+# 
+# oncho_snapshot_subset_endemic <- subset(oncho_snapshot_subset, Endemic_classification == "Endemic ")
+# 
+# endemic_NGA_extraIUs <- unique(oncho_snapshot_subset_endemic$ADMIN2)
+# endemic_NGA_extraIUs # 3 extra IUs found for Nigeria (because of missing in original APOC_Baseline values) - Surulere in Lagos to be removed next!
+# 
+# # remove  and rows with both"Surulere" in ADMIN2 & "Lagos" ADMIN1
+# dfAPOC_included4 <- dfAPOC_included4 %>% filter(!(ADMIN2 == "Surulere" & ADMIN1 == "Lagos"))
+# 
+# nrow(subset(dfAPOC_included4, Year == 2022)) # 2044 (1 removed from NGA) = now a total of 251 NGA IUs removed because non-endemic
 
 # # just eq.guinea
 # ggplot() +
@@ -3964,459 +5317,834 @@ nrow(subset(dfAPOC_included4, Year == 2022)) # 2044 (1 removed from NGA) = now a
 #     legend.position = "bottom",  # Place the legend at the bottom
 #     legend.direction = "horizontal")
 
-# =========================================== #
-# 4) extend each IU by 3 years (2023 - 2025)  #
+# # =========================================== #
+# # 4) extend each IU by 3 years (2023 - 2025)  #
+# 
+# dfAPOC_included5 <- dfAPOC_included4 # RESET HERE
+# 
+# nrow(subset(dfAPOC_included5, Year == 2022)) # check n IUs = 2346; 2108 IUs March 2025
+#                                              # 2044 IUs (April 2025)
+# 
+# #FinalESPENyr <- 2013
+# FinalESPENyr <- 2022
+# 
+# dfls <- split(dfAPOC_included5, dfAPOC_included5$IU_ID_MAPPING)
+# 
+# ## new list of dfs
+# newdf <- vector("list", length(dfls))
+# 
+# lsid <- split(dfAPOC_included5$IU_ID_MAPPING, dfAPOC_included5$IU_ID_MAPPING)
+# lsid <- unique(unlist(lsid))
+# 
+# # loop to fill in missing years and columns
+# 
+# #loop_func <- function(dfls, dfAPOC_included5, FinalESPENyr, newdf, lsid) {
+# for (i in 1:length(dfls)) {
+# 
+#   newdf[[i]] <- subset(dfls[[i]], select=colnames(dfAPOC_included5))
+# 
+#   #IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA) - start)
+# 
+#   IUend <- 2025
+# 
+#   newdf[[i]]$IUend <- IUend
+#   Futureyrs <- IUend - FinalESPENyr ## prior years to include
+# 
+#   #PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
+# 
+#   newdf[[i]]$lsID <- i
+# 
+#   i
+# 
+#   if (is.na(IUend)!=T) {
+#     if(IUend>FinalESPENyr) {
+#       # if cumulative rounds greater than 1, augment data frame
+#       # by repeating the first row
+# 
+#       tmp <- newdf[[i]][rep(1, each = (min(IUend - newdf[[i]]$Year))), ]
+# 
+#       # fill in the years from start date of IU to first year on ESPEN
+#       #tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
+#       tmp$Year <- seq(FinalESPENyr+1, IUend)
+# 
+#       # fill in with years that had MDA (where any cum_MDA > 1 in 2013 onwards)
+# 
+#       # if(any(head(newdf[[i]]$Cum_MDA)> 0)) {
+#       #   # tmp$MDA[1:PriorMDA] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
+#       #
+#       #   val_totest <- head(newdf[[i]]$Cum_MDA,1)
+#       #
+#       #   # where top cum_MDA value is greater than 1
+#       #   if(val_totest > 1){
+#       #
+#       #     # Determine the number of leading zeros based on your condition
+#       #     leading_zeros <- rep(0, 37 - head(newdf[[i]]$Cum_MDA,1) + 1) # back to 2000 (or 1999)
+#       #     #leading_zeros <- rep(0, 27 - head(newdf[[1]]$Cum_MDA,1) + 1)
+#       #
+#       #
+#       #     # Create the sequence that goes in reverse from 0 to 27
+#       #     tmp$Cum_MDA <- c(leading_zeros, seq(from = 0, to = head(newdf[[i]]$Cum_MDA,1) - 1, by = 1))
+#       #
+#       #   }
+# 
+#       }
+# 
+#       # #enedmicity category given "Augmented Status"
+#       tmp$Endemicity <- "Augmented"
+#       tmp$MDA_scheme <- "Augmented"
+#       # #tmp$Endemicity_ID <- 6
+# 
+#       newdf[[i]] <- rbind(newdf[[i]], tmp) # want tmp at end
+#     }
+#   }
+# 
+# #}
+# 
+# 
+# #test <- loop_func(dfls = dfls, dfAPOC_included = dfAPOC_included5, FinalESPENyr = FinalESPENyr, newdf = newdf, lsid = lsid)
+# 
+# newdf <- do.call(rbind, newdf)
+# 
+# dfAPOC_included5 <- newdf
+# 
+# dfAPOC_included5$Year_tmp <- dfAPOC_included5$Year
 
-dfAPOC_included5 <- dfAPOC_included4 # RESET HERE
+# ====================================================== #
+#  Function to augment (extend) each Iu from 2022 - 2025 #
 
-nrow(subset(dfAPOC_included5, Year == 2022)) # check n IUs = 2346; 2108 IUs March 2025
-                                             # 2044 IUs (April 2025)
-
-#FinalESPENyr <- 2013
-FinalESPENyr <- 2022
-
-dfls <- split(dfAPOC_included5, dfAPOC_included5$IU_ID_MAPPING)
-
-## new list of dfs
-newdf <- vector("list", length(dfls))
-
-lsid <- split(dfAPOC_included5$IU_ID_MAPPING, dfAPOC_included5$IU_ID_MAPPING)
-lsid <- unique(unlist(lsid))
-
-# loop to fill in missing years and columns
-
-#loop_func <- function(dfls, dfAPOC_included5, FinalESPENyr, newdf, lsid) {
-for (i in 1:length(dfls)) {
-
-  newdf[[i]] <- subset(dfls[[i]], select=colnames(dfAPOC_included5))
-
-  #IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA) - start)
-
-  IUend <- 2025
-
-  newdf[[i]]$IUend <- IUend
-  Futureyrs <- IUend - FinalESPENyr ## prior years to include
-
-  #PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
-
-  newdf[[i]]$lsID <- i
-
-  i
-
-  if (is.na(IUend)!=T) {
-    if(IUend>FinalESPENyr) {
-      # if cumulative rounds greater than 1, augment data frame
-      # by repeating the first row
-
-      tmp <- newdf[[i]][rep(1, each = (min(IUend - newdf[[i]]$Year))), ]
-
-      # fill in the years from start date of IU to first year on ESPEN
-      #tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
-      tmp$Year <- seq(FinalESPENyr+1, IUend)
-
-      # fill in with years that had MDA (where any cum_MDA > 1 in 2013 onwards)
-
-      # if(any(head(newdf[[i]]$Cum_MDA)> 0)) {
-      #   # tmp$MDA[1:PriorMDA] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
-      #
-      #   val_totest <- head(newdf[[i]]$Cum_MDA,1)
-      #
-      #   # where top cum_MDA value is greater than 1
-      #   if(val_totest > 1){
-      #
-      #     # Determine the number of leading zeros based on your condition
-      #     leading_zeros <- rep(0, 37 - head(newdf[[i]]$Cum_MDA,1) + 1) # back to 2000 (or 1999)
-      #     #leading_zeros <- rep(0, 27 - head(newdf[[1]]$Cum_MDA,1) + 1)
-      #
-      #
-      #     # Create the sequence that goes in reverse from 0 to 27
-      #     tmp$Cum_MDA <- c(leading_zeros, seq(from = 0, to = head(newdf[[i]]$Cum_MDA,1) - 1, by = 1))
-      #
-      #   }
-
+augment_mda_to2025_func <- function(df, FinalESPENyr = 2022, IUend = 2025) {
+  
+  # Make a copy of the dataframe
+  df_updated <- df
+  
+  # Split the data by IU_ID_MAPPING
+  dfls <- split(df_updated, df_updated$IU_ID_MAPPING)
+  
+  # Initialize the list to store new dataframes
+  newdf <- vector("list", length(dfls))
+  
+  # Loop over each split dataframe (grouped by IU_ID_MAPPING)
+  for (i in 1:length(dfls)) {
+    
+    newdf[[i]] <- subset(dfls[[i]], select = colnames(df_updated))
+    
+    # Assigning the last year to IUend (2025 in this case)
+    newdf[[i]]$IUend <- IUend
+    
+    # Calculate the number of future years to include
+    Futureyrs <- IUend - FinalESPENyr
+    
+    # Assign the index of the list to the IU data frame
+    newdf[[i]]$lsID <- i
+    
+    # Check if IUend is not NA
+    if (!is.na(IUend)) {
+      # If the IUend year is greater than the FinalESPEN year (i.e., there are missing years after FinalESPENyr)
+      if (IUend > FinalESPENyr) {
+        
+        # Repeat the first row to create new rows for the missing years
+        tmp <- newdf[[i]][rep(1, each = (min(IUend - newdf[[i]]$Year))), ]
+        
+        # Fill the new rows with the correct years starting after FinalESPENyr
+        tmp$Year <- seq(FinalESPENyr + 1, IUend)
+        
+        # Set the endemicity and MDA scheme for the augmented rows
+        tmp$Endemicity <- "Augmented"
+        tmp$MDA_scheme <- "Augmented"
+        
+        # Append the augmented rows to the original dataframe
+        newdf[[i]] <- rbind(newdf[[i]], tmp)  # Add the augmented rows at the end
       }
-
-      # #enedmicity category given "Augmented Status"
-      tmp$Endemicity <- "Augmented"
-      tmp$MDA_scheme <- "Augmented"
-      # #tmp$Endemicity_ID <- 6
-
-      newdf[[i]] <- rbind(newdf[[i]], tmp) # want tmp at end
     }
   }
+  
+  # Combine the list of augmented dataframes back into a single dataframe
+  df_updated <- do.call(rbind, newdf)
+  
+  # Check the result:
+  cat("Rows in 2022 after augmenting MDA data (adding 2022-2025 rows):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after augmenting MDA data (adding 2022-2025 rows):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-#}
+# call function:
+dfAPOC_included5 <- augment_mda_to2025_func(dfAPOC_included4, FinalESPENyr = 2022, IUend = 2025)
 
-
-#test <- loop_func(dfls = dfls, dfAPOC_included = dfAPOC_included5, FinalESPENyr = FinalESPENyr, newdf = newdf, lsid = lsid)
-
-newdf <- do.call(rbind, newdf)
-
-dfAPOC_included5 <- newdf
-
-dfAPOC_included5$Year_tmp <- dfAPOC_included5$Year
 
 # ================================================================================================ #
 # 5) label each IU on forward status: MDA stopped (post intervention surveillance in 2022 or 2021
 #    or all EpiCov == 0 for "unknowns" / MDA continue/ treatment naive
 
-final_endemic_PIS_yr_check <- dfAPOC_included5 %>%
-  filter(Endemicity == "Endemic (under post-intervention surveillance)") %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(LastYear = max(Year))
-
-# =================================================== #
-dfAPOC_included6 <- dfAPOC_included5 # reset here
-length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2044 IUs (April 2025)
-
-# one IU needs treatment introduced in UGA based on "Endemic (under post intervention surveillance")
-condition <- with(dfAPOC_included6, IU_ID_MAPPING == 49752 & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
-indices <- which(condition)
-replace_MDA_CDTI <- c(1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-dfAPOC_included6$MDA_CDTI[indices] <- rep(replace_MDA_CDTI, length.out = length(indices))
-dfAPOC_included6$Cov.in2[indices] <- rep(coverages_UGA2, length.out = length(indices))
-
-# for years covered by APOC, 2015 report
-dfAPOC_included6$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included6$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
-dfAPOC_included6$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
-
-# make treatment status in 2022 label
-
-dfAPOC_included6 <- dfAPOC_included6 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022 = case_when(
-      all(
-        any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-        #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-      ) ~ "MDA continues",
-      all(
-        any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-          any(EpiCov > 0) &
-          any(Cum_MDA > 0)
-      ) ~ "MDA continues",
-      any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
-      all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-            all(EpiCov == 0) &
-            any(Cum_MDA > 0) &
-            !all(is.na(Cov.in2))
-      ) ~ "MDA stopped",
-      any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
-      any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
-      all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
-      all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped",
-      all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues",
-      all(is.na(Cov.in2)) ~ "Treatment naive",
-      TRUE ~ NA
-    )
-  )
-
-dfAPOC_included6$Endemicity_tmp <- dfAPOC_included6$Endemicity
-length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2044 IUs (April 25')
-
-# testing/ checking labelling over trt_status_2022
-dfAPOC_included6_check_MDAstopped <- subset(dfAPOC_included6, trt_status_2022 == "MDA stopped")
-length(unique(dfAPOC_included6_check_MDAstopped$IU_ID_MAPPING))
-
-dfAPOC_included6_check_MDAcont <- subset(dfAPOC_included6, trt_status_2022 == "MDA continues")
-length(unique(dfAPOC_included6_check_MDAcont$IU_ID_MAPPING))
-
-dfAPOC_included6_check_trtnaive <- subset(dfAPOC_included6, trt_status_2022 == "Treatment naive")
-length(unique(dfAPOC_included6_check_trtnaive$IU_ID_MAPPING))
-
-
-dfAPOC_included6_check_IU <- subset(dfAPOC_included6, IU_ID_MAPPING == 36548)
-dfAPOC_included6_check_IU <- dfAPOC_included6_check_IU %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022 = case_when(
-      all(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA continues",
-      TRUE ~ NA_character_
-    )
-  )
-
-dfAPOC_included6_check_IU <- dfAPOC_included6_check_IU %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022 = case_when(
-      any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA continues",
-      TRUE ~ NA_character_
-    )
-  )
-
-# check any violations where treatment_naive doesnt match columns
-violated_combinations <- dfAPOC_included6 %>%
-  group_by(biannual_VC_mapping, trt_status_2022, IU_ID_MAPPING) %>%
-  filter((biannual_VC_mapping == "treatment naive" & trt_status_2022 != "Treatment naive") |
-           (biannual_VC_mapping != "treatment naive" & trt_status_2022 == "Treatment naive")) %>%
-  summarise(count = n())
-# check: IU: 49752
-
-violated_combinations2 <- dfAPOC_included6 %>%
-  group_by(biannual_VC_mapping, trt_status_2022) %>%
-  filter((biannual_VC_mapping == "treatment naive" & trt_status_2022 != "Treatment naive") |
-           (biannual_VC_mapping != "treatment naive" & trt_status_2022 == "Treatment naive")) %>%
-  summarise(count = n())
-
-# check any remaining NAs in trt_status_2022
-
-IUs_with_NA <- dfAPOC_included6 %>%
-  filter(is.na(trt_status_2022)) %>%
-  select(IU_ID_MAPPING) %>%
-  distinct()
-
-# how many IUs become non-endemic when reconfigure?
-
-# non_endemic_IUs <- dfAPOC_included6 %>%
-#   filter(Endemicity == "Non-endemic" & Year %in% c(2021, 2022)) %>%
-#   distinct(IU_ID_MAPPING)
-#
-# filtered_df <- dfAPOC_included6 %>%
-#   semi_join(non_endemic_IUs, by = "IU_ID_MAPPING")
-#
-# filtered_IUs <- filtered_df %>%
-#   filter(Year >= 2013 & Year <= 2022) %>%
+# final_endemic_PIS_yr_check <- dfAPOC_included5 %>%
+#   filter(Endemicity == "Endemic (under post-intervention surveillance)") %>%
 #   group_by(IU_ID_MAPPING) %>%
-#   filter(all(Endemicity %in% c("Non-endemic", "Not reported")) &
-#            length(unique(Endemicity)) == 2) %>%
-#   distinct(IU_ID_MAPPING)
-#
-# filtered_df2 <- filtered_df %>%
-#   semi_join(filtered_IUs, by = "IU_ID_MAPPING")
-#
-# non_endemic_IUs <- dfAPOC_included6 %>%
-#   filter(
-#     Endemicity == "non-endemic" &
-#       Year %in% c(2021, 2022) &
-#       !is.na(Parent1_IU_ID)
-#   ) %>%
-#   distinct(IU_ID_MAPPING)
+#   summarise(LastYear = max(Year))
 
-# added July 2024 #
+# # =================================================== #
+# dfAPOC_included6 <- dfAPOC_included5 # reset here
+# length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2044 IUs (April 2025)
+# 
+# # one IU needs treatment introduced in UGA based on "Endemic (under post intervention surveillance")
+# condition <- with(dfAPOC_included6, IU_ID_MAPPING == 49752 & trimws(Pre_ESPEN_MDA_history) == "Include" & Year > 1998 & Year < 2013)
+# indices <- which(condition)
+# replace_MDA_CDTI <- c(1,1,1,1,1,1,1,1,1,1,1,1,1,1)
+# dfAPOC_included6$MDA_CDTI[indices] <- rep(replace_MDA_CDTI, length.out = length(indices))
+# dfAPOC_included6$Cov.in2[indices] <- rep(coverages_UGA2, length.out = length(indices))
+# 
+# # for years covered by APOC, 2015 report
+# dfAPOC_included6$MDA_CDTI_raw[indices] <- rep(coverages_UGA, length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included6$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))# Use indexing to assign values based on the condition
+# dfAPOC_included6$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))# Use indexing to assign values based on the condition
 
-dfAPOC_included6 <- dfAPOC_included6 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022_v2 = case_when(
-      all(
-        any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-        #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-      ) ~ "MDA continues",
-      all(
-        any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-          any(EpiCov > 0) &
-          any(Cum_MDA > 0)
-      ) ~ "MDA continues",
-      any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
-      all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-            all(EpiCov == 0) &
-            any(Cum_MDA > 0) &
-            !all(is.na(Cov.in2))
-      ) ~ "MDA stopped: no MDA in ESPEN years",
-      any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
-      any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
-      all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
-      all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
-      all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
-      all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
-      all(is.na(Cov.in2)) ~ "Treatment naive",
-      TRUE ~ trt_status_2022
+# ================================= #
+#    Single IU needs updating       #  
+
+update_iu_mda_data <- function(df, IU_ID, coverage_input, year_range = c(1999, 2012)) {
+  
+  # Create a copy of the input dataframe to avoid modifying the original
+  df_updated <- df
+  
+  # Define the condition to select the rows for the specific IU and year range
+  condition <- with(df_updated, IU_ID_MAPPING == 49752 & trimws(Pre_ESPEN_MDA_history) == "Include" & Year >= year_range[1] & Year <= year_range[2])
+  
+  # Find the indices that meet the condition
+  indices <- which(condition)
+  
+  # Define the replacement MDA_CDTI values (assuming 1 for each year)
+  replace_MDA_CDTI <- rep(1, length(indices))
+  
+  # Update MDA_CDTI values
+  df_updated$MDA_CDTI[indices] <- replace_MDA_CDTI
+  
+  # Set Cov.in2 values (coverage data, passed as parameter)
+  df_updated$Cov.in2[indices] <- rep(coverage_input, length.out = length(indices))
+  
+  # For years covered by APOC, 2015 report, set MDA_CDTI_raw and source columns
+  df_updated$MDA_CDTI_raw[indices] <- rep(coverage_input, length.out = length(indices))
+  df_updated$cov_source[indices] <- rep("national-level coverage data", length.out = length(indices))
+  df_updated$cov_specific_source[indices] <- rep("APOC report, 2015", length.out = length(indices))
+  
+  # Check the updated dataframe
+  cat("Rows updated for IU 49752:", range(indices), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
+
+# call function
+dfAPOC_included6 <- update_iu_mda_data(dfAPOC_included5, IU_ID = 49752, coverage_input = coverages_UGA2)
+
+
+# # make treatment status in 2022 label
+# 
+# dfAPOC_included6 <- dfAPOC_included6 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022 = case_when(
+#       all(
+#         any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#         #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#       ) ~ "MDA continues",
+#       all(
+#         any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#           any(EpiCov > 0) &
+#           any(Cum_MDA > 0)
+#       ) ~ "MDA continues",
+#       any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
+#       all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#             all(EpiCov == 0) &
+#             any(Cum_MDA > 0) &
+#             !all(is.na(Cov.in2))
+#       ) ~ "MDA stopped",
+#       any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+#       any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+#       all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
+#       all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped",
+#       all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues",
+#       all(is.na(Cov.in2)) ~ "Treatment naive",
+#       TRUE ~ NA
+#     )
+#   )
+# 
+# dfAPOC_included6$Endemicity_tmp <- dfAPOC_included6$Endemicity
+# length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2044 IUs (April 25')
+# 
+# # testing/ checking labelling over trt_status_2022
+# dfAPOC_included6_check_MDAstopped <- subset(dfAPOC_included6, trt_status_2022 == "MDA stopped")
+# length(unique(dfAPOC_included6_check_MDAstopped$IU_ID_MAPPING))
+# 
+# dfAPOC_included6_check_MDAcont <- subset(dfAPOC_included6, trt_status_2022 == "MDA continues")
+# length(unique(dfAPOC_included6_check_MDAcont$IU_ID_MAPPING))
+# 
+# dfAPOC_included6_check_trtnaive <- subset(dfAPOC_included6, trt_status_2022 == "Treatment naive")
+# length(unique(dfAPOC_included6_check_trtnaive$IU_ID_MAPPING))
+# 
+# 
+# dfAPOC_included6_check_IU <- subset(dfAPOC_included6, IU_ID_MAPPING == 36548)
+# dfAPOC_included6_check_IU <- dfAPOC_included6_check_IU %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022 = case_when(
+#       all(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA continues",
+#       TRUE ~ NA_character_
+#     )
+#   )
+# 
+# dfAPOC_included6_check_IU <- dfAPOC_included6_check_IU %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022 = case_when(
+#       any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA continues",
+#       TRUE ~ NA_character_
+#     )
+#   )
+# 
+# # check any violations where treatment_naive doesnt match columns
+# violated_combinations <- dfAPOC_included6 %>%
+#   group_by(biannual_VC_mapping, trt_status_2022, IU_ID_MAPPING) %>%
+#   filter((biannual_VC_mapping == "treatment naive" & trt_status_2022 != "Treatment naive") |
+#            (biannual_VC_mapping != "treatment naive" & trt_status_2022 == "Treatment naive")) %>%
+#   summarise(count = n())
+# # check: IU: 49752
+# 
+# violated_combinations2 <- dfAPOC_included6 %>%
+#   group_by(biannual_VC_mapping, trt_status_2022) %>%
+#   filter((biannual_VC_mapping == "treatment naive" & trt_status_2022 != "Treatment naive") |
+#            (biannual_VC_mapping != "treatment naive" & trt_status_2022 == "Treatment naive")) %>%
+#   summarise(count = n())
+# 
+# # check any remaining NAs in trt_status_2022
+# 
+# IUs_with_NA <- dfAPOC_included6 %>%
+#   filter(is.na(trt_status_2022)) %>%
+#   select(IU_ID_MAPPING) %>%
+#   distinct()
+# 
+# # how many IUs become non-endemic when reconfigure?
+# 
+# # non_endemic_IUs <- dfAPOC_included6 %>%
+# #   filter(Endemicity == "Non-endemic" & Year %in% c(2021, 2022)) %>%
+# #   distinct(IU_ID_MAPPING)
+# #
+# # filtered_df <- dfAPOC_included6 %>%
+# #   semi_join(non_endemic_IUs, by = "IU_ID_MAPPING")
+# #
+# # filtered_IUs <- filtered_df %>%
+# #   filter(Year >= 2013 & Year <= 2022) %>%
+# #   group_by(IU_ID_MAPPING) %>%
+# #   filter(all(Endemicity %in% c("Non-endemic", "Not reported")) &
+# #            length(unique(Endemicity)) == 2) %>%
+# #   distinct(IU_ID_MAPPING)
+# #
+# # filtered_df2 <- filtered_df %>%
+# #   semi_join(filtered_IUs, by = "IU_ID_MAPPING")
+# #
+# # non_endemic_IUs <- dfAPOC_included6 %>%
+# #   filter(
+# #     Endemicity == "non-endemic" &
+# #       Year %in% c(2021, 2022) &
+# #       !is.na(Parent1_IU_ID)
+# #   ) %>%
+# #   distinct(IU_ID_MAPPING)
+# 
+# # added July 2024 #
+# 
+# dfAPOC_included6 <- dfAPOC_included6 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022_v2 = case_when(
+#       all(
+#         any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#         #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#       ) ~ "MDA continues",
+#       all(
+#         any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#           any(EpiCov > 0) &
+#           any(Cum_MDA > 0)
+#       ) ~ "MDA continues",
+#       any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
+#       all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#             all(EpiCov == 0) &
+#             any(Cum_MDA > 0) &
+#             !all(is.na(Cov.in2))
+#       ) ~ "MDA stopped: no MDA in ESPEN years",
+#       any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
+#       any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
+#       all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
+#       all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
+#       all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
+#       all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
+#       all(is.na(Cov.in2)) ~ "Treatment naive",
+#       TRUE ~ trt_status_2022
+#     )
+#   )
+# 
+# unique(dfAPOC_included6$trt_status_2022_v2)
+# length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2280 IUs
+#                                                # 2044 IUs (April 2025)
+
+# ============================================================================= #
+# Function to create trt_status_2022 variable and print frequency of categories #
+
+update_trt_status_and_print <- function(df) {
+  
+  # Update trt_status_2022
+  df_updated <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      trt_status_2022 = case_when(
+        all(
+          any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+        ) ~ "MDA continues",
+        all(
+          any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+            any(EpiCov > 0) &
+            any(Cum_MDA > 0)
+        ) ~ "MDA continues",
+        any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
+        all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+              all(EpiCov == 0) &
+              any(Cum_MDA > 0) &
+              !all(is.na(Cov.in2))
+        ) ~ "MDA stopped",
+        any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+        any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+        all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
+        all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped",
+        all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues",
+        all(is.na(Cov.in2)) ~ "Treatment naive",
+        TRUE ~ NA
+      )
     )
-  )
-
-unique(dfAPOC_included6$trt_status_2022_v2)
-length(unique(dfAPOC_included6$IU_ID_MAPPING)) # 2280 IUs
-                                               # 2044 IUs (April 2025)
-
-# ===========================================================================================#
-# 6) continue MDA (65% coverage) in those IUs with "MDA continuing"                          #
-
-dfAPOC_included7 <- dfAPOC_included6
-
-dfAPOC_included7 <- dfAPOC_included7 %>%
-  mutate(
-    MDA_CDTI = if_else(
-      trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
-      1,
-      MDA_CDTI
+  
+  # Update trt_status_2022_v2
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      trt_status_2022_v2 = case_when(
+        all(
+          any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+        ) ~ "MDA continues",
+        all(
+          any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+            any(EpiCov > 0) &
+            any(Cum_MDA > 0)
+        ) ~ "MDA continues",
+        any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
+        all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+              all(EpiCov == 0) &
+              any(Cum_MDA > 0) &
+              !all(is.na(Cov.in2))
+        ) ~ "MDA stopped: no MDA in ESPEN years",
+        any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
+        any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
+        all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
+        all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
+        all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
+        all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
+        all(is.na(Cov.in2)) ~ "Treatment naive",
+        TRUE ~ trt_status_2022
+      )
     )
-  )
+  
+  # Print the frequency of each category for trt_status_2022 and trt_status_2022_v2 for Year 2022
+  cat("Frequency of trt_status_2022 in 2022:\n")
+  status_2022_table <- table(subset(df_updated, Year == 2022)$trt_status_2022)
+  for (category in names(status_2022_table)) {
+    cat(category, ":", status_2022_table[category], "\n")
+  }
+  
+  cat("\nFrequency of trt_status_2022_v2 in 2022:\n")
+  status_2022_v2_table <- table(subset(df_updated, Year == 2022)$trt_status_2022_v2)
+  for (category in names(status_2022_v2_table)) {
+    cat(category, ":", status_2022_v2_table[category], "\n")
+  }
+  
+  # Check the result:
+  cat("Rows in 2022 after creating trt_status_2022 variable:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after creating trt_status_2022 variable:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-dfAPOC_included7 <- dfAPOC_included7 %>%
-  mutate(
-    Cov.in2 = if_else(
-      trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
-      0.65,
-      Cov.in2
-    )
-  )
+# call function 
+dfAPOC_included6 <- update_trt_status_and_print(dfAPOC_included6)
 
-dfAPOC_included7 <- dfAPOC_included7 %>%
-  mutate(
-    cov_source = if_else(
-      trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
-      "assumed (projected)",
-      cov_source
-    )
-  )
-
-
-# check
-dfAPOC_included7_check_MDAstopped <- subset(dfAPOC_included7, trt_status_2022 == "MDA stopped")
-length(unique(dfAPOC_included7_check_MDAstopped$IU_ID_MAPPING))
-dfAPOC_included7_check_MDAstopped <- subset(dfAPOC_included7_check_MDAstopped, Year %in% c(2023:2025))
-
-dfAPOC_included7_check_MDAcont <- subset(dfAPOC_included7, trt_status_2022 == "MDA continues")
-length(unique(dfAPOC_included7_check_MDAcont$IU_ID_MAPPING))
-dfAPOC_included7_check_MDAcont <- subset(dfAPOC_included7_check_MDAcont, Year %in% c(2023:2025))
-
-dfAPOC_included7_check_trtnaive <- subset(dfAPOC_included7, trt_status_2022 == "Treatment naive")
-length(unique(dfAPOC_included7_check_trtnaive$IU_ID_MAPPING))
-
-# 272 + 1224 + 784 = 2280 IUs
-# 259 (MDA Stopped) + 1230 (MDA continues) + 555 (treatment naive) = 2044 IUs (April 2025)
-
-
-# ============================================================================================== #
-# need to continue biannual where any biannual in years 2020 - 2022 (NGA and UGA) for 2023-2025
-
-# first find IUs where any biannual in 2020 - 2022 (and MDA continues classification with MDA_CDTI in 2023-25)
-
-filtered_ids <- dfAPOC_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(
-    any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
-      any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
-      trt_status_2022 == "MDA continues"
-  ) %>%
-  distinct(IU_ID_MAPPING) %>%
-  pull(IU_ID_MAPPING)
-
-dfAPOC_included7$MDA_CDTI_Biannual <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% filtered_ids & dfAPOC_included7$Year %in% c(2023,2024,2025), 1, dfAPOC_included7$MDA_CDTI_Biannual)
-
-# check Nigeria
-
-# ============================================================================================== #
-# need to continue VC status (either 2 = vector eliminated or 1 = under VC) in UGA for 2023-2025
-# where vector control is 1 in 2022 make 1 in 2023 - 2025
-condition <- dfAPOC_included7$vector_control == 1 & dfAPOC_included7$Year == 2022
-indices <- which(condition)
-selected_rows <- dfAPOC_included7[indices, ]
-unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
-dfAPOC_included7$vector_control <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% unique_IDIU & dfAPOC_included7$Year %in% c(2023,2024,2025), 1, dfAPOC_included7$vector_control)
-
-# where vector control is 2 in 2022 make 2 in 2023-2025
-condition <- dfAPOC_included7$vector_control == 2 & dfAPOC_included7$Year == 2022
-indices <- which(condition)
-selected_rows <- dfAPOC_included7[indices, ]
-unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
-dfAPOC_included7$vector_control <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% unique_IDIU & dfAPOC_included7$Year %in% c(2023,2024,2025), 2, dfAPOC_included7$vector_control)
-
-# ========================================================== #
-#     modify certain countries based on expected non-endemic - MARCH UPDATE # #
-
-length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 2280 IUs  - UP TO HERE SHOULD INCLUDE FOR THE HISTORIES PAPER
-                                               # 2044 IUs (April 25')
-
-# Uganda - most of country (any considered treatment naive should be non-endemic)
-condition <- dfAPOC_included7$ADMIN0ISO3 == "UGA" &
-  dfAPOC_included7$trt_status_2022 == "Treatment naive"
-indices <- which(condition)
-dfAPOC_included7$trt_status_2022[indices] <- "non-endemic"
-
-# filter these out so no longer included as IUs
-dfAPOC_included7 <- subset(dfAPOC_included7, !(dfAPOC_included7$trt_status_2022 == "non-endemic"))
-
-length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 2194 IUs
-                                               # 1956 IUs (April 2025) - 88 IUs removed from UGA
-
-# ================================================================= #
-#   remove treatment naive IUs (with not-reported etc) - MARCH UPDATE #
-
-# condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
-#   dfAPOC_included7$MAX_Endemicity == "Not reported"
-condition <- dfAPOC_included7$ADMIN1 != "Blue Nile" & dfAPOC_included7$trt_status_2022 == "Treatment naive" &
-  dfAPOC_included7$MAX_Endemicity %in% c("Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
-# condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
-#   dfAPOC_included7$MAX_Endemicity %in% c("Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
-indices <- which(condition)
-dfAPOC_included7$exclude[indices] <- "exclude"
-
-# check #
-dfAPOC_included7_exclude <- subset(dfAPOC_included7, exclude == "exclude")
-dfAPOC_included7_exclude_2022 <- subset(dfAPOC_included7_exclude, Year == 2022)
-nrow(dfAPOC_included7_exclude_2022) # 56 IUs
-                                    # 430 IUs (April 2025)
-trt_naive_IUs_APOC_exclude <- unique(dfAPOC_included7_exclude_2022$IU_ID_MAPPING)
-trt_naive_IUs_APOC_exclude
-#writeLines(as.character(trt_naive_IUs_APOC_exclude), "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/trt_naive_IUs_APOC_exclude_n659.txt")
-
-unique(dfAPOC_included7_exclude_2022$MAX_Endemicity)
-
-# filter these out so no longer included as IUs
-dfAPOC_included7 <- subset(dfAPOC_included7, is.na(dfAPOC_included7$exclude))
-length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 1535 IUs (now 1524 IUs: March 2025)
-                                               # 1526 IUs (April 2025) (1956 IUs - 430 IUs = 1526 IUs in April 25')
-
-# ====================================================== #
-# 7) create rho parameter column = start all with 0.3    #
-#
+# # ===========================================================================================#
+# # 6) continue MDA (65% coverage) in those IUs with "MDA continuing"                          #
+# 
+# dfAPOC_included7 <- dfAPOC_included6
+# 
 # dfAPOC_included7 <- dfAPOC_included7 %>%
 #   mutate(
-#     adherence_par = ifelse(MDA_CDTI == 1, 0.5, NA_real_)
-#   ) # for business case
+#     MDA_CDTI = if_else(
+#       trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+#       1,
+#       MDA_CDTI
+#     )
+#   )
+# 
+# dfAPOC_included7 <- dfAPOC_included7 %>%
+#   mutate(
+#     Cov.in2 = if_else(
+#       trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+#       0.65,
+#       Cov.in2
+#     )
+#   )
+# 
+# dfAPOC_included7 <- dfAPOC_included7 %>%
+#   mutate(
+#     cov_source = if_else(
+#       trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+#       "assumed (projected)",
+#       cov_source
+#     )
+#   )
+# 
+# 
+# # check
+# dfAPOC_included7_check_MDAstopped <- subset(dfAPOC_included7, trt_status_2022 == "MDA stopped")
+# length(unique(dfAPOC_included7_check_MDAstopped$IU_ID_MAPPING))
+# dfAPOC_included7_check_MDAstopped <- subset(dfAPOC_included7_check_MDAstopped, Year %in% c(2023:2025))
+# 
+# dfAPOC_included7_check_MDAcont <- subset(dfAPOC_included7, trt_status_2022 == "MDA continues")
+# length(unique(dfAPOC_included7_check_MDAcont$IU_ID_MAPPING))
+# dfAPOC_included7_check_MDAcont <- subset(dfAPOC_included7_check_MDAcont, Year %in% c(2023:2025))
+# 
+# dfAPOC_included7_check_trtnaive <- subset(dfAPOC_included7, trt_status_2022 == "Treatment naive")
+# length(unique(dfAPOC_included7_check_trtnaive$IU_ID_MAPPING))
+# 
+# # 272 + 1224 + 784 = 2280 IUs
+# # 259 (MDA Stopped) + 1230 (MDA continues) + 555 (treatment naive) = 2044 IUs (April 2025)
 
-dfAPOC_included7 <- dfAPOC_included7 %>%
-  mutate(
-    adherence_par = ifelse(MDA_CDTI == 1, 0.3, NA_real_)
-  ) # for Endgame
+# ========================================================== #
+#        Function for updating MDA in 2023 - 2025 period     #
+
+update_mda_status_to2025 <- function(df) {
+  
+  # Create a copy of the original dataframe
+  df_updated <- df
+  
+  # make Cov.in2 a numeric column
+  df_updated$Cov.in2 <- as.numeric(df_updated$Cov.in2)
+  
+  # Mutate to update MDA_CDTI, Cov.in2, and cov_source for years 2023-2025 where MDA continues
+  df_updated <- df_updated %>%
+    mutate(
+      MDA_CDTI = if_else(
+        trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+        1,
+        MDA_CDTI
+      ),
+      Cov.in2 = if_else(
+        trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+        0.65,
+        Cov.in2
+      ),
+      cov_source = if_else(
+        trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+        "assumed (projected)",
+        cov_source
+      )
+    )
+  
+  # Check if MDA stopped
+  df_updated_check_MDAstopped <- subset(df_updated, trt_status_2022 == "MDA stopped")
+  cat("Unique IUs with MDA stopped:", length(unique(df_updated_check_MDAstopped$IU_ID_MAPPING)), "\n")
+  df_updated_check_MDAstopped <- subset(df_updated_check_MDAstopped, Year %in% c(2023:2025))
+  
+  # Check if MDA continues
+  df_updated_check_MDAcont <- subset(df_updated, trt_status_2022 == "MDA continues")
+  cat("Unique IUs with MDA continues:", length(unique(df_updated_check_MDAcont$IU_ID_MAPPING)), "\n")
+  df_updated_check_MDAcont <- subset(df_updated_check_MDAcont, Year %in% c(2023:2025))
+  
+  # Check if treatment naive
+  df_updated_check_trtnaive <- subset(df_updated, trt_status_2022 == "Treatment naive")
+  cat("Unique IUs with Treatment naive:", length(unique(df_updated_check_trtnaive$IU_ID_MAPPING)), "\n")
+  
+  # Check number of IUs:
+  cat("Rows in 2022 after updated MDA in 2023-2025:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after updated MDA in 2023-2025:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
+
+# call function:
+dfAPOC_included7 <- update_mda_status_to2025(dfAPOC_included6)
 
 
-# ===================================================== #
-#  8) create num_rnds and modelled_CUM_MDA cols         #
+# # ============================================================================================== #
+# # need to continue biannual where any biannual in years 2020 - 2022 (NGA and UGA) for 2023-2025
+# 
+# # first find IUs where any biannual in 2020 - 2022 (and MDA continues classification with MDA_CDTI in 2023-25)
+# 
+# filtered_ids <- dfAPOC_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(
+#     any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
+#       any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
+#       trt_status_2022 == "MDA continues"
+#   ) %>%
+#   distinct(IU_ID_MAPPING) %>%
+#   pull(IU_ID_MAPPING)
+# 
+# dfAPOC_included7$MDA_CDTI_Biannual <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% filtered_ids & dfAPOC_included7$Year %in% c(2023,2024,2025), 1, dfAPOC_included7$MDA_CDTI_Biannual)
+# 
+# # check Nigeria
+# 
+# # ============================================================================================== #
+# # need to continue VC status (either 2 = vector eliminated or 1 = under VC) in UGA for 2023-2025
+# # where vector control is 1 in 2022 make 1 in 2023 - 2025
+# condition <- dfAPOC_included7$vector_control == 1 & dfAPOC_included7$Year == 2022
+# indices <- which(condition)
+# selected_rows <- dfAPOC_included7[indices, ]
+# unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
+# dfAPOC_included7$vector_control <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% unique_IDIU & dfAPOC_included7$Year %in% c(2023,2024,2025), 1, dfAPOC_included7$vector_control)
+# 
+# # where vector control is 2 in 2022 make 2 in 2023-2025
+# condition <- dfAPOC_included7$vector_control == 2 & dfAPOC_included7$Year == 2022
+# indices <- which(condition)
+# selected_rows <- dfAPOC_included7[indices, ]
+# unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
+# dfAPOC_included7$vector_control <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% unique_IDIU & dfAPOC_included7$Year %in% c(2023,2024,2025), 2, dfAPOC_included7$vector_control)
 
-dfAPOC_included7$number_rnds <- rowSums(dfAPOC_included7[c("MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
 
-dfAPOC_included7$any_MDA <- ifelse(dfAPOC_included7$number_rnds > 0, 1, 0)
+# =================================================================== #
+#   Function to update biannual MDA and vector control in 2023 - 2025 #
 
-dfAPOC_included7 <- dfAPOC_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(CUM_MDA_modelled = cumsum(number_rnds))
+update_biannual_and_vector_control_to2025 <- function(df) {
+  # Create a copy of the original dataframe
+  df_updated <- df
+  
+  # Filter IUs where MDA was biannual in 2020-2022 and continues in 2023-2025
+  filtered_ids <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(
+      any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
+        any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
+        trt_status_2022 == "MDA continues"
+    ) %>%
+    distinct(IU_ID_MAPPING) %>%
+    pull(IU_ID_MAPPING)
+  
+  # Update biannual MDA for 2023-2025
+  df_updated$MDA_CDTI_Biannual <- ifelse(df_updated$IU_ID_MAPPING %in% filtered_ids & df_updated$Year %in% c(2023, 2024, 2025), 1, df_updated$MDA_CDTI_Biannual)
+  
+  # Update vector control for 2023-2025 (continue VC status from 2022)
+  # If vector control was 1 in 2022, continue VC=1 in 2023-2025
+  condition_vc1 <- df_updated$vector_control == 1 & df_updated$Year == 2022
+  indices_vc1 <- which(condition_vc1)
+  selected_rows_vc1 <- df_updated[indices_vc1, ]
+  unique_IDIU_vc1 <- unique(selected_rows_vc1$IU_ID_MAPPING)
+  df_updated$vector_control <- ifelse(df_updated$IU_ID_MAPPING %in% unique_IDIU_vc1 & df_updated$Year %in% c(2023, 2024, 2025), 1, df_updated$vector_control)
+  
+  # If vector control was 2 in 2022, continue VC=2 in 2023-2025
+  condition_vc2 <- df_updated$vector_control == 2 & df_updated$Year == 2022
+  indices_vc2 <- which(condition_vc2)
+  selected_rows_vc2 <- df_updated[indices_vc2, ]
+  unique_IDIU_vc2 <- unique(selected_rows_vc2$IU_ID_MAPPING)
+  df_updated$vector_control <- ifelse(df_updated$IU_ID_MAPPING %in% unique_IDIU_vc2 & df_updated$Year %in% c(2023, 2024, 2025), 2, df_updated$vector_control)
+  
+  # Check number of IUs:
+  cat("Rows in 2022 after updating biannual MDA & vector control in 2023-2025:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after updating biannual MDA & vector control in 2023-2025:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-dfAPOC_included7$Cum_MDA_ESPEN <- dfAPOC_included7$Cum_MDA
+# Example usage:
+dfAPOC_included7 <- update_biannual_and_vector_control_to2025(dfAPOC_included7)
 
-length(unique(dfAPOC_included7$IU_ID_MAPPING))
-check_df <- subset(dfAPOC_included7, Year == 2022)
-nrow(check_df) # 1526 IUs left
 
-# =====================================#
-# 9) label co-endemic IUS with loa     #
 
-co_endemic_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs.csv")
+# # ========================================================== #
+# #     modify certain countries based on expected non-endemic - MARCH UPDATE # #
+# 
+# length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 2280 IUs  - UP TO HERE SHOULD INCLUDE FOR THE HISTORIES PAPER
+#                                                # 2044 IUs (April 25')
+# 
+# # Uganda - most of country (any considered treatment naive should be non-endemic)
+# condition <- dfAPOC_included7$ADMIN0ISO3 == "UGA" &
+#   dfAPOC_included7$trt_status_2022 == "Treatment naive"
+# indices <- which(condition)
+# dfAPOC_included7$trt_status_2022[indices] <- "non-endemic"
+# 
+# # filter these out so no longer included as IUs
+# dfAPOC_included7 <- subset(dfAPOC_included7, !(dfAPOC_included7$trt_status_2022 == "non-endemic"))
+# 
+# length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 2194 IUs
+#                                                # 1956 IUs (April 2025) - 88 IUs removed from UGA
+# 
+# # ================================================================= #
+# #   remove treatment naive IUs (with not-reported etc) - MARCH UPDATE #
+# 
+# # condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
+# #   dfAPOC_included7$MAX_Endemicity == "Not reported"
+# condition <- dfAPOC_included7$ADMIN1 != "Blue Nile" & dfAPOC_included7$trt_status_2022 == "Treatment naive" &
+#   dfAPOC_included7$MAX_Endemicity %in% c("Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
+# # condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
+# #   dfAPOC_included7$MAX_Endemicity %in% c("Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
+# indices <- which(condition)
+# dfAPOC_included7$exclude[indices] <- "exclude"
+# 
+# # check #
+# dfAPOC_included7_exclude <- subset(dfAPOC_included7, exclude == "exclude")
+# dfAPOC_included7_exclude_2022 <- subset(dfAPOC_included7_exclude, Year == 2022)
+# nrow(dfAPOC_included7_exclude_2022) # 56 IUs
+#                                     # 430 IUs (April 2025)
+# trt_naive_IUs_APOC_exclude <- unique(dfAPOC_included7_exclude_2022$IU_ID_MAPPING)
+# trt_naive_IUs_APOC_exclude
+# #writeLines(as.character(trt_naive_IUs_APOC_exclude), "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/trt_naive_IUs_APOC_exclude_n659.txt")
+# 
+# unique(dfAPOC_included7_exclude_2022$MAX_Endemicity)
+# 
+# # filter these out so no longer included as IUs
+# dfAPOC_included7 <- subset(dfAPOC_included7, is.na(dfAPOC_included7$exclude))
+# length(unique(dfAPOC_included7$IU_ID_MAPPING)) # 1535 IUs (now 1524 IUs: March 2025)
+#                                                # 1526 IUs (April 2025) (1956 IUs - 430 IUs = 1526 IUs in April 25')
 
-unique(dfAPOC_included7$ADMIN0ISO3)
 
-co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
-co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
+# ============================================================== #
+#       Function to remove a) non-endemic IUs in Uganda and      #
+#       b) treatment naive IUs which are not-reported/ unknown   #
+#       except in SDN Blue Nile Admin1                           #
 
-co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
-co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
+remove_non_endemic_and_trtnaive_IUs <- function(df) {
+  df_updated <- df
+  
+  cat("Rows in 2022 after BEFORE non-endemic IUs (UGA) & treatment-naive (unknown/not-reported in ESPEN) step:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count BEFORE removing non-endemic IUs (UGA) & treatment-naive (unknown/not-reported in ESPEN) step:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  nIUs_prestep <- length(unique(df_updated$IU_ID_MAPPING)) # store
+  
+  # Update treatment naive IUs in Uganda to "non-endemic"
+  # Uganda - most of country (any considered treatment naive should be non-endemic)
+  condition <- dfAPOC_included7$ADMIN0ISO3 == "UGA" &
+    dfAPOC_included7$trt_status_2022 == "Treatment naive"
+  indices <- which(condition)
+  dfAPOC_included7$trt_status_2022[indices] <- "non-endemic"
+  
+  df_updated <- subset(df_updated, !(df_updated$trt_status_2022 == "non-endemic"))
+  
+  cat("Rows in 2022 AFTER removing non-endemic IUs (UGA):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count AFTER removing non-endemic IUs (UGA) :", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  cat("Unique IU_ID_MAPPING removed because non-endemic IUs (UGA):", nIUs_prestep - length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  nIUs_prestep2 <- length(unique(df_updated$IU_ID_MAPPING)) # store
+  
+  # Remove treatment naive IUs with Not reported, Unknown (under LF MDA), or Unknown (consider Oncho Elimination Mapping)
+  condition <- df_updated$ADMIN1 != "Blue Nile" & df_updated$trt_status_2022 == "Treatment naive" &
+    df_updated$MAX_Endemicity %in% c("Not reported", "Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)")
+  
+  indices <- which(condition)
+  df_updated$exclude[indices] <- "exclude"
+  
+  # Filter out the rows marked as "exclude"
+  df_updated <- subset(df_updated, is.na(df_updated$exclude))
+  
+  # Check number of IUs:
+  cat("Rows in 2022 AFTER removing treatment-naive (unknown/not-reported in ESPEN):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count AFTER removing treatment-naive (unknown/not-reported in ESPEN):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  cat("Unique IU_ID_MAPPING removed because treatment-naive (unknown/not-reported in ESPEN) step:", nIUs_prestep2 - length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  nIUs_prestep3 <- length(unique(df_updated$IU_ID_MAPPING)) # store
+  
+  # final filtering of treatment naive (not in Gabon or Sudan)
+  
+  df_updated <- df_updated %>%
+    filter(
+      # Keep "Treatment naive" only if ADMIN0ISO3 is "GAB" or "SDN"
+      (trt_status_2022 == "Treatment naive" & ADMIN0ISO3 %in% c("GAB", "SDN")) |
+        # Keep any row where trt_status_2022 is not "Treatment naive"
+        trt_status_2022 != "Treatment naive",
+      # Exclude a specific IU_ID
+      !IU_ID_MAPPING %in% c("19529", "37017") # these two are both revised_cum_MDA == 0 so treatment naive 
+    )
+  
+  # Check number of IUs:
+  cat("Rows in 2022 AFTER final removal of treatment-naive (except GAB and SDN):", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count AFTER final removal of treatment-naive (except GAB and SDN):", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  cat("Unique IU_ID_MAPPING removed because treatment-naive (except GAB and SDN) step:", nIUs_prestep3 - length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
-co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
+# call function:
+dfAPOC_included7 <- remove_non_endemic_and_trtnaive_IUs(dfAPOC_included7)
 
-co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
-co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
 
-dfAPOC_included7$co_endemicity <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
-                                         ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
-                                                ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
-                                                       ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
 
-length(unique(dfAPOC_included7$IU_ID_MAPPING))
-check_df <- subset(dfAPOC_included7, Year == 2022)
-nrow(check_df) # 1526 IUs left
+# # ====================================================== #
+# # 7) create rho parameter column = start all with 0.3    #
+# #
+# # dfAPOC_included7 <- dfAPOC_included7 %>%
+# #   mutate(
+# #     adherence_par = ifelse(MDA_CDTI == 1, 0.5, NA_real_)
+# #   ) # for business case
+# 
+# dfAPOC_included7 <- dfAPOC_included7 %>%
+#   mutate(
+#     adherence_par = ifelse(MDA_CDTI == 1, 0.3, NA_real_)
+#   ) # for Endgame
+# 
+
+# # ===================================================== #
+# #  8) create num_rnds and modelled_CUM_MDA cols         #
+# 
+# dfAPOC_included7$number_rnds <- rowSums(dfAPOC_included7[c("MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+# 
+# dfAPOC_included7$any_MDA <- ifelse(dfAPOC_included7$number_rnds > 0, 1, 0)
+# 
+# dfAPOC_included7 <- dfAPOC_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(CUM_MDA_modelled = cumsum(number_rnds))
+# 
+# dfAPOC_included7$Cum_MDA_ESPEN <- dfAPOC_included7$Cum_MDA
+# 
+# length(unique(dfAPOC_included7$IU_ID_MAPPING))
+# check_df <- subset(dfAPOC_included7, Year == 2022)
+# nrow(check_df) # 1526 IUs left
+
+# # =====================================#
+# # 9) label co-endemic IUS with loa     #
+# 
+# co_endemic_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs.csv")
+# 
+# unique(dfAPOC_included7$ADMIN0ISO3)
+# 
+# co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
+# co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
+# co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
+# co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
+# co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
+# 
+# dfAPOC_included7$co_endemicity <- ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
+#                                          ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
+#                                                 ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
+#                                                        ifelse(dfAPOC_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
+# 
+# length(unique(dfAPOC_included7$IU_ID_MAPPING))
+# check_df <- subset(dfAPOC_included7, Year == 2022)
+# nrow(check_df) # 1526 IUs left
 # ==========================================================================
 # 9) in co-endemic IUs with loa, increase rho parameter value to 0.5 or 0.6
 
@@ -4431,21 +6159,119 @@ nrow(check_df) # 1526 IUs left
 # ======================================================================================
 # 10) make extra empty columns to match OCP dataframe when ready & make FINAL dataframe #
 
-dfAPOC_included7$PHASE <- NA
-dfAPOC_included7$SIZ_label <- NA
-dfAPOC_included7$MDA_nonCDTI <- NA
+# dfAPOC_included7$PHASE <- NA
+# dfAPOC_included7$SIZ_label <- NA
+# dfAPOC_included7$MDA_nonCDTI <- NA
+# 
+# dfAPOC_included7$IUID <- dfAPOC_included7$IU_ID_MAPPING
+# dfAPOC_included7$IUID[nchar(dfAPOC_included7$IU_ID_MAPPING)==4] <-  paste(0, dfAPOC_included7$IUID[nchar(dfAPOC_included7$IU_ID_MAPPING)==4], sep="")
+# dfAPOC_included7$IUID <- paste(dfAPOC_included7$ADMIN0ISO3, dfAPOC_included7$IUID, sep="")
+# 
+# dfAPOC_included7$Control_prog <- "APOC"
+# 
+# dfAPOC_included7$Cov_raw <- dfAPOC_included7$MDA_CDTI_raw
+# 
+# length(unique(dfAPOC_included7$IU_ID_MAPPING))
+# check_df <- subset(dfAPOC_included7, Year == 2022)
+# nrow(check_df) # 1526 IUs left
 
-dfAPOC_included7$IUID <- dfAPOC_included7$IU_ID_MAPPING
-dfAPOC_included7$IUID[nchar(dfAPOC_included7$IU_ID_MAPPING)==4] <-  paste(0, dfAPOC_included7$IUID[nchar(dfAPOC_included7$IU_ID_MAPPING)==4], sep="")
-dfAPOC_included7$IUID <- paste(dfAPOC_included7$ADMIN0ISO3, dfAPOC_included7$IUID, sep="")
 
-dfAPOC_included7$Control_prog <- "APOC"
+# ====================================================== #
+#    Function to make final columns & tidying            #
 
-dfAPOC_included7$Cov_raw <- dfAPOC_included7$MDA_CDTI_raw
+create_final_columns <- function(df) {
+  
+  df_updated <- df
+  
+  # 1) Create adherence_par column based on MDA_CDTI
+  df_updated <- df_updated %>%
+    mutate(
+      adherence_par = ifelse(MDA_CDTI == 1, 0.3, NA_real_)
+    ) 
+  
+  # 2) Create number_rnds column (sum of MDA_CDTI and MDA_CDTI_Biannual)
+  df_updated$number_rnds <- rowSums(df_updated[c("MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+  
+  # 3) Create any_MDA column (1 if number_rnds > 0, else 0)
+  df_updated$any_MDA <- ifelse(df_updated$number_rnds > 0, 1, 0)
+  
+  # 4) Create CUM_MDA_modelled column (cumulative sum of number_rnds grouped by IU_ID_MAPPING)
+  df_updated <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(CUM_MDA_modelled = cumsum(number_rnds))
+  
+  # 5) Create Cum_MDA_ESPEN column
+  df_updated$Cum_MDA_ESPEN <- df_updated$Cum_MDA
+  
+  # 6) Create PHASE, SIZ_label, and MDA_nonCDTI columns with NA values
+  df_updated$PHASE <- NA
+  df_updated$SIZ_label <- NA
+  df_updated$MDA_nonCDTI <- NA
+  
+  # 7) Create IUID column
+  df_updated$IUID <- df_updated$IU_ID_MAPPING
+  df_updated$IUID[nchar(df_updated$IU_ID_MAPPING) == 4] <- paste(0, df_updated$IUID[nchar(df_updated$IU_ID_MAPPING) == 4], sep = "")
+  df_updated$IUID <- paste(df_updated$ADMIN0ISO3, df_updated$IUID, sep = "")
+  
+  # 8) Set Control_prog to "APOC"
+  df_updated$Control_prog <- "APOC"
+  
+  # 9) Create Cov_raw column from MDA_CDTI_raw
+  df_updated$Cov_raw <- df_updated$MDA_CDTI_raw
+  
+  # Check number of IUs:
+  cat("Rows in 2022 after creating final columns and tidying:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after creating final columns and tidying:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
 
-length(unique(dfAPOC_included7$IU_ID_MAPPING))
-check_df <- subset(dfAPOC_included7, Year == 2022)
-nrow(check_df) # 1526 IUs left
+# Call function :
+dfAPOC_included7 <- create_final_columns(dfAPOC_included7)
+
+
+# =============================================================== #
+#    Function to make a co-endemic column for oncho-LF-loa        #
+
+create_co_endemicity_column <- function(df, co_endemicity_file_path) {
+  
+  df_updated <- df
+  
+  # Read the co-endemicity data
+  co_endemic_IUs <- read.csv(co_endemicity_file_path)
+  
+  # Create subsets for each co-endemicity category
+  co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
+  co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
+  co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
+  co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
+  co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
+  
+  # Update co_endemicity column based on IU_ID_MAPPING
+  df_updated$co_endemicity <- ifelse(df_updated$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
+                                     ifelse(df_updated$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
+                                            ifelse(df_updated$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
+                                                   ifelse(df_updated$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
+  
+  # Check number of IUs:
+  cat("Rows in 2022 after creating co-endemicity column:", nrow(subset(df_updated, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after creating co-endemicity column:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
+}
+
+# Example usage:
+dfAPOC_included7 <- create_co_endemicity_column(dfAPOC_included7, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs.csv")
+
+
 
 # =============================================================== #
 #    NOTE THIS STEP IS PERFORMED IN OCP SCRIPT - END OF APRIL 25' #
@@ -4483,15 +6309,15 @@ nrow(check_df) # 1526 IUs left
 # #       trt_status_2022 != "Treatment naive"
 # #   )
 # 
-Full_histories_df_minimal_lastyr_2022_check <- Full_histories_df_minimal_lastyr_2022_check %>%
-  filter(
-    # Keep "Treatment naive" only if ADMIN0ISO3 is "GAB" or "SDN"
-    (trt_status_2022 == "Treatment naive" & ADMIN0ISO3 %in% c("GAB", "SDN")) |
-      # Keep any row where trt_status_2022 is not "Treatment naive"
-      trt_status_2022 != "Treatment naive",
-    # Exclude a specific IU_ID
-    !IUID %in% c("ETH19529", "NGA37017") # these two are both revised_cum_MDA == 0 so treatment naive 
-  )
+# Full_histories_df_minimal_lastyr_2022_check <- Full_histories_df_minimal_lastyr_2022_check %>%
+#   filter(
+#     # Keep "Treatment naive" only if ADMIN0ISO3 is "GAB" or "SDN"
+#     (trt_status_2022 == "Treatment naive" & ADMIN0ISO3 %in% c("GAB", "SDN")) |
+#       # Keep any row where trt_status_2022 is not "Treatment naive"
+#       trt_status_2022 != "Treatment naive",
+#     # Exclude a specific IU_ID
+#     !IUID %in% c("ETH19529", "NGA37017") # these two are both revised_cum_MDA == 0 so treatment naive 
+#   )
 
 # Full_histories_df_minimal_lastyr_2022_check_trtnaive <- subset(Full_histories_df_minimal_lastyr_2022_check, trt_status_2022 == "Treatment naive")
 # 
@@ -4509,41 +6335,85 @@ Full_histories_df_minimal_lastyr_2022_check <- Full_histories_df_minimal_lastyr_
 #                                                        "Cov.in2","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog",
 #                                                        "new_MDA_IUs_2022")]
 
-# adding in raw coverages and source of data (Feb 25)
-Full_APOC_histories_df_popinfo <- dfAPOC_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity", "MAX_Endemicity",
-                                                       "PHASE", "SIZ_label", "endemicity_baseline","Year","PopTot","PopPreSAC","PopSAC","PopAdult","PopReq",
-                                                       "PopTrg","PopTreat", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
-                                                       "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
-                                                       "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog",
-                                                       "new_MDA_IUs_2022")]
+# # adding in raw coverages and source of data (Feb 25)
+# Full_APOC_histories_df_popinfo <- dfAPOC_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity", "MAX_Endemicity",
+#                                                        "PHASE", "SIZ_label", "endemicity_baseline","Year","PopTot","PopPreSAC","PopSAC","PopAdult","PopReq",
+#                                                        "PopTrg","PopTreat", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+#                                                        "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+#                                                        "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog",
+#                                                        "new_MDA_IUs_2022")]
+# 
+# #Full_APOC_histories_df_popinfo$Control_prog <- "APOC"
+# 
+# # write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_200324.csv")
+# # write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_200324.csv")
+# 
+# # with ESPEN 2022 update (May 2024)
+# # write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_170524.csv")
+# 
+# # with TCC update (South Sudan including Blue Nile IUs - Nov 2024)
+# # write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_111124.csv")
+# 
+# 
+# # # just 4 countries with chnages from May 2024 and new trt_status_2022_v2 from July 2024:
+# # Full_APOC_histories_df_popinfo_4countries <- subset(Full_APOC_histories_df_popinfo, ADMIN0ISO3 %in% c("NGA", "CMR", "ETH", "SSD"))
+# # write.csv(Full_APOC_histories_df_popinfo_4countries, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_4countries_220724.csv")
+# 
+# 
+# Full_APOC_histories_df_minimal <- dfAPOC_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity", "MAX_Endemicity",
+#                                                        "PHASE", "SIZ_label", "endemicity_baseline","Year","MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+#                                                        "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+#                                                        "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog",
+#                                                        "new_MDA_IUs_2022")]
+# 
+# Full_APOC_histories_df_minimal_lastyr_2022 <- subset(Full_APOC_histories_df_popinfo, Year == 2022)
+# Full_APOC_histories_df_minimal_lastyr_2025 <- subset(Full_APOC_histories_df_popinfo, Year == 2025)
+# 
+# nrow(Full_APOC_histories_df_minimal_lastyr_2022)
 
-#Full_APOC_histories_df_popinfo$Control_prog <- "APOC"
 
-# write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_200324.csv")
-# write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_200324.csv")
+# ========================================================= #
+#   funtion to make final, minimal & single year dataframes #
 
-# with ESPEN 2022 update (May 2024)
-# write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_170524.csv")
+create_apoc_histories_dataframes <- function(df) {
+  # Create Full_APOC_histories_df_popinfo
+  Full_df_popinfo <- df[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity", 
+                                                   "MAX_Endemicity", "PHASE", "SIZ_label", "endemicity_baseline", "Year", "PopTot", "PopPreSAC", 
+                                                   "PopSAC", "PopAdult", "PopReq", "PopTrg", "PopTreat", "MDA_scheme", "Cum_MDA_ESPEN", "Cov", 
+                                                   "EpiCov", "vector_control", "biannual_VC_mapping", "MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual", 
+                                                   "number_rnds", "Cov.in2", "Cov_raw", "cov_source", "cov_specific_source", "CUM_MDA_modelled", 
+                                                   "trt_status_2022", "trt_status_2022_v2", "adherence_par", "co_endemicity", "Control_prog")]
+  
+  # Create Full_APOC_histories_df_minimal
+  Full_df_minimal <- df[, c("IU_ID_MAPPING", "IUs_NAME_MAPPING", "IU_CODE_MAPPING", "IUID", "ADMIN0ISO3", "Endemicity", 
+                                                   "MAX_Endemicity", "PHASE", "SIZ_label", "endemicity_baseline", "Year", "MDA_scheme", 
+                                                   "Cum_MDA_ESPEN", "Cov", "EpiCov", "vector_control", "biannual_VC_mapping", "MDA_nonCDTI", 
+                                                   "MDA_CDTI", "MDA_CDTI_Biannual", "number_rnds", "Cov.in2", "Cov_raw", "cov_source", 
+                                                   "cov_specific_source", "CUM_MDA_modelled", "trt_status_2022", "trt_status_2022_v2", "adherence_par", 
+                                                   "co_endemicity", "Control_prog")]
+  
+  # Create Full_APOC_histories_df_minimal_lastyr_2022
+  Full_df_minimal_lastyr_2022 <- subset(Full_df_popinfo, Year == 2022)
+  
+  # Create Full_APOC_histories_df_minimal_lastyr_2025
+  Full_df_minimal_lastyr_2025 <- subset(Full_df_popinfo, Year == 2025)
+  
+  # Return all dataframes as a list
+  return(list(
+    Full_df_popinfo,
+    Full_df_minimal,
+    Full_df_minimal_lastyr_2022,
+    Full_df_minimal_lastyr_2025
+  ))
+}
 
-# with TCC update (South Sudan including Blue Nile IUs - Nov 2024)
-# write.csv(Full_APOC_histories_df_popinfo, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_111124.csv")
+# call function:
+result <- create_apoc_histories_dataframes(dfAPOC_included7)
+Full_APOC_histories_df_popinfo <- result[[1]]
+Full_APOC_histories_df_minimal <- result[[2]]
+Full_APOC_histories_df_minimal_lastyr_2022 <- result[[3]]
+Full_APOC_histories_df_minimal_lastyr_2025 <- result[[4]]
 
-
-# # just 4 countries with chnages from May 2024 and new trt_status_2022_v2 from July 2024:
-# Full_APOC_histories_df_popinfo_4countries <- subset(Full_APOC_histories_df_popinfo, ADMIN0ISO3 %in% c("NGA", "CMR", "ETH", "SSD"))
-# write.csv(Full_APOC_histories_df_popinfo_4countries, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_APOC_histories_df_popinfo_4countries_220724.csv")
-
-
-Full_APOC_histories_df_minimal <- dfAPOC_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity", "MAX_Endemicity",
-                                                       "PHASE", "SIZ_label", "endemicity_baseline","Year","MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
-                                                       "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
-                                                       "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog",
-                                                       "new_MDA_IUs_2022")]
-
-Full_APOC_histories_df_minimal_lastyr_2022 <- subset(Full_APOC_histories_df_popinfo, Year == 2022)
-Full_APOC_histories_df_minimal_lastyr_2025 <- subset(Full_APOC_histories_df_popinfo, Year == 2025)
-
-nrow(Full_APOC_histories_df_minimal_lastyr_2022)
 
 # maps & frequency distributions ~ country #
 
