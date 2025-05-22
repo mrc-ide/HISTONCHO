@@ -10,1072 +10,2040 @@ library(ggplot2)
 library(readxl)
 library(stringdist)
 
+# ================================================= #
+# Define the base path for calling all data sources #
+base_path <- "C:/Users/mad206/OneDrive - Imperial College London/Documents/HISTONCHO/input data" # set base path specific to your system
+
+
 # LOAD IN OCP #
 
-#OCP_DF_lastyr <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Cleaning IUs (Paul B)/OCP_DF.csv")
+# #OCP_DF_lastyr <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Cleaning IUs (Paul B)/OCP_DF.csv")
+# 
+# load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Cleaning IUs (Paul B)/OCP_DF_ALL.RData")
+# 
+# dfOCP_included <- oncho_df_phase_complete
+# dfOCP_included_lastyr <- subset(dfOCP_included, Year == 2022) # 873 IUs (April 25')
+# 
+# # 443 IUs classified as endemic
+# nrow(dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Endemic (under MDA)",
+#                                                                        "Endemic (MDA not delivered)",
+#                                                                        "Endemic (under post-intervention surveillance)"), ])
+# 
+# # 430 IUs are non-endemic, not-reported, unknwon
+# nrow(dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)",
+#                                                                        "Unknown (under LF MDA)",
+#                                                                        "Not reported",
+#                                                                        "Non-endemic"), ])
+# 
+# # 443 + 430 = 873 IuS
+# 
+# # check (April 25' ) 
+# table(dfOCP_included_lastyr$Included) # check : included b/c "endemic" in ESPEN = 449 or 
+#                                       # included b/c not "endemic" in OCP shape = 227
+#                                       # 449 + 227 = 676 
+#                                       # not included = 197
+#                                       # 449 + 227 + 197 = 873 total
+# # look at each set of IUs under two types of included categories:
+# 
+# # 1) included = "endemic"
+# dfOCP_included_lastyr_incl_endemic <- subset(dfOCP_included_lastyr, Included == "Included Endemic")
+# nrow(dfOCP_included_lastyr_incl_endemic) # 449
+# unique(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity)
+# table(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity) # 245 (endemic - MDA not delivered), 186 (endemic - under MDA), 12 (endemic - under PIS), 
+#                                                         # 6 ("not reported" or "non-endemic")
+# 
+# dfOCP_included_lastyr_incl_endemic_subset <- subset(dfOCP_included_lastyr_incl_endemic, MAX_Endemicity %in% c("Not reported", "Non-endemic")) # 6 
+# unique(dfOCP_included_lastyr_incl_endemic_subset$MAX_Endemicity_parent) # all parent IUs = endemic
+# 
+# # 2) included = Intervention (OCP)
+# dfOCP_included_lastyr_incl_OCPshape <- subset(dfOCP_included_lastyr, Included == "Intervention (OCP)")
+# nrow(dfOCP_included_lastyr_incl_OCPshape) # 227
+# table(dfOCP_included_lastyr_incl_OCPshape$MAX_Endemicity) # 211 (Not reported), 6 (unknown - both consider OEM + under LF MDA), 10 non-endemic
+# 
+# 
+# vec_to_include <- c("Included Endemic", "Intervention (OCP)")
+# dfOCP_included1 <- dfOCP_included[dfOCP_included$Included %in% vec_to_include,]
+# 
+# matches <- dfOCP_included1$Cum_MDA == dfOCP_included1$Cum_MDA_Final
+# isFALSE(matches)
+# matches_df <- as.data.frame(matches)
+# 
+# length(unique(dfOCP_included1$IU_ID_MAPPING)) # 676 IUs
 
-load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Cleaning IUs (Paul B)/OCP_DF_ALL.RData")
 
-dfOCP_included <- oncho_df_phase_complete
-dfOCP_included_lastyr <- subset(dfOCP_included, Year == 2022) # 873 IUs (April 25')
+# =============================================================================================== #
+#     Function to load and filter IUs in OCP (based on being endemic in ESPEN or in shapefile)    #
+# =============================================================================================== #
 
-# 443 IUs classified as endemic
-nrow(dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Endemic (under MDA)",
-                                                                       "Endemic (MDA not delivered)",
-                                                                       "Endemic (under post-intervention surveillance)"), ])
+load_and_filter_ocp_data <- function(file_path_input) {
+  
+  OCP_data_file <- file.path(base_path, file_path_input)
+  
+  # Load the OCP data
+  load(OCP_data_file)
+  
+  # Assign to dfOCP_included
+  dfOCP_included <- oncho_df_phase_complete
+  
+  # Filter the data for Year 2022
+  dfOCP_included_lastyr <- subset(dfOCP_included, Year == 2022)
+  
+  # Number of endemic IUs (443)
+  endemic_IUs <- dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Endemic (under MDA)",
+                                                                                   "Endemic (MDA not delivered)",
+                                                                                   "Endemic (under post-intervention surveillance)"), ]
+  cat("Number of endemic IUs:", nrow(endemic_IUs), "\n")
+  
+  # Number of non-endemic IUs (430)
+  non_endemic_IUs <- dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)",
+                                                                                       "Unknown (under LF MDA)",
+                                                                                       "Not reported",
+                                                                                       "Non-endemic"), ]
+  cat("Number of non-endemic IUs:", nrow(non_endemic_IUs), "\n")
+  
+  # Total IUs (443 + 430 = 873)
+  total_IUs <- nrow(dfOCP_included_lastyr)
+  cat("Total number of IUs:", total_IUs, "\n")
+  
+  # Check 'Included' status
+  included_status <- table(dfOCP_included_lastyr$Included)
+  cat("Frequency of 'Included' status in 2022:\n")
+  print(included_status)
+  
+  # Endemic IUs (Included as 'Endemic')
+  dfOCP_included_lastyr_incl_endemic <- subset(dfOCP_included_lastyr, Included == "Included Endemic")
+  cat("Number of IUs with 'Included Endemic':", nrow(dfOCP_included_lastyr_incl_endemic), "\n")
+  cat("Unique MAX_Endemicity in 'Included Endemic':\n")
+  print(unique(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity))
+  cat("Frequency of MAX_Endemicity in 'Included Endemic':\n")
+  print(table(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity))
+  
+  # Subset 'Not reported' or 'Non-endemic' IUs from the 'Included Endemic'
+  dfOCP_included_lastyr_incl_endemic_subset <- subset(dfOCP_included_lastyr_incl_endemic, MAX_Endemicity %in% c("Not reported", "Non-endemic"))
+  cat("Number of IUs with 'Not reported' or 'Non-endemic' in 'Included Endemic':", nrow(dfOCP_included_lastyr_incl_endemic_subset), "\n")
+  
+  # Intervention (OCP) IUs
+  dfOCP_included_lastyr_incl_OCPshape <- subset(dfOCP_included_lastyr, Included == "Intervention (OCP)")
+  cat("Number of IUs with 'Intervention (OCP)':", nrow(dfOCP_included_lastyr_incl_OCPshape), "\n")
+  cat("Frequency of MAX_Endemicity in 'Intervention (OCP)':\n")
+  print(table(dfOCP_included_lastyr_incl_OCPshape$MAX_Endemicity))
+  
+  # Filter based on 'Included' status
+  vec_to_include <- c("Included Endemic", "Intervention (OCP)")
+  dfOCP_included1 <- dfOCP_included[dfOCP_included$Included %in% vec_to_include,]
+  
+  # # Check if Cum_MDA matches Cum_MDA_Final
+  # matches <- dfOCP_included1$Cum_MDA == dfOCP_included1$Cum_MDA_Final
+  # cat("Matches between Cum_MDA and Cum_MDA_Final (FALSE indicates mismatch):\n")
+  # print(isFALSE(matches))
+  
+  # Display number of unique IUs
+  cat("Number of unique IU_ID_MAPPING in filtered data:", length(unique(dfOCP_included1$IU_ID_MAPPING)), "\n")
+  
+  return(dfOCP_included1)
+}
 
-# 430 IUs are non-endemic, not-reported, unknwon
-nrow(dfOCP_included_lastyr[dfOCP_included_lastyr$MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)",
-                                                                       "Unknown (under LF MDA)",
-                                                                       "Not reported",
-                                                                       "Non-endemic"), ])
-
-# 443 + 430 = 873 IuS
-
-# check (April 25' ) 
-table(dfOCP_included_lastyr$Included) # check : included b/c "endemic" in ESPEN = 449 or 
-                                      # included b/c not "endemic" in OCP shape = 227
-                                      # 449 + 227 = 676 
-                                      # not included = 197
-                                      # 449 + 227 + 197 = 873 total
-# look at each set of IUs under two types of included categories:
-
-# 1) included = "endemic"
-dfOCP_included_lastyr_incl_endemic <- subset(dfOCP_included_lastyr, Included == "Included Endemic")
-nrow(dfOCP_included_lastyr_incl_endemic) # 449
-unique(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity)
-table(dfOCP_included_lastyr_incl_endemic$MAX_Endemicity) # 245 (endemic - MDA not delivered), 186 (endemic - under MDA), 12 (endemic - under PIS), 
-                                                        # 6 ("not reported" or "non-endemic")
-
-dfOCP_included_lastyr_incl_endemic_subset <- subset(dfOCP_included_lastyr_incl_endemic, MAX_Endemicity %in% c("Not reported", "Non-endemic")) # 6 
-unique(dfOCP_included_lastyr_incl_endemic_subset$MAX_Endemicity_parent) # all parent IUs = endemic
-
-# 2) included = Intervention (OCP)
-dfOCP_included_lastyr_incl_OCPshape <- subset(dfOCP_included_lastyr, Included == "Intervention (OCP)")
-nrow(dfOCP_included_lastyr_incl_OCPshape) # 227
-table(dfOCP_included_lastyr_incl_OCPshape$MAX_Endemicity) # 211 (Not reported), 6 (unknown - both consider OEM + under LF MDA), 10 non-endemic
+# call function :
+dfOCP_included1 <- load_and_filter_ocp_data("/OCP_DF_ALL.RData")
 
 
-vec_to_include <- c("Included Endemic", "Intervention (OCP)")
-dfOCP_included1 <- dfOCP_included[dfOCP_included$Included %in% vec_to_include,]
-
-matches <- dfOCP_included1$Cum_MDA == dfOCP_included1$Cum_MDA_Final
-isFALSE(matches)
-matches_df <- as.data.frame(matches)
-
-length(unique(dfOCP_included1$IU_ID_MAPPING)) # 676 IUs
-
-# =========================================================================== #
-# Find Ius that have "not-reported" in 2013 and "non-endemic" all other years #
-
-filtered_ius <- dfOCP_included1 %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(
-    any(Year == 2013 & Endemicity == "Not reported") &
-      any(Year %in% 2014:2022 & Endemicity == "Non-endemic") &
-      !any(Year %in% 2014:2022 & Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)",
-                                                   "Unknown (consider Oncho Elimination Mapping)"))
-  )
-
+# # =========================================================================== #
+# # Find Ius that have "not-reported" in 2013 and "non-endemic" all other years #
+# 
 # filtered_ius <- dfOCP_included1 %>%
 #   group_by(IU_ID_MAPPING) %>%
 #   filter(
-#     any(Year %in% c(2013,2014) & Endemicity == "Not reported") &
-#       any(Year %in% 2015:2022 & Endemicity == "Non-endemic") &
-#       !any(Year %in% 2015:2022 & Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)",
+#     any(Year == 2013 & Endemicity == "Not reported") &
+#       any(Year %in% 2014:2022 & Endemicity == "Non-endemic") &
+#       !any(Year %in% 2014:2022 & Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)",
 #                                                    "Unknown (consider Oncho Elimination Mapping)"))
 #   )
-
-# Get the unique IU_names that satisfy the conditions
-unique_ius <- unique(filtered_ius$IU_ID_MAPPING) # 223 IUs
-length(unique_ius) # 223 when with not reported in just 2013 or both 2013, 2014 (rest non-endemic)
-
-# relabel these IUs as not included in overall dataframe (new included column) #
-dfOCP_included$Included_updated <- ifelse(dfOCP_included$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included$Included)
-dfOCP_included1$Included_updated <- ifelse(dfOCP_included1$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included1$Included)
-dfOCP_included_lastyr$Included_updated <- ifelse(dfOCP_included_lastyr$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included_lastyr$Included)
-
-table(dfOCP_included_lastyr$Included_updated)
-
-dfOCP_included1_lastyr_notincluded <- subset(dfOCP_included_lastyr, Included_updated == "Not included") # want to exclude these
-length(unique(dfOCP_included1_lastyr_notincluded$IU_ID_MAPPING)) # 197 IUs removed
-dfOCP_included1_lastyr_noncontrol <- subset(dfOCP_included_lastyr, PHASE == "NON-CONTROL") # theres 20 IUs extra here want to keep!
-length(unique(dfOCP_included1_lastyr_noncontrol$IU_ID_MAPPING)) # 217 IUs here (197 of these are specified as "Not included" above - 20 are endemic and need to be included)
-
-# Assuming df1 and df2 are your two dataframes
-difference_iu <- setdiff(unique(dfOCP_included1_lastyr_noncontrol$IU_ID_MAPPING), unique(dfOCP_included1_lastyr_notincluded$IU_ID_MAPPING)) # these are the 20 extra want to keep!
-
-dfOCP_included1_check <- subset(dfOCP_included1, IU_ID_MAPPING %in% difference_iu)
-#dfOCP_included1_check2 <- subset(dfOCP_included1, IU_ID_MAPPING %in% difference_iu)
-
-# want to filter on not included rather than Non-control in Phase
-# above dataframe still has all 873 IUs, but labels some as not to be included (non-endemic in the )
-
-# map to check #
-
-# set-up objects #
-ESPEN_IUs <- st_read('C:/Users/mad206/OneDrive/Endgame/Endgame IUs/ESPEN_IU_2021.shp')
-
-#OCP_histories_updated_lastyr_270923 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/New Endgame Sept 2023 -/OCP_histories_updated_lastyr_270923.csv")
-#df_OCP_endemic_minimal <- OCP_histories_updated_lastyr_270923[, c("ADMIN0", "ADMIN0ISO3", "ADMIN1", "IU_ID_MAPPING", "IUs_NAME_MAPPING","IU_CODE_MAPPING", "endemicity")]
-OCP_countries <- unique(dfOCP_included1$ADMIN0ISO3)
-ESPEN_IUs_OCP <- ESPEN_IUs[which((ESPEN_IUs$ADMIN0ISO3 %in% OCP_countries)),]
-st_geometry_type(ESPEN_IUs_OCP)
-st_crs(ESPEN_IUs_OCP)
-
-shapefile_path <- "C:/Users/mad206/OneDrive/Endgame/OCP mapping/African countries/Africa_Boundaries.shp"
-african_countries <- st_read(dsn = shapefile_path)
-summary(african_countries)
-
-dfOCP_included_lastyr1 <- subset(dfOCP_included1, Year == 2022)
-nrow(dfOCP_included_lastyr1)# IUs = 676
-
-table(dfOCP_included_lastyr1$Included) # included endemic (449) + included OCP shape (227) = 676 IUs
-table(dfOCP_included_lastyr1$Included_updated) # included endemic (449) + included OCP shape (4) + 
-                                               # included under OCP shapefile but considered not reported/non-endemic (223) = 676 IUs
-
-OCP_includedIUs_676 <- ESPEN_IUs_OCP %>%
-  left_join(dfOCP_included_lastyr1, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-#cbPalette <- c("#CC79A7","#E69F00","#009E73","#F0E442","#0072B2")
-
-ggplot() +
-  geom_sf(data = OCP_includedIUs_676, aes(fill = PHASE), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_OCP, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 7), ylim = c(4, 20)) +
-  theme_bw() +
-  #scale_fill_manual(na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-
-# =================================================================== #
-#       backfill histories to 1975                                    #
-# =================================================================== #
-
-#FinalESPENyr <- 2021
-FinalESPENyr <- 2013
-
-dfls <- split(dfOCP_included1, dfOCP_included1$IU_ID)
-
-## new list of dfs
-newdf <- vector("list", length(dfls))
-
-lsid <- split(dfOCP_included1$IU_ID, dfOCP_included1$IU_ID)
-lsid <- unique(unlist(lsid))
-
-# loop to fill in missing years and columns
+# 
+# # filtered_ius <- dfOCP_included1 %>%
+# #   group_by(IU_ID_MAPPING) %>%
+# #   filter(
+# #     any(Year %in% c(2013,2014) & Endemicity == "Not reported") &
+# #       any(Year %in% 2015:2022 & Endemicity == "Non-endemic") &
+# #       !any(Year %in% 2015:2022 & Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)",
+# #                                                    "Unknown (consider Oncho Elimination Mapping)"))
+# #   )
+# 
+# # Get the unique IU_names that satisfy the conditions
+# unique_ius <- unique(filtered_ius$IU_ID_MAPPING) # 223 IUs
+# length(unique_ius) # 223 when with not reported in just 2013 or both 2013, 2014 (rest non-endemic)
+# 
+# # relabel these IUs as not included in overall dataframe (new included column) #
+# dfOCP_included$Included_updated <- ifelse(dfOCP_included$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included$Included)
+# dfOCP_included1$Included_updated <- ifelse(dfOCP_included1$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included1$Included)
+# dfOCP_included_lastyr$Included_updated <- ifelse(dfOCP_included_lastyr$IU_ID_MAPPING %in% unique_ius, "Not included (under OCP area but not reported/non-endemic)", dfOCP_included_lastyr$Included)
+# 
+# table(dfOCP_included_lastyr$Included_updated)
+# 
+# dfOCP_included1_lastyr_notincluded <- subset(dfOCP_included_lastyr, Included_updated == "Not included") # want to exclude these
+# length(unique(dfOCP_included1_lastyr_notincluded$IU_ID_MAPPING)) # 197 IUs removed
+# dfOCP_included1_lastyr_noncontrol <- subset(dfOCP_included_lastyr, PHASE == "NON-CONTROL") # theres 20 IUs extra here want to keep!
+# length(unique(dfOCP_included1_lastyr_noncontrol$IU_ID_MAPPING)) # 217 IUs here (197 of these are specified as "Not included" above - 20 are endemic and need to be included)
+# 
+# # Assuming df1 and df2 are your two dataframes
+# difference_iu <- setdiff(unique(dfOCP_included1_lastyr_noncontrol$IU_ID_MAPPING), unique(dfOCP_included1_lastyr_notincluded$IU_ID_MAPPING)) # these are the 20 extra want to keep!
+# 
+# dfOCP_included1_check <- subset(dfOCP_included1, IU_ID_MAPPING %in% difference_iu)
+# #dfOCP_included1_check2 <- subset(dfOCP_included1, IU_ID_MAPPING %in% difference_iu)
+# 
+# # want to filter on not included rather than Non-control in Phase
+# # above dataframe still has all 873 IUs, but labels some as not to be included (non-endemic in the )
+# 
+# # map to check #
+# 
+# # set-up objects #
+# ESPEN_IUs <- st_read('C:/Users/mad206/OneDrive/Endgame/Endgame IUs/ESPEN_IU_2021.shp')
+# 
+# #OCP_histories_updated_lastyr_270923 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/New Endgame Sept 2023 -/OCP_histories_updated_lastyr_270923.csv")
+# #df_OCP_endemic_minimal <- OCP_histories_updated_lastyr_270923[, c("ADMIN0", "ADMIN0ISO3", "ADMIN1", "IU_ID_MAPPING", "IUs_NAME_MAPPING","IU_CODE_MAPPING", "endemicity")]
+# OCP_countries <- unique(dfOCP_included1$ADMIN0ISO3)
+# ESPEN_IUs_OCP <- ESPEN_IUs[which((ESPEN_IUs$ADMIN0ISO3 %in% OCP_countries)),]
+# st_geometry_type(ESPEN_IUs_OCP)
+# st_crs(ESPEN_IUs_OCP)
+# 
+# shapefile_path <- "C:/Users/mad206/OneDrive/Endgame/OCP mapping/African countries/Africa_Boundaries.shp"
+# african_countries <- st_read(dsn = shapefile_path)
+# summary(african_countries)
+# 
+# dfOCP_included_lastyr1 <- subset(dfOCP_included1, Year == 2022)
+# nrow(dfOCP_included_lastyr1)# IUs = 676
+# 
+# table(dfOCP_included_lastyr1$Included) # included endemic (449) + included OCP shape (227) = 676 IUs
+# table(dfOCP_included_lastyr1$Included_updated) # included endemic (449) + included OCP shape (4) + 
+#                                                # included under OCP shapefile but considered not reported/non-endemic (223) = 676 IUs
+# 
+# OCP_includedIUs_676 <- ESPEN_IUs_OCP %>%
+#   left_join(dfOCP_included_lastyr1, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# #cbPalette <- c("#CC79A7","#E69F00","#009E73","#F0E442","#0072B2")
+# 
+# ggplot() +
+#   geom_sf(data = OCP_includedIUs_676, aes(fill = PHASE), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_OCP, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 7), ylim = c(4, 20)) +
+#   theme_bw() +
+#   #scale_fill_manual(na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
 
 
-for (i in 1:length(dfls)) {
+# ========================================================================== #
+#         Function to perform further checks on IUs in OCP dataframe         #
+# ========================================================================== #
+
+further_IU_checks_update_df_OCP <- function(df) {
+  
+  # =========================================================================== #
+  # Find IUs that have "not-reported" in 2013 and "non-endemic" all other years #
+  
+  filtered_ius <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(
+      any(Year == 2013 & Endemicity == "Not reported") &
+        any(Year %in% 2014:2022 & Endemicity == "Non-endemic") &
+        !any(Year %in% 2014:2022 & Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)",
+                                                     "Unknown (consider Oncho Elimination Mapping)"))
+    )
+  
+  # Get the unique IU_names that satisfy the conditions
+  unique_ius <- unique(filtered_ius$IU_ID_MAPPING)
+  cat("Number of unique IUs that satisfy the conditions:", length(unique_ius), "\n")
+  
+  # Relabel these IUs as not included in overall dataframe (new included column)
+  df$Included_updated <- ifelse(df$IU_ID_MAPPING %in% unique_ius, 
+                                "Not included (under OCP area but not reported/non-endemic)", 
+                                df$Included)
+  
+  # Check the frequency of Included_updated status
+  cat("Frequency of 'Included_updated' status:\n")
+  print(table(df$Included_updated))
+  
+  # IUs marked as "Not included"
+  df_not_included <- subset(df, Included_updated == "Not included")
+  cat("Number of IUs marked as 'Not included':", length(unique(df_not_included$IU_ID_MAPPING)), "\n")
+  
+  # IUs with 'NON-CONTROL' phase
+  df_noncontrol <- subset(df, PHASE == "NON-CONTROL")
+  cat("Number of IUs in 'NON-CONTROL' phase:", length(unique(df_noncontrol$IU_ID_MAPPING)), "\n")
+  
+  # Find the difference (the 20 extra IUs that should be kept)
+  difference_iu <- setdiff(unique(df_noncontrol$IU_ID_MAPPING), 
+                           unique(df_not_included$IU_ID_MAPPING))
+  cat("Number of extra IUs to keep:", length(difference_iu), "\n")
+  
+  # Create the final subset with these IUs
+  df_check <- subset(df, IU_ID_MAPPING %in% difference_iu)
+  
+  # Check the final counts for 2022
+  df_lastyr <- subset(df, Year == 2022)
+  cat("Number of IUs in 2022 after processing:", nrow(df_lastyr), "\n")
+  
+  # Check the frequency of 'Included' and 'Included_updated'
+  cat("Frequency of 'Included' status:\n")
+  print(table(df_lastyr$Included))
+  
+  cat("Frequency of 'Included_updated' status:\n")
+  print(table(df_lastyr$Included_updated))
+  
+  # Return the final updated data
+  return(df)
+}
+
+# call function:
+# Assuming dfOCP_included1 is already loaded in the environment
+dfOCP_included1 <- further_IU_checks_update_df_OCP(dfOCP_included1)
+
+# # =================================================================== #
+# #       backfill histories to 1975                                    #
+# # =================================================================== #
+# 
+# #FinalESPENyr <- 2021
+# FinalESPENyr <- 2013
+# 
+# dfls <- split(dfOCP_included1, dfOCP_included1$IU_ID)
+# 
+# ## new list of dfs
+# newdf <- vector("list", length(dfls))
+# 
+# lsid <- split(dfOCP_included1$IU_ID, dfOCP_included1$IU_ID)
+# lsid <- unique(unlist(lsid))
+# 
+# # loop to fill in missing years and columns
+# 
+# 
+# for (i in 1:length(dfls)) {
+# 
+# 
+#   newdf[[i]] <- subset(dfls[[i]], select=colnames(dfOCP_included1))
+# 
+#   FinalESPENyr <- head(newdf[[i]]$Year, 1)
+#   # indicator for augmented or ESPEN data
+#   #newdf[[i]]$Aug <- 0
+# 
+#   ## check if any years are missing from ESPEN and if so add these years to the Augmentation
+#   start <- min(newdf[[i]]$Year) - FinalESPENyr # should be 0 if starting at 2014
+# 
+#   ## cumulative rounds of national MDA before 2014
+#   ## set equal to national start year if IU start indicates going further back
+#   ## set equal to national start year
+# 
+#   IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA_Final) - start)
+# 
+#   IUstart <- 1975
+# 
+#   newdf[[i]]$IUstart <- IUstart
+#   Prioryrs <- FinalESPENyr - IUstart ## prior years to include
+# 
+#   PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
+# 
+#   newdf[[i]]$lsID <- i
+# 
+#   i
+# 
+#   if (is.na(IUstart)!=T) {
+#     if(IUstart<FinalESPENyr) {
+#       # if cumulative rounds greater than 1, augment data frame
+#       # by repeating the first row
+# 
+#       tmp <- newdf[[i]][rep(1, each = (min(newdf[[i]]$Year)-IUstart)), ]
+# 
+#       # fill in the years from start date of IU to first year on ESPEN
+#       tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
+# 
+#       # set MDA to 0 for all years
+# 
+#       # tmp$MDA <- 0
+#       # tmp$Cum_MDA <- 0
+# 
+# 
+#       # fill in with years that had MDA (where any cum_MDA > 1 in 2013 onwards)
+# 
+#       if(any(head(newdf[[i]]$Cum_MDA_Final)> 0)) {
+#         # tmp$MDA[1:PriorMDA] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
+# 
+#         val_totest <- head(newdf[[i]]$Cum_MDA_Final,1)
+# 
+#         # where top cum_MDA value is greater than 1
+#         if(val_totest > 1){
+# 
+#           # tmp$MDA[(nrow(tmp) - (PriorMDA-2)) : (nrow(tmp))] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
+#           #
+#           # # remove MDA = 1 and Cum_MDA = 1 for 1975 yr (incorrectly included)
+#           # ifelse(tmp$year == 1975 & tmp$MDA == 1, 0, tmp$MDA)
+# 
+#           #tmp$Cum_MDA[1:PriorMDA] <- seq(1, PriorMDA)
+#           #tmp$Cum_MDA_Final[(nrow(tmp) - (PriorMDA-2)) : (nrow(tmp))] <- seq(1, PriorMDA)
+# 
+#           # Determine the number of leading zeros based on your condition
+#           leading_zeros <- rep(0, 37 - head(newdf[[i]]$Cum_MDA_Final,1) + 1)
+# 
+#           # Create the sequence that goes in reverse from 0 to 27
+#           tmp$Cum_MDA_Final <- c(leading_zeros, seq(from = 0, to = head(newdf[[i]]$Cum_MDA_Final,1) - 1, by = 1))
+# 
+# 
+#         }
+# 
+#       }
+# 
+#       # #enedmicity category given "Augmented Status"
+#       tmp$Endemicity <- "Augmented"
+#       tmp$MDA_scheme <- "Augmented"
+# 
+#       newdf[[i]] <- rbind(tmp, newdf[[i]])
+# 
+# 
+#       #rm(tmp)
+#     }
+#   }
+# 
+# 
+# }
+# 
+# newdf <- do.call(rbind, newdf)
+# 
+# dfOCP_included2 <- newdf
+# 
+# # check all IUs have 1975 - 2022 (48 rows)
+# check_result5 <- dfOCP_included2 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(n() != 48) %>%
+#   ungroup() # check if any IUs with less than 10 rows
+# 
+# length(unique(dfOCP_included2$IU_ID_MAPPING)) # theres 5 Ius without full 2013 - 2022 history
+#                                               # 676 IUs
+# 
+# # remove geometry column as making dataframe slow?
+# dfOCP_included2$geometry <- NULL
 
 
-  newdf[[i]] <- subset(dfls[[i]], select=colnames(dfOCP_included1))
+# ================================================================================ #
+#           Function to fill years back to 1975 for each Iu & perform checks       #
+# ================================================================================ #
 
-  FinalESPENyr <- head(newdf[[i]]$Year, 1)
-  # indicator for augmented or ESPEN data
-  #newdf[[i]]$Aug <- 0
-
-  ## check if any years are missing from ESPEN and if so add these years to the Augmentation
-  start <- min(newdf[[i]]$Year) - FinalESPENyr # should be 0 if starting at 2014
-
-  ## cumulative rounds of national MDA before 2014
-  ## set equal to national start year if IU start indicates going further back
-  ## set equal to national start year
-
-  IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA_Final) - start)
-
-  IUstart <- 1975
-
-  newdf[[i]]$IUstart <- IUstart
-  Prioryrs <- FinalESPENyr - IUstart ## prior years to include
-
-  PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
-
-  newdf[[i]]$lsID <- i
-
-  i
-
-  if (is.na(IUstart)!=T) {
-    if(IUstart<FinalESPENyr) {
-      # if cumulative rounds greater than 1, augment data frame
-      # by repeating the first row
-
-      tmp <- newdf[[i]][rep(1, each = (min(newdf[[i]]$Year)-IUstart)), ]
-
-      # fill in the years from start date of IU to first year on ESPEN
-      tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
-
-      # set MDA to 0 for all years
-
-      # tmp$MDA <- 0
-      # tmp$Cum_MDA <- 0
-
-
-      # fill in with years that had MDA (where any cum_MDA > 1 in 2013 onwards)
-
-      if(any(head(newdf[[i]]$Cum_MDA_Final)> 0)) {
-        # tmp$MDA[1:PriorMDA] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
-
-        val_totest <- head(newdf[[i]]$Cum_MDA_Final,1)
-
-        # where top cum_MDA value is greater than 1
-        if(val_totest > 1){
-
-          # tmp$MDA[(nrow(tmp) - (PriorMDA-2)) : (nrow(tmp))] <- 1 # this should be from last row (2012) to n row (i.e. (nrow(tmp) - priorMDA) : (nrow(tmp)) )
-          #
-          # # remove MDA = 1 and Cum_MDA = 1 for 1975 yr (incorrectly included)
-          # ifelse(tmp$year == 1975 & tmp$MDA == 1, 0, tmp$MDA)
-
-          #tmp$Cum_MDA[1:PriorMDA] <- seq(1, PriorMDA)
-          #tmp$Cum_MDA_Final[(nrow(tmp) - (PriorMDA-2)) : (nrow(tmp))] <- seq(1, PriorMDA)
-
-          # Determine the number of leading zeros based on your condition
-          leading_zeros <- rep(0, 37 - head(newdf[[i]]$Cum_MDA_Final,1) + 1)
-
-          # Create the sequence that goes in reverse from 0 to 27
-          tmp$Cum_MDA_Final <- c(leading_zeros, seq(from = 0, to = head(newdf[[i]]$Cum_MDA_Final,1) - 1, by = 1))
-
-
+backfill_histories <- function(df) {
+  # Split data by IU_ID_MAPPING
+  dfls <- split(df, df$IU_ID_MAPPING)
+  
+  # Initialize a list to hold the updated data frames
+  newdf <- vector("list", length(dfls))
+  
+  # Start processing each IU
+  for (i in 1:length(dfls)) {
+    # Extract individual IU data
+    newdf[[i]] <- subset(dfls[[i]], select = colnames(df))
+    
+    # Get the final ESPEN year
+    FinalESPENyr <- head(newdf[[i]]$Year, 1)
+    
+    # Check if the IU starts before ESPEN and calculate prior years
+    IUstart <- 1975
+    newdf[[i]]$IUstart <- IUstart
+    Prioryrs <- FinalESPENyr - IUstart
+    
+    IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA_Final) - (min(newdf[[i]]$Year) - FinalESPENyr))
+    newdf[[i]]$lsID <- i
+    
+    # Log current IU's history
+    cat("Processing IU:", i, "with start year:", IUstart, "\n")
+    
+    if (!is.na(IUstart)) {
+      if (IUstart < FinalESPENyr) {
+        # Augment data for years before the first year on ESPEN
+        tmp <- newdf[[i]][rep(1, each = (min(newdf[[i]]$Year) - IUstart)), ]
+        
+        # Fill in missing years and set MDA to 0 for those years
+        tmp$Year <- seq(IUstart, min(newdf[[i]]$Year) - 1)
+        
+        # If there is any MDA before the FinalESPENyr, fill the cumulative MDA
+        if (any(head(newdf[[i]]$Cum_MDA_Final) > 0)) {
+          val_totest <- head(newdf[[i]]$Cum_MDA_Final, 1)
+          
+          if (val_totest > 1) {
+            leading_zeros <- rep(0, 37 - head(newdf[[i]]$Cum_MDA_Final, 1) + 1)
+            tmp$Cum_MDA_Final <- c(leading_zeros, seq(from = 0, to = head(newdf[[i]]$Cum_MDA_Final, 1) - 1, by = 1))
+          }
         }
-
+        
+        # Assign augmented values for the "Endemicity" and "MDA_scheme" columns
+        tmp$Endemicity <- "Augmented"
+        tmp$MDA_scheme <- "Augmented"
+        
+        # Bind the augmented data to the original data for this IU
+        newdf[[i]] <- rbind(tmp, newdf[[i]])
       }
-
-      # #enedmicity category given "Augmented Status"
-      tmp$Endemicity <- "Augmented"
-      tmp$MDA_scheme <- "Augmented"
-
-      newdf[[i]] <- rbind(tmp, newdf[[i]])
-
-
-      #rm(tmp)
     }
   }
-
-
+  
+  # Combine all the individual IU data frames into a single data frame
+  newdf <- do.call(rbind, newdf)
+  df_updated <- newdf
+  
+  # Check if all IUs have 1975-2022 data (48 rows)
+  check_result <- df_updated %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(n() != 48) %>%
+    ungroup()
+  
+  # Log the number of IUs with incomplete history
+  cat("Number of IUs with missing history data:", nrow(check_result), "\n")
+  
+  # Log the total number of unique IUs after processing
+  cat("Total number of unique IUs after processing:", length(unique(df_updated$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df_updated)
 }
 
-newdf <- do.call(rbind, newdf)
-
-dfOCP_included2 <- newdf
-
-# check all IUs have 1975 - 2022 (48 rows)
-check_result5 <- dfOCP_included2 %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(n() != 48) %>%
-  ungroup() # check if any IUs with less than 10 rows
-
-length(unique(dfOCP_included2$IU_ID_MAPPING)) # theres 5 Ius without full 2013 - 2022 history
-                                              # 676 IUs
-
-# remove geometry column as making dataframe slow?
-dfOCP_included2$geometry <- NULL
-
-# ======================================= #
-#       Add in SIZ labels                 #
-
-# match SIZs to IUs#
-SIZs_IUs <- read_excel("C:/Users/mad206/OneDrive/Endgame/OCP mapping/SIZs/SIZs_IUs.xlsx")
-
-SIZ_IU_vec <- as.character(SIZs_IUs$IU)
-SIZ_IU_vec # check these IUs against new IUs
-
-# extract out the IUs which should be in the SIZs (function to below to deal with those IUs with accents not matching)
-
-# Define a function to find the closest match
-find_closest_match <- function(target, candidates) {
-  distances <- stringdist::stringdistmatrix(target, candidates, method = "jw")
-  closest_match <- candidates[which.min(distances)]
-  return(closest_match)
-}
-
-# Apply the function to each value in names_to_keep
-matched_names <- sapply(SIZ_IU_vec, function(name) find_closest_match(name, dfOCP_included2$IUs_NAME_MAPPING))
-
-# Subset the dataframe based on the matched names
-dfOCP_included2_SIZs <- dfOCP_included2[dfOCP_included2$IUs_NAME_MAPPING %in% matched_names, ]
-length(unique(dfOCP_included2_SIZs$IUs_NAME))
-
-# ADD label in to main dataframe #
-
-# Create a vector of logical values indicating whether the conditions are met
-conditions_met <- dfOCP_included2$IUs_NAME_MAPPING %in% matched_names &
-  !is.na(dfOCP_included2$Year) &  # Check for non-NA values in Year
-  dfOCP_included2$Year %in% 2003:2012
-
-# Use ifelse to assign "SIZ" where conditions are met and NA otherwise
-dfOCP_included2$SIZ_label <- ifelse(conditions_met, "SIZ", NA)
-
-length(unique(dfOCP_included2$IU_ID_MAPPING)) # 676 IUs
+# call function (note this will take some time)
+dfOCP_included2 <- backfill_histories(dfOCP_included1)
 
 
-# ============================================================== #
-#   how many are not endemic in ESPEN but included in OCP shape? #
+# # ======================================= #
+# #       Add in SIZ labels                 #
+# 
+# # match SIZs to IUs#
+# SIZs_IUs <- read_excel("C:/Users/mad206/OneDrive/Endgame/OCP mapping/SIZs/SIZs_IUs.xlsx")
+# 
+# SIZ_IU_vec <- as.character(SIZs_IUs$IU)
+# SIZ_IU_vec # check these IUs against new IUs
+# 
+# # extract out the IUs which should be in the SIZs (function to below to deal with those IUs with accents not matching)
+# 
+# # Define a function to find the closest match
+# find_closest_match <- function(target, candidates) {
+#   distances <- stringdist::stringdistmatrix(target, candidates, method = "jw")
+#   closest_match <- candidates[which.min(distances)]
+#   return(closest_match)
+# }
+# 
+# # Apply the function to each value in names_to_keep
+# matched_names <- sapply(SIZ_IU_vec, function(name) find_closest_match(name, dfOCP_included2$IUs_NAME_MAPPING))
+# 
+# # Subset the dataframe based on the matched names
+# dfOCP_included2_SIZs <- dfOCP_included2[dfOCP_included2$IUs_NAME_MAPPING %in% matched_names, ]
+# length(unique(dfOCP_included2_SIZs$IUs_NAME))
+# 
+# # ADD label in to main dataframe #
+# 
+# # Create a vector of logical values indicating whether the conditions are met
+# conditions_met <- dfOCP_included2$IUs_NAME_MAPPING %in% matched_names &
+#   !is.na(dfOCP_included2$Year) &  # Check for non-NA values in Year
+#   dfOCP_included2$Year %in% 2003:2012
+# 
+# # Use ifelse to assign "SIZ" where conditions are met and NA otherwise
+# dfOCP_included2$SIZ_label <- ifelse(conditions_met, "SIZ", NA)
+# 
+# length(unique(dfOCP_included2$IU_ID_MAPPING)) # 676 IUs
 
-dfOCP_included2_ESPENendemic <- subset(dfOCP_included2, MAX_Endemicity %in% c("Endemic (under MDA)",
-                                                                              "Endemic (MDA not delivered)",
-                                                                              "Endemic (under post-intervention surveillance)"))
-
-dfOCP_included2_ESPENendemic_lastyr <- subset(dfOCP_included2_ESPENendemic, Year == 2022)
-nrow(dfOCP_included2_ESPENendemic_lastyr) # 443 IUs
-
-dfOCP_included2_ESPENendemic_notinOCPshape <- subset(dfOCP_included2_ESPENendemic_lastyr, PHASE == "NON-CONTROL")
-nrow(dfOCP_included2_ESPENendemic_notinOCPshape) # 20 Ius are ESPEN endemic but not in the OCP shape file - remove
-
-dfOCP_included2_onlyOCPshape <- subset(dfOCP_included2, MAX_Endemicity %in% c("Unknown (under LF MDA)",
-                                                                              "Not reported",
-                                                                              "Non-endemic",
-                                                                              "Unknown (consider Oncho Elimination Mapping)"))
-
-dfOCP_included2_onlyOCPshape_lastyr <- subset(dfOCP_included2_onlyOCPshape, Year == 2022)
-nrow(dfOCP_included2_onlyOCPshape_lastyr) # 233 IUs
-
-# =================================================== #
-#     add baseline endemicity to dataframe            #
-
-load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/IU pre-control fitted prevalence/summaries_ocp.Rdata")
-View(summaries_ocp)
-
-OCP_baseline <- as.data.frame(summaries_ocp) # convert matrix to dataframe
-check <- dfOCP_included2 %>%
-  group_by(ADMIN0ISO3) %>%
-  summarise(unique_numeric_count = length(unique(IU_ID_MAPPING[!is.na(as.numeric(IU_ID_MAPPING))])))
-
-OCP_baseline$ADMIN0 <- substr(OCP_baseline$IU_CODE, 1, 3)
-
-OCP_baseline$IU_ID_MAPPING <- substr(OCP_baseline$IU_CODE, nchar(OCP_baseline$IU_CODE) - 4, nchar(OCP_baseline$IU_CODE))
-
-OCP_baseline$IU_ID_MAPPING <- as.numeric(as.character(OCP_baseline$IU_ID_MAPPING)) # remove leading 0 from IU_ID_MAPPING
-
-# Merge the two data frames based on the 'IU_CODE' column
-dfOCP_included2  <- merge(dfOCP_included2, OCP_baseline, by.x = "IU_ID_MAPPING", by.y = "IU_ID_MAPPING", all.x = TRUE)
-
-# omit last 8 cols with merged dataframe (unless want quantiles for pre-control prev)
-dfOCP_included2  <- dfOCP_included2[, 1:(ncol(dfOCP_included2) - 8)]
-
-dfOCP_included2 <- dfOCP_included2 %>%
-  mutate(endemicity_baseline = case_when(
-    is.na(mean) ~ "non-endemic",
-    mean < 0.40 ~ "hypoendemic",
-    mean < 0.60 ~ "mesoendemic",
-    mean < 0.80 ~ "hyperendemic",
-    TRUE ~ "holoendemic"
-  ))
-
-# remove any IUs with non-endemic baseline from geostatistical maps (O'Hanlon)
-dfOCP_included2_nonendemic_baseline <- subset(dfOCP_included2, endemicity_baseline == "non-endemic")
-check_df <- subset(dfOCP_included2_nonendemic_baseline, Year == 2022)
-table(check_df$MAX_Endemicity) # 6 IUs  - all "Not reported" status (so these are in the box of 227 in the flow chart (i.e., included b/c in OCP shape))
-
-non_endemic_baseline_vec <- unique(dfOCP_included2_nonendemic_baseline$IU_ID_MAPPING)
-length(non_endemic_baseline_vec) # n = 6 IUs
-unique(dfOCP_included2_nonendemic_baseline$MAX_Endemicity) # all MAX_endemicity = "Not reported"
-
-
-dfOCP_included2 <- dfOCP_included2[!dfOCP_included2$IU_ID_MAPPING %in% non_endemic_baseline_vec, ]
-length(unique(dfOCP_included2$IU_ID_MAPPING)) # 670 Ius left (with 6 IUs removed as no baseline in geostat map)
-
-check_df <- subset(dfOCP_included2, Year == 2022)
-table(check_df$Included) # included (endemic) = 449 + included OCP area = 221 = 670 IUs
 
 # =================================================================================================== #
-#  1) identify if treatment naive area                                                                #
+#  Function to load, process and integrate special intervention zone labels to IUs where SIZ occurred #
+# =================================================================================================== #
 
-dfOCP_included3 <- dfOCP_included2
+add_SIZ_labels <- function(df, file_path_input) {
+  
+  SIZ_data_file <- file.path(base_path, file_path_input)
+  
+  # Load the SIZ data from the given path
+  SIZs_IUs <- read_excel(SIZ_data_file)
+  
+  # Create a vector of IUs from the SIZ file
+  SIZ_IU_vec <- as.character(SIZs_IUs$IU)
+  cat("Number of IUs in SIZs list:", length(SIZ_IU_vec), "\n")
+  cat("IUs in SIZs list:", SIZ_IU_vec, "\n")
+  
+  # Define a function to find the closest match
+  find_closest_match <- function(target, candidates) {
+    distances <- stringdist::stringdistmatrix(target, candidates, method = "jw")
+    closest_match <- candidates[which.min(distances)]
+    return(closest_match)
+  }
+  
+  # Apply the function to match IUs in the main dataframe
+  matched_names <- sapply(SIZ_IU_vec, function(name) find_closest_match(name, df$IUs_NAME_MAPPING))
+  
+  # Subset the dataframe based on the matched names
+  df_SIZs <- df[df$IUs_NAME_MAPPING %in% matched_names, ]
+  cat("Number of IUs matched in SIZs:", length(unique(df_SIZs$IUs_NAME)), "\n")
+  
+  # Create a vector of logical values indicating whether the conditions are met
+  conditions_met <- df$IUs_NAME_MAPPING %in% matched_names &
+    !is.na(df$Year) &  # Check for non-NA values in Year
+    df$Year %in% 2003:2012
+  
+  # Use ifelse to assign "SIZ" where conditions are met and NA otherwise
+  df$SIZ_label <- ifelse(conditions_met, "SIZ", NA)
+  
+  # Final check on the number of unique IUs
+  cat("Number of unique IUs after adding SIZ labels:", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-# ============================== #
-#  Pre-ESPEN history to include  #
-
-dfOCP_included3 <- dfOCP_included3 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    Pre_ESPEN_MDA_history = ifelse(ADMIN0ISO3 == "NER" |
-      (any(MAX_Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)")) &
-         any(Cum_MDA > 0 & Year == 2013)) |
-        (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported","Non-endemic")) &
-           any(endemicity_baseline %in% c("hyperendemic","mesoendemic", "hypoendemic")) &
-           any(Cum_MDA > 0 & Year == 2013)),
-      "Include",
-      "Exclude"
-    )
-  ) %>%
-  ungroup()  # Remove grouping information
+# call function
+dfOCP_included2 <- add_SIZ_labels(dfOCP_included2, "/SIZs_IUs.xlsx")
 
 
+
+# =============================================================================== #
+#   Function to check how many are not endemic in ESPEN but included in OCP shape? #
+# =============================================================================== #
+
+# dfOCP_included2_ESPENendemic <- subset(dfOCP_included2, MAX_Endemicity %in% c("Endemic (under MDA)",
+#                                                                               "Endemic (MDA not delivered)",
+#                                                                               "Endemic (under post-intervention surveillance)"))
+# 
+# dfOCP_included2_ESPENendemic_lastyr <- subset(dfOCP_included2_ESPENendemic, Year == 2022)
+# nrow(dfOCP_included2_ESPENendemic_lastyr) # 443 IUs
+# 
+# dfOCP_included2_ESPENendemic_notinOCPshape <- subset(dfOCP_included2_ESPENendemic_lastyr, PHASE == "NON-CONTROL")
+# nrow(dfOCP_included2_ESPENendemic_notinOCPshape) # 20 Ius are ESPEN endemic but not in the OCP shape file - remove
+# 
+# dfOCP_included2_onlyOCPshape <- subset(dfOCP_included2, MAX_Endemicity %in% c("Unknown (under LF MDA)",
+#                                                                               "Not reported",
+#                                                                               "Non-endemic",
+#                                                                               "Unknown (consider Oncho Elimination Mapping)"))
+# 
+# dfOCP_included2_onlyOCPshape_lastyr <- subset(dfOCP_included2_onlyOCPshape, Year == 2022)
+# nrow(dfOCP_included2_onlyOCPshape_lastyr) # 233 IUs
+
+# =============================================================================== #
+#   Function to check how many are not endemic in ESPEN but included in OCP shape? #
+# =============================================================================== #
+
+# Function to perform checks and print cat() messages
+perform_endemicity_checks <- function(df) {
+  
+  # Subset for ESPEN endemic IUs
+  dfOCP_included2_ESPENendemic <- subset(df, MAX_Endemicity %in% c("Endemic (under MDA)",
+                                                                   "Endemic (MDA not delivered)",
+                                                                   "Endemic (under post-intervention surveillance)"))
+  dfOCP_included2_ESPENendemic_lastyr <- subset(dfOCP_included2_ESPENendemic, Year == 2022)
+  cat("Number of ESPEN endemic IUs in 2022:", nrow(dfOCP_included2_ESPENendemic_lastyr), "\n")
+  
+  # Subset for ESPEN endemic IUs that are not in the OCP shape file
+  dfOCP_included2_ESPENendemic_notinOCPshape <- subset(dfOCP_included2_ESPENendemic_lastyr, PHASE == "NON-CONTROL")
+  cat("Number of ESPEN endemic IUs not in the OCP shape file:", nrow(dfOCP_included2_ESPENendemic_notinOCPshape), "\n")
+  
+  # Subset for only OCP shape IUs
+  dfOCP_included2_onlyOCPshape <- subset(df, MAX_Endemicity %in% c("Unknown (under LF MDA)",
+                                                                   "Not reported",
+                                                                   "Non-endemic",
+                                                                   "Unknown (consider Oncho Elimination Mapping)"))
+  dfOCP_included2_onlyOCPshape_lastyr <- subset(dfOCP_included2_onlyOCPshape, Year == 2022)
+  cat("Number of only OCP shape IUs in 2022:", nrow(dfOCP_included2_onlyOCPshape_lastyr), "\n")
+  
+}
+
+# call function:
+perform_endemicity_checks(dfOCP_included2)
+
+
+# # =================================================== #
+# #     add baseline endemicity to dataframe            #
+# 
+# load("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/IU pre-control fitted prevalence/summaries_ocp.Rdata")
+# View(summaries_ocp)
+# 
+# OCP_baseline <- as.data.frame(summaries_ocp) # convert matrix to dataframe
+# check <- dfOCP_included2 %>%
+#   group_by(ADMIN0ISO3) %>%
+#   summarise(unique_numeric_count = length(unique(IU_ID_MAPPING[!is.na(as.numeric(IU_ID_MAPPING))])))
+# 
+# OCP_baseline$ADMIN0 <- substr(OCP_baseline$IU_CODE, 1, 3)
+# 
+# OCP_baseline$IU_ID_MAPPING <- substr(OCP_baseline$IU_CODE, nchar(OCP_baseline$IU_CODE) - 4, nchar(OCP_baseline$IU_CODE))
+# 
+# OCP_baseline$IU_ID_MAPPING <- as.numeric(as.character(OCP_baseline$IU_ID_MAPPING)) # remove leading 0 from IU_ID_MAPPING
+# 
+# # Merge the two data frames based on the 'IU_CODE' column
+# dfOCP_included2  <- merge(dfOCP_included2, OCP_baseline, by.x = "IU_ID_MAPPING", by.y = "IU_ID_MAPPING", all.x = TRUE)
+# 
+# # omit last 8 cols with merged dataframe (unless want quantiles for pre-control prev)
+# dfOCP_included2  <- dfOCP_included2[, 1:(ncol(dfOCP_included2) - 8)]
+# 
+# dfOCP_included2 <- dfOCP_included2 %>%
+#   mutate(endemicity_baseline = case_when(
+#     is.na(mean) ~ "non-endemic",
+#     mean < 0.40 ~ "hypoendemic",
+#     mean < 0.60 ~ "mesoendemic",
+#     mean < 0.80 ~ "hyperendemic",
+#     TRUE ~ "holoendemic"
+#   ))
+# 
+# # remove any IUs with non-endemic baseline from geostatistical maps (O'Hanlon)
+# dfOCP_included2_nonendemic_baseline <- subset(dfOCP_included2, endemicity_baseline == "non-endemic")
+# check_df <- subset(dfOCP_included2_nonendemic_baseline, Year == 2022)
+# table(check_df$MAX_Endemicity) # 6 IUs  - all "Not reported" status (so these are in the box of 227 in the flow chart (i.e., included b/c in OCP shape))
+# 
+# non_endemic_baseline_vec <- unique(dfOCP_included2_nonendemic_baseline$IU_ID_MAPPING)
+# length(non_endemic_baseline_vec) # n = 6 IUs
+# unique(dfOCP_included2_nonendemic_baseline$MAX_Endemicity) # all MAX_endemicity = "Not reported"
+# 
+# 
+# dfOCP_included2 <- dfOCP_included2[!dfOCP_included2$IU_ID_MAPPING %in% non_endemic_baseline_vec, ]
+# length(unique(dfOCP_included2$IU_ID_MAPPING)) # 670 Ius left (with 6 IUs removed as no baseline in geostat map)
+# 
+# check_df <- subset(dfOCP_included2, Year == 2022)
+# table(check_df$Included) # included (endemic) = 449 + included OCP area = 221 = 670 IUs
+
+# =========================================================================================== #
+#     Function to integrate baseline endemicity and remove IUs without baseline information   #
+# =========================================================================================== #
+
+integrate_baseline_endemicity <- function(df, file_path_input) {
+  
+  # Load the baseline endemicity data from the specified path
+  baseline_data_file <- file.path(base_path, file_path_input)
+  load(baseline_data_file)
+  
+  # Convert the matrix to a dataframe
+  OCP_baseline <- as.data.frame(summaries_ocp) 
+  cat("OCP baseline data loaded. Total number of IUs in baseline data:", nrow(OCP_baseline), "\n")
+  
+  # Add ADMIN0 and IU_ID_MAPPING to the baseline data
+  OCP_baseline$ADMIN0 <- substr(OCP_baseline$IU_CODE, 1, 3)
+  OCP_baseline$IU_ID_MAPPING <- substr(OCP_baseline$IU_CODE, nchar(OCP_baseline$IU_CODE) - 4, nchar(OCP_baseline$IU_CODE))
+  OCP_baseline$IU_ID_MAPPING <- as.numeric(as.character(OCP_baseline$IU_ID_MAPPING)) # Remove leading 0 from IU_ID_MAPPING
+  
+  # Merge the baseline data with the input dataframe based on 'IU_ID_MAPPING'
+  df <- merge(df, OCP_baseline, by.x = "IU_ID_MAPPING", by.y = "IU_ID_MAPPING", all.x = TRUE)
+  #cat("Data merged. Number of rows in merged dataframe:", nrow(df), "\n")
+  
+  # Remove extra columns from the merged dataframe (keeping only relevant columns)
+  df <- df[, 1:(ncol(df) - 8)]  # Remove last 8 columns (optional)
+  
+  # Add the baseline endemicity column
+  df <- df %>%
+    mutate(endemicity_baseline = case_when(
+      is.na(mean) ~ "non-endemic",  # No baseline data
+      mean < 0.40 ~ "hypoendemic",  # Hypoendemic
+      mean < 0.60 ~ "mesoendemic",  # Mesoendemic
+      mean < 0.80 ~ "hyperendemic", # Hyperendemic
+      TRUE ~ "holoendemic"          # Holoendemic
+    ))
+  
+  cat("Baseline endemicity column added.\n")
+  
+  # Remove IUs with non-endemic baseline from the dataframe
+  non_endemic_baseline <- subset(df, endemicity_baseline == "non-endemic")
+  cat("Number of IUs with non-endemic baseline:", nrow(non_endemic_baseline), "\n")
+  
+  # Identify IUs to exclude (those without baseline endemicity information)
+  non_endemic_baseline_vec <- unique(non_endemic_baseline$IU_ID_MAPPING)
+  df <- df[!df$IU_ID_MAPPING %in% non_endemic_baseline_vec, ]
+  cat("Number of IUs remaining after removing non-endemic baseline:", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Check number of IUs in the last year (2022) after the removal
+  check_df <- subset(df, Year == 2022)
+  cat("Number of IUs remaining in 2022:", nrow(check_df), "\n")
+  cat("Frequency of 'Included' status in 2022:\n")
+  print(table(check_df$Included))
+  
+  return(df)
+}
+
+# Call function:
+dfOCP_included2 <- integrate_baseline_endemicity(dfOCP_included2, "/summaries_ocp.Rdata")
+
+
+# # =================================================================================================== #
+# #  1) identify if treatment naive area                                                                #
+# 
+# dfOCP_included3 <- dfOCP_included2
+# 
+# # ============================== #
+# #  Pre-ESPEN history to include  #
+# 
 # dfOCP_included3 <- dfOCP_included3 %>%
 #   group_by(IU_ID_MAPPING) %>%
-#   mutate(ADMIN0ISO3 == "NER","Include","Exclude") %>%
+#   mutate(
+#     Pre_ESPEN_MDA_history = ifelse(ADMIN0ISO3 == "NER" |
+#       (any(MAX_Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)")) &
+#          any(Cum_MDA > 0 & Year == 2013)) |
+#         (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported","Non-endemic")) &
+#            any(endemicity_baseline %in% c("hyperendemic","mesoendemic", "hypoendemic")) &
+#            any(Cum_MDA > 0 & Year == 2013)),
+#       "Include",
+#       "Exclude"
+#     )
+#   ) %>%
 #   ungroup()  # Remove grouping information
+# 
+# 
+# # dfOCP_included3 <- dfOCP_included3 %>%
+# #   group_by(IU_ID_MAPPING) %>%
+# #   mutate(ADMIN0ISO3 == "NER","Include","Exclude") %>%
+# #   ungroup()  # Remove grouping information
+# 
+# 
+# dfOCP_included3 <- dfOCP_included3 %>% arrange(IU_ID_MAPPING, Year) # order by ascending year within each IU_ID_MAPPING
+# 
+# #dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Exclude")
+# #dfOCP_included3a_check <- subset(dfOCP_included3_check, Year < 2013)
+# 
+# # ==============================  #
+# #  Post-ESPEN history to include  #
+# 
+# # note we include non-endemic in the statement below because CUM_MDA is > 0 & within the OCP shape file so believe this is endemic
+# dfOCP_included3 <- dfOCP_included3 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     ESPEN_MDA_history = ifelse(
+#       (any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)") &
+#              Year > 2012) &
+#          any(EpiCov > 0 & Year > 2013)) |
+#         (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported", "Non-endemic")) &
+#            any(endemicity_baseline %in% c("hyperendemic","mesoendemic", "hypoendemic")) &
+#            any(EpiCov > 0 & Year > 2013)),
+#       "Include",
+#       "Exclude"
+#     )
+#   ) %>%
+#   ungroup()  # Remove grouping information
+# 
+# #dfOCP_included3_check <- subset(dfOCP_included3, ESPEN_MDA_history == "Exclude")
+# #dfOCP_included3a_check <- subset(dfOCP_included3_check, Year > 2012)
+# #dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
+# #dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Include")
+# #dfOCP_included3a_check <- subset(dfOCP_included3_check, Year > 2012)
+# 
+# check_histories_trtnaive <- dfOCP_included3 %>%
+#   filter(
+#     (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
+#   )
+# 
+# length(unique(check_histories_trtnaive$IU_ID_MAPPING)) # 57 IUs are treatment naive
+# 
+# dfOCP_included3_lastyr <- subset(dfOCP_included3, Year == 2022)
+# dfOCP_included3_lastyr$MDA_status <- ifelse(dfOCP_included3_lastyr$Pre_ESPEN_MDA_history == "Exclude" &
+#                                               dfOCP_included3_lastyr$ESPEN_MDA_history == "Exclude", "Treatment naive", "MDA history")
+# 
+# OCP_MDAstatus_670 <- ESPEN_IUs_OCP %>%
+#   left_join(dfOCP_included3_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# ggplot() +
+#   geom_sf(data = OCP_MDAstatus_670, aes(fill = MDA_status), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_OCP, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
+#   coord_sf(xlim = c(-20, 7), ylim = c(4, 20)) +
+#   theme_bw() +
+#   #scale_fill_manual(na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# length(unique(dfOCP_included3_lastyr$IU_ID_MAPPING))
+# nrow(dfOCP_included3_lastyr) # 670 Ius
 
 
-dfOCP_included3 <- dfOCP_included3 %>% arrange(IU_ID_MAPPING, Year) # order by ascending year within each IU_ID_MAPPING
+# -======================================================================================================== #
+# Function to produce columns to define whether an IU is inclued/excluded for Pre-ESPEN and ESPEN histories #
+# ========================================================================================================= #
 
-#dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Exclude")
-#dfOCP_included3a_check <- subset(dfOCP_included3_check, Year < 2013)
+add_pre_post_ESPEN_history <- function(df) {
+  
+  # ============================== #
+  # Pre-ESPEN history to include  #
+  cat("Processing Pre-ESPEN MDA history...\n")
+  
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      Pre_ESPEN_MDA_history = ifelse(ADMIN0ISO3 == "NER" |
+                                       (any(MAX_Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)")) &
+                                          any(Cum_MDA > 0 & Year == 2013)) |
+                                       (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported", "Non-endemic")) &
+                                          any(endemicity_baseline %in% c("hyperendemic", "mesoendemic", "hypoendemic")) &
+                                          any(Cum_MDA > 0 & Year == 2013)),
+                                     "Include", "Exclude")
+    ) %>%
+    ungroup()  # Remove grouping information
+  
+  cat("Pre-ESPEN MDA history processed.\n")
+  
+  # need to arrange by year # 
+  df <- df %>% arrange(IU_ID_MAPPING, Year) # order by ascending year within each IU_ID_MAPPING
+  
+  
+  # ============================== #
+  # Post-ESPEN history to include  #
+  cat("Processing Post-ESPEN MDA history...\n")
+  
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      ESPEN_MDA_history = ifelse(
+        (any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)") &
+               Year > 2012) &
+           any(EpiCov > 0 & Year > 2013)) |
+          (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported", "Non-endemic")) &
+             any(endemicity_baseline %in% c("hyperendemic", "mesoendemic", "hypoendemic")) &
+             any(EpiCov > 0 & Year > 2013)),
+        "Include", "Exclude")
+    ) %>%
+    ungroup()  # Remove grouping information
+  
+  cat("Post-ESPEN MDA history processed.\n")
+  
+  # Check Treatment Naive IUs
+  cat("Checking for treatment naive IUs...\n")
+  check_histories_trtnaive <- df %>%
+    filter(Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
+  cat("Number of treatment naive IUs:", length(unique(check_histories_trtnaive$IU_ID_MAPPING)), "\n")
+  
+  # Process MDA status for 2022
+  df_lastyr <- subset(df, Year == 2022)
+  df_lastyr$MDA_status <- ifelse(df_lastyr$Pre_ESPEN_MDA_history == "Exclude" & 
+                                   df_lastyr$ESPEN_MDA_history == "Exclude", 
+                                 "Treatment naive", "MDA history")
+  
+  
 
-# ==============================  #
-#  Post-ESPEN history to include  #
+  return(df)
+}
 
-# note we include non-endemic in the statement below because CUM_MDA is > 0 & within the OCP shape file so believe this is endemic
-dfOCP_included3 <- dfOCP_included3 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    ESPEN_MDA_history = ifelse(
-      (any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)", "Endemic (under post-intervention surveillance)") &
-             Year > 2012) &
-         any(EpiCov > 0 & Year > 2013)) |
-        (any(MAX_Endemicity %in% c("Unknown (consider Oncho Elimination Mapping)", "Unknown (under LF MDA)", "Not reported", "Non-endemic")) &
-           any(endemicity_baseline %in% c("hyperendemic","mesoendemic", "hypoendemic")) &
-           any(EpiCov > 0 & Year > 2013)),
-      "Include",
-      "Exclude"
-    )
-  ) %>%
-  ungroup()  # Remove grouping information
+# call function:
+dfOCP_included3 <- add_pre_post_ESPEN_history(dfOCP_included2)
 
-#dfOCP_included3_check <- subset(dfOCP_included3, ESPEN_MDA_history == "Exclude")
-#dfOCP_included3a_check <- subset(dfOCP_included3_check, Year > 2012)
-#dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
-#dfOCP_included3_check <- subset(dfOCP_included3, Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Include")
-#dfOCP_included3a_check <- subset(dfOCP_included3_check, Year > 2012)
-
-check_histories_trtnaive <- dfOCP_included3 %>%
-  filter(
-    (Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Exclude")
-  )
-
-length(unique(check_histories_trtnaive$IU_ID_MAPPING)) # 57 IUs are treatment naive
-
-dfOCP_included3_lastyr <- subset(dfOCP_included3, Year == 2022)
-dfOCP_included3_lastyr$MDA_status <- ifelse(dfOCP_included3_lastyr$Pre_ESPEN_MDA_history == "Exclude" &
-                                              dfOCP_included3_lastyr$ESPEN_MDA_history == "Exclude", "Treatment naive", "MDA history")
-
-OCP_MDAstatus_670 <- ESPEN_IUs_OCP %>%
-  left_join(dfOCP_included3_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-ggplot() +
-  geom_sf(data = OCP_MDAstatus_670, aes(fill = MDA_status), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_OCP, aes(), colour = NA, size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.1) +
-  coord_sf(xlim = c(-20, 7), ylim = c(4, 20)) +
-  theme_bw() +
-  #scale_fill_manual(na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-length(unique(dfOCP_included3_lastyr$IU_ID_MAPPING))
-nrow(dfOCP_included3_lastyr) # 670 Ius
 
 # ================================================================================================== #
 # 2)                                Introduce interventions                                          #
 # ================================================================================================== #
 
-dfOCP_included4 <- dfOCP_included3 # RESET HERE
+# dfOCP_included4 <- dfOCP_included3 # RESET HERE
+# 
+# dfOCP_included4$MDA_status <- ifelse(dfOCP_included4$Pre_ESPEN_MDA_history == "Exclude" &
+#                                        dfOCP_included4$ESPEN_MDA_history == "Exclude", "Treatment naive", "MDA history")
+# 
+# dfOCP_included4$ADMIN0 <- dfOCP_included4$ADMIN0.x
+# 
+# OCP_DF3 <- dfOCP_included4
+# 
+# check_df <- subset(OCP_DF3, Year == 2022)
+# nrow(check_df) # 670 IUs
+# 
+# # Vector Control (from 1975) in OCP period (up to 2002) #
+# 
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:2002), 1,
+#                                  ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:2002), 1,
+#                                         ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1989), 1,
+#                                                ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1989), 1,
+#                                                       ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1989), 1,
+#                                                              ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1991), 1,
+#                                                                     ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE III WEST - MAR 1977" & OCP_DF3$Year %in% c(1977:1991), 1,
+#                                                                            ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE IV - MAR 1979" & OCP_DF3$Year %in% c(1979:1991), 1,
+#                                                                                   ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1989), 1,
+#                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1989), 1,
+#                                                                                                 ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1989), 1,
+#                                                                                                        ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:1998), 1,
+#                                                                                                               ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:2002), 1,
+#                                                                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% "Savanes" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1993), 1,
+#                                                                                                                             ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:2002), 1,
+#                                                                                                                                    ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% "Savanes" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1993), 1,
+#                                                                                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1989:2002), 1,
+#                                                                                                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:2002), 1,
+#                                                                                                                                                         ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1987), 1,
+#                                                                                                                                                                ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1987), 1,
+#                                                                                                                                                                       ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:2002), 1,
+#                                                                                                                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE III WEST - MAR 1977" & OCP_DF3$Year %in% c(1977:1991), 1,
+#                                                                                                                                                                              ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1977:1989), 1,
+#                                                                                                                                                                                     NA)))))))))))))))))))))))
+# 
+# 
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 vector control
+# #OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+# #BEN0036803224
+# 
+# # non-CDTI MDA (up to 1996/1997) #
+# OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(1988:1996), 1,
+#                               ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                      ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & OCP_DF3$Year %in% c(1988:1996), 1,
+#                                           ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                             ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                    ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:1996), 1,
+#                                                       ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                           ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1991:1996), 1,
+#                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1991:1996), 1,
+#                                                                         ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:1996), 1,
+#                                                                                ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                                                       ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                                                              ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(1988:1996), 1,
+#                                                                                                     ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:1996), 1,
+#                                                                                                            ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                                                                                   ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
+#                                                                                                                                 NA)))))))))))))))))
+# 
+# OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non-CDTI
+# #OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+# 
+# #BEN0036803224
+# 
+# # CDTI MDA (up to 2002) #
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                            ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                   ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & OCP_DF3$Year %in% c(1997:2000), 1,
+#                                          ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                          ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                 ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                     ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                        ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                               ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                             ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                    ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                                         ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                                                ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                                                       ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
+#                                                                                                                              NA)))))))))))))))))
+# 
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# #OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# 
+# #BEN0036803224
+# #OCP_DF3_Togo <- subset(OCP_DF3, OCP_DF3$ADMIN1 == "Savanes") # check Savanes in Togo
 
-dfOCP_included4$MDA_status <- ifelse(dfOCP_included4$Pre_ESPEN_MDA_history == "Exclude" &
-                                       dfOCP_included4$ESPEN_MDA_history == "Exclude", "Treatment naive", "MDA history")
 
-dfOCP_included4$ADMIN0 <- dfOCP_included4$ADMIN0.x
+# ========================================================================================= #
+#                Function to apply vector control and MDA interventions up to 2002          #
+# ========================================================================================= #
 
-OCP_DF3 <- dfOCP_included4
+apply_OCP_interventions_up_to_2002 <- function(df) {
+  
+  # create a MDA_status col and modify ADMINO col name
+  df$MDA_status <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" &
+                                         df$ESPEN_MDA_history == "Exclude", "Treatment naive", "MDA history")
+  
+  df$ADMIN0 <- df$ADMIN0.x
+  
+  
+  # ============================== #
+  #  Vector Control (up to 2002)   #
+  #cat("Applying vector control interventions (up to 2002)...\n")
+  
+  df$vector_control <- ifelse(df$ADMIN0 %in% "Benin" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:2002), 1,
+                              ifelse(df$ADMIN0 %in% "Benin" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1988:2002), 1,
+                                     ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% "PHASE 1 - FEB 1975" & df$Year %in% c(1975:1989), 1,
+                                            ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% "PHASE II - JAN 1976" & df$Year %in% c(1976:1989), 1,
+                                                   ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:1989), 1,
+                                                          ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% "PHASE 1 - FEB 1975" & df$Year %in% c(1975:1991), 1,
+                                                                 ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% "PHASE III WEST - MAR 1977" & df$Year %in% c(1977:1991), 1,
+                                                                        ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% "PHASE IV - MAR 1979" & df$Year %in% c(1979:1991), 1,
+                                                                               ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "PHASE 1 - FEB 1975" & df$Year %in% c(1975:1989), 1,
+                                                                                      ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "PHASE II - JAN 1976" & df$Year %in% c(1976:1989), 1,
+                                                                                             ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:1989), 1,
+                                                                                                    ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1988:1998), 1,
+                                                                                                           ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% c("Kara","Centrale") & df$PHASE %in% "PHASE II - JAN 1976" & df$Year %in% c(1976:2002), 1,
+                                                                                                                  ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% "Savanes" & df$PHASE %in% "PHASE II - JAN 1976" & df$Year %in% c(1976:1993), 1,
+                                                                                                                         ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% c("Kara","Centrale") & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:2002), 1,
+                                                                                                                                ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% "Savanes" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:1993), 1,
+                                                                                                                                       ifelse(df$ADMIN0 %in% "Togo" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1989:2002), 1,
+                                                                                                                                              ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1989:2002), 1,
+                                                                                                                                                     ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "PHASE 1 - FEB 1975" & df$Year %in% c(1975:1987), 1,
+                                                                                                                                                            ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(1977:1987), 1,
+                                                                                                                                                                   ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1989:2002), 1,
+                                                                                                                                                                          ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "PHASE III WEST - MAR 1977" & df$Year %in% c(1977:1991), 1,
+                                                                                                                                                                                 ifelse(df$ADMIN0 %in% "Niger" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & df$Year %in% c(1977:1989), 1,
+                                                                                                                                                                                        NA)))))))))))))))))))))))
 
-check_df <- subset(OCP_DF3, Year == 2022)
-nrow(check_df) # 670 IUs
-
-# Vector Control (from 1975) in OCP period (up to 2002) #
-
-OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:2002), 1,
-                                 ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:2002), 1,
-                                        ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1989), 1,
-                                               ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1989), 1,
-                                                      ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1989), 1,
-                                                             ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1991), 1,
-                                                                    ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE III WEST - MAR 1977" & OCP_DF3$Year %in% c(1977:1991), 1,
-                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% "PHASE IV - MAR 1979" & OCP_DF3$Year %in% c(1979:1991), 1,
-                                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1989), 1,
-                                                                                         ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1989), 1,
-                                                                                                ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1989), 1,
-                                                                                                       ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:1998), 1,
-                                                                                                              ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:2002), 1,
-                                                                                                                     ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% "Savanes" & OCP_DF3$PHASE %in% "PHASE II - JAN 1976" & OCP_DF3$Year %in% c(1976:1993), 1,
-                                                                                                                            ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:2002), 1,
-                                                                                                                                   ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% "Savanes" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1993), 1,
-                                                                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1989:2002), 1,
-                                                                                                                                                 ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:2002), 1,
-                                                                                                                                                        ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE 1 - FEB 1975" & OCP_DF3$Year %in% c(1975:1987), 1,
-                                                                                                                                                               ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(1977:1987), 1,
-                                                                                                                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:2002), 1,
-                                                                                                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "PHASE III WEST - MAR 1977" & OCP_DF3$Year %in% c(1977:1991), 1,
-                                                                                                                                                                             ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1977:1989), 1,
-                                                                                                                                                                                    NA)))))))))))))))))))))))
-
-
-OCP_DF3$vector_control <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 vector control
-#OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
-#BEN0036803224
+  cat("vector control to 2002 applied.\n")
+  
+  # Ensure Treatment Naive Areas are set to 0 for MDA_nonCDTI
+  df$vector_control <- ifelse(df$vector_control == "Treatment naive", 0, df$vector_control)
+  #cat("vector control to 2002 applied updated for Treatment naive areas.\n")
 
 # non-CDTI MDA (up to 1996/1997) #
-OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(1988:1996), 1,
-                              ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1990:1996), 1,
-                                     ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & OCP_DF3$Year %in% c(1988:1996), 1,
-                                          ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1990:1996), 1,
-                                            ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                   ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1988:1996), 1,
-                                                      ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                          ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1991:1996), 1,
-                                                                 ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1991:1996), 1,
-                                                                        ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:1996), 1,
-                                                                               ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                                                             ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(1988:1996), 1,
-                                                                                                    ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1989:1996), 1,
-                                                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                                                                                         ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1990:1996), 1,
-                                                                                                                                NA)))))))))))))))))
 
-OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non-CDTI
-#OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+#cat("Applying non-CDTI MDA (up to 1996)...\n")
+df$MDA_nonCDTI <- ifelse(df$ADMIN0 %in% "Benin" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988") & df$Year %in% c(1988:1996), 1,
+                         ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1990:1996), 1,
+                                ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & df$Year %in% c(1988:1996), 1,
+                                       ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(1990:1996), 1,
+                                              ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1990:1996), 1,
+                                                     ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1988:1996), 1,
+                                                            ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & df$Year %in% c(1990:1996), 1,
+                                                                   ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% c("Kara","Centrale", "Savanes") & df$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1991:1996), 1,
+                                                                          ifelse(df$ADMIN0 %in% "Togo" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1991:1996), 1,
+                                                                                 ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1989:1996), 1,
+                                                                                        ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(1990:1996), 1,
+                                                                                               ifelse(df$ADMIN0 %in% "Guinea-Bissau" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(1990:1996), 1,
+                                                                                                      ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & df$Year %in% c(1988:1996), 1,
+                                                                                                             ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1989:1996), 1,
+                                                                                                                    ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(1990:1996), 1,
+                                                                                                                           ifelse(df$ADMIN0 %in% "Niger" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & df$Year %in% c(1990:1996), 1,
+                                                                                                                                  ifelse(df$ADMIN0 %in% "Senegal" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(1990:1996), 1,
+                                                                                                                                        NA)))))))))))))))))
 
-#BEN0036803224
+cat("Non-CDTI MDA applied (to 1996).\n")
 
-# CDTI MDA (up to 2002) #
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(1997:2002), 1,
-                           ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                  ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & OCP_DF3$Year %in% c(1997:2000), 1,
-                                         ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                         ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                    ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                       ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                              ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                     ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                            ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                   ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                                 ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1989" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                                        ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                                               ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(1997:2002), 1,
-                                                                                                                             NA)))))))))))))))))
-
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-#OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-
-#BEN0036803224
-#OCP_DF3_Togo <- subset(OCP_DF3, OCP_DF3$ADMIN1 == "Savanes") # check Savanes in Togo
+# Ensure Treatment Naive Areas are set to 0 for MDA_nonCDTI
+df$MDA_nonCDTI <- ifelse(df$MDA_status == "Treatment naive", 0, df$MDA_nonCDTI)
+#cat("MDA_nonCDTI status updated for Treatment naive areas.\n")
 
 
-# 2003 - 2013 Period SIZs (2003 - 2013) and non-SIZs (2003 - 2013) & Biannual (up to 2022) #
+# ============================== #
+#  CDTI MDA (up to 2002)        #
+#cat("Applying MDA interventions (up to 2002)...\n")
 
-# ========================================== #
-# vector control (2003 - 2012) ONLY IN SIZs
-# OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2007), 1,
-#                                  ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2007), 1,
-#                                         ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2007), 1,
-#                                                OCP_DF3$vector_control)))
+df$MDA_CDTI <- ifelse(df$ADMIN0 %in% "Benin" & df$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & df$Year %in% c(1997:2002), 1,
+                      ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1997:2002), 1,
+                             ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979") & df$Year %in% c(1997:2000), 1,
+                                    ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% c("SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(1997:2002), 1,
+                                           ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1997:2002), 1,
+                                                  ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1997:2002), 1,
+                                                         ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% "SOUTHERN FOREST EXTENSION - JAN 1990" & df$Year %in% c(1997:2002), 1,
+                                                                ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% c("Kara","Centrale", "Savanes") & df$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(1997:2002), 1,
+                                                                       ifelse(df$ADMIN0 %in% "Togo" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(1997:2002), 1,
+                                                                              ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1997:2002), 1,
+                                                                                     ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% c("WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(1997:2002), 1,
+                                                                                            ifelse(df$ADMIN0 %in% "Guinea-Bissau" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(1997:2002), 1,
+                                                                                                   ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "PHASE III WEST - MAR 1977") & df$Year %in% c(1997:2002), 1,
+                                                                                                          ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "WESTERN EXTENSION - MAR 1989" & df$Year %in% c(1997:2002), 1,
+                                                                                                                 ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(1997:2002), 1,
+                                                                                                                        ifelse(df$ADMIN0 %in% "Niger" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & df$Year %in% c(1997:2002), 1,
+                                                                                                                               NA))))))))))))))))
 
-OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2007), 1,
-                                 ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2007), 1,
-                                        ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$Year %in% c(2003:2007), 1,
-                                               OCP_DF3$vector_control))) # only Oti in Ghana (phase III sliver in the north-east of country) not Pru (small area in central-west) basins
+cat("CDTI MDA to 2002 applied.\n")
 
+# Ensure Treatment Naive Areas are set to 0 for MDA_nonCDTI
+df$MDA_CDTI <- ifelse(df$MDA_CDTI == "Treatment naive", 0, df$MDA_CDTI)
+#cat("CDTI MDA to 2002 applied updated for Treatment naive areas.\n")
 
-OCP_DF3$vector_control <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 vector control
-#BEN0036803224
-
-# annual CDTI (2003 - 2012) in non-SIZs
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2013), 1,
-                           ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                  ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2008:2013), 1,
-                                         ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                       ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                              ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                     ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                            ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                                   ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                                          ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                                                 ifelse(OCP_DF3$ADMIN0 %in% "Sierra Leone" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                                                                        OCP_DF3$MDA_CDTI))))))))))))
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-#OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-
-#BEN0036803224
-
-# biannual CDTI
-OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                    ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2013), 1,
-                                           ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$endemicity_baseline %in% c("mesoendemic", "hyperendemic") & OCP_DF3$Year %in% c(2009:2022), 1,
-                                            ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
-                                                  ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$IUs_NAME_MAPPING %in% c("Anie", "OGOU", "AMOU", "HAHO") & OCP_DF3$Year %in% c(2014:2022), 1,
-                                                         ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$IUs_NAME_MAPPING %in% c("Kpendjal", "Kpendjal-Ouest", "OTI", "OtI-Sud",
-                                                                                                                             "ASSOLI", "BASSAR", "BINAH", "DANKPEN", "DOUFELGOU", "KERAN", "KOZAH",
-                                                                                                                             "TCHAOUDJO", "MO", "SOTOUBOUA") & OCP_DF3$Year %in% c(2003:2022), 1, NA))))))
-# Ghana needs biannual - all MESO and HYPER beyond 2009! (OCP from 2003 - )
-
-OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI_Biannual) # update, if in treatment naive area = 0 non CDTI
-
-#BEN0036803224
+# check number of IUs at this stage:
+cat("Rows in 2022 after processing (updating interventions 1975 - 2002):", nrow(subset(df, Year == 2022)), "\n")
+cat("Unique IU_ID_MAPPING count after processing (updating interventions 1975 - 2002):", length(unique(df$IU_ID_MAPPING)), "\n")
 
 
-# need to remove vector control, annual non-CDTI and CDTI in those IUs where pre_ESPEN = EXCLUDE (expect Ghana meso and hyper endemic IUs)
-OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
-OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+return(df)
 
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
-
-OCP_DF3$vector_control <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 non CDTI
-OCP_DF3$vector_control <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 non CDTI
-
-# NOTES:
-# Togo bi-annual in non-SIZ Plateau region : Anie, OGOU, AMOU, HAHO (2014 - 2023)
-# Togo biannual in Savanes : Kpendjal, Kpendjal-Ouest, OTI, OtI-Sud (2003 - 2023)
-# Togo biannual in Kara: all of Kara; ASSOLI, BASSAR, BINAH, DANKPEN, DOUFELGOU, KERAN, KOZAH  (2003-2023)
-# Togo biannual in Centrale: TCHAOUDJO, MO, SOTOUBOUA (2003 - 2023)
-
-# OCP_DF3_Ghana <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Ghana") # check biannual in Togo
-#GHA0216421474 (meso) # want to keep pre-ESPEN (even though "Exclude") b/c mesoendemic
-#GHA0216421476 (hypo) #remove preESPEN because "exclude & hypoendemic
-
-# OCP_DF3_Togo <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Togo") # check biannual in Togo
-
-#OCP_DF3_check <- subset(OCP_DF3, Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
-#OCP_DF3_check <- subset(OCP_DF3, Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Include")
-
-# Filling in MDA presence based on ESPEN data (2013 - 2022)  #
-OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$EpiCov > 0 & OCP_DF3$Year %in% c(2014:2022), 1, OCP_DF3$MDA_CDTI)
-
-# need to remove 1 from biannual where no annual CDTI between 2014-2022
-OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$MDA_CDTI == 0 | is.na(OCP_DF3$MDA_CDTI) & OCP_DF3$Year %in% c(2014:2022), 0, OCP_DF3$MDA_CDTI_Biannual)
-
-#OCP_DF3_Ghana <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Ghana") # check biannual in Togo
-#OCP_DF3$Year_temp <- OCP_DF3$Year
-
-# =================================================================================================== #
-#                                   4) extend by 3 years (2023- 2025)                                 #
-
-dfOCP_included4 <- OCP_DF3
-dfOCP_included4_lastyr <- subset(dfOCP_included4, Year == 2022)
-nrow(dfOCP_included4_lastyr) # 670 IUs
-
-#FinalESPENyr <- 2013
-FinalESPENyr <- 2022
-
-dfls <- split(dfOCP_included4, dfOCP_included4$IU_ID_MAPPING)
-
-## new list of dfs
-newdf <- vector("list", length(dfls))
-
-lsid <- split(dfOCP_included4$IU_ID_MAPPING, dfOCP_included4$IU_ID_MAPPING)
-lsid <- unique(unlist(lsid))
-
-# loop to fill in missing years and columns
-
-#loop_func <- function(dfls, dfAPOC_included5, FinalESPENyr, newdf, lsid) {
-for (i in 1:length(dfls)) {
-
-  newdf[[i]] <- subset(dfls[[i]], select=colnames(dfOCP_included4))
-
-  #IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA) - start)
-
-  IUend <- 2025
-
-  newdf[[i]]$IUend <- IUend
-  Futureyrs <- IUend - FinalESPENyr ## prior years to include
-
-  #PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
-
-  newdf[[i]]$lsID <- i
-
-  i
-
-  if (is.na(IUend)!=T) {
-    if(IUend>FinalESPENyr) {
-      # if cumulative rounds greater than 1, augment data frame
-      # by repeating the first row
-
-      tmp <- newdf[[i]][rep(1, each = (min(IUend - newdf[[i]]$Year))), ]
-
-      # fill in the years from start date of IU to first year on ESPEN
-      #tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
-      tmp$Year <- seq(FinalESPENyr+1, IUend)
-
-    }
-
-    # #enedmicity category given "Augmented Status"
-    tmp$Endemicity <- "Augmented"
-    tmp$MDA_scheme <- "Augmented"
-    # #tmp$Endemicity_ID <- 6
-
-    newdf[[i]] <- rbind(newdf[[i]], tmp) # want tmp at end
-  }
 }
 
-#}
+# call function:
+dfOCP_included4 <- apply_OCP_interventions_up_to_2002(dfOCP_included3)
 
 
-#test <- loop_func(dfls = dfls, dfAPOC_included = dfAPOC_included5, FinalESPENyr = FinalESPENyr, newdf = newdf, lsid = lsid)
 
-newdf <- do.call(rbind, newdf)
+# # 2003 - 2013 Period SIZs (2003 - 2013) and non-SIZs (2003 - 2013) & Biannual (up to 2022) #
+# 
+# # ========================================== #
+# # vector control (2003 - 2012) ONLY IN SIZs
+# # OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2007), 1,
+# #                                  ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2007), 1,
+# #                                         ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2007), 1,
+# #                                                OCP_DF3$vector_control)))
+# 
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2007), 1,
+#                                  ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2007), 1,
+#                                         ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale") & OCP_DF3$Year %in% c(2003:2007), 1,
+#                                                OCP_DF3$vector_control))) # only Oti in Ghana (phase III sliver in the north-east of country) not Pru (small area in central-west) basins
+# 
+# 
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 vector control
+# #BEN0036803224
+# 
+# # annual CDTI (2003 - 2012) in non-SIZs
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                            ifelse(OCP_DF3$ADMIN0 %in% "Burkina Faso" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                   ifelse(OCP_DF3$ADMIN0 %in% "Cote d'Ivoire" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2008:2013), 1,
+#                                          ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                 ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$ADMIN1 %in% c("Kara","Centrale", "Savanes") & OCP_DF3$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                        ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                               ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                      ifelse(OCP_DF3$ADMIN0 %in% "Guinea-Bissau" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                             ifelse(OCP_DF3$ADMIN0 %in% "Mali" & OCP_DF3$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "PHASE III WEST - MAR 1977") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                                    ifelse(OCP_DF3$ADMIN0 %in% "Niger" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                                           ifelse(OCP_DF3$ADMIN0 %in% "Senegal" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                                                  ifelse(OCP_DF3$ADMIN0 %in% "Sierra Leone" & OCP_DF3$PHASE %in% "WESTERN EXTENSION - MAR 1990" & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                                                                         OCP_DF3$MDA_CDTI))))))))))))
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# #OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# 
+# #BEN0036803224
+# 
+# # biannual CDTI
+# OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$ADMIN0 %in% "Benin" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                     ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% "PHASE III EAST - JUL 1977" & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                            ifelse(OCP_DF3$ADMIN0 %in% "Ghana" & OCP_DF3$endemicity_baseline %in% c("mesoendemic", "hyperendemic") & OCP_DF3$Year %in% c(2009:2022), 1,
+#                                             ifelse(OCP_DF3$ADMIN0 %in% "Guinea" & OCP_DF3$SIZ_label == "SIZ" & OCP_DF3$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990") & OCP_DF3$Year %in% c(2003:2013), 1,
+#                                                   ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$IUs_NAME_MAPPING %in% c("Anie", "OGOU", "AMOU", "HAHO") & OCP_DF3$Year %in% c(2014:2022), 1,
+#                                                          ifelse(OCP_DF3$ADMIN0 %in% "Togo" & OCP_DF3$IUs_NAME_MAPPING %in% c("Kpendjal", "Kpendjal-Ouest", "OTI", "OtI-Sud",
+#                                                                                                                              "ASSOLI", "BASSAR", "BINAH", "DANKPEN", "DOUFELGOU", "KERAN", "KOZAH",
+#                                                                                                                              "TCHAOUDJO", "MO", "SOTOUBOUA") & OCP_DF3$Year %in% c(2003:2022), 1, NA))))))
+# # Ghana needs biannual - all MESO and HYPER beyond 2009! (OCP from 2003 - )
+# 
+# OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$MDA_status == "Treatment naive", 0, OCP_DF3$MDA_CDTI_Biannual) # update, if in treatment naive area = 0 non CDTI
+# 
+# #BEN0036803224
 
-dfOCP_included5 <- newdf
+# ============================================================================= #
+#          Function to apply vector control and MDA interventions               #
+#        up 2003-2012 (including SIZ vector control) & biannual to 2022         #
+# ============================================================================= #
 
-dfOCP_included5$Year_tmp <- dfOCP_included5$Year
+apply_OCP_interventions_SIZ_2003_2012_biannual <- function(df) {
+  
+  # ============================== #
+  # Vector Control (2003-2012)   #
+  cat("Applying vector control interventions (2003-2012)...\n")
+  
+  df$vector_control <- ifelse(df$ADMIN0 %in% "Benin" & df$SIZ_label == "SIZ" & df$PHASE %in% c("PHASE III EAST - JUL 1977","SOUTHERN EXTENSION - FEB 1988") & df$Year %in% c(2003:2007), 1,
+                              ifelse(df$ADMIN0 %in% "Ghana" & df$SIZ_label == "SIZ" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(2003:2007), 1,
+                                     ifelse(df$ADMIN0 %in% "Togo" & df$SIZ_label == "SIZ" & df$ADMIN1 %in% c("Kara", "Centrale") & df$Year %in% c(2003:2007), 1,
+                                            df$vector_control))) # only Oti in Ghana
+  
+  # Update vector control for treatment naive areas
+  df$vector_control <- ifelse(df$MDA_status == "Treatment naive", 0, df$vector_control)
+  #cat("Vector control for 2003-2012 applied and updated for Treatment naive areas.\n")
+  
+  # ============================== #
+  # MDA (2003-2012)   #
+  cat("Applying MDA interventions (2003-2012)...\n")
+  
+  df$MDA_CDTI <- ifelse(df$ADMIN0 %in% "Benin" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988") & df$Year %in% c(2003:2013), 1,
+                        ifelse(df$ADMIN0 %in% "Burkina Faso" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(2003:2013), 1,
+                               ifelse(df$ADMIN0 %in% "Cote d'Ivoire" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III WEST - MAR 1977", "PHASE IV - MAR 1979", "SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(2008:2013), 1,
+                                      ifelse(df$ADMIN0 %in% "Ghana" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE II - JAN 1976", "PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988", "SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(2003:2013), 1,
+                                             ifelse(df$ADMIN0 %in% "Togo" & df$ADMIN1 %in% c("Kara", "Centrale", "Savanes") & df$PHASE %in% c("PHASE II - JAN 1976", "PHASE III EAST - JUL 1977") & df$Year %in% c(2003:2013), 1,
+                                                    ifelse(df$ADMIN0 %in% "Togo" & df$PHASE %in% "SOUTHERN EXTENSION - FEB 1988" & df$Year %in% c(2003:2013), 1,
+                                                           ifelse(df$ADMIN0 %in% "Guinea" & df$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "SOUTHERN FOREST EXTENSION - JAN 1990") & df$Year %in% c(2003:2013), 1,
+                                                                  ifelse(df$ADMIN0 %in% "Guinea-Bissau" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(2003:2013), 1,
+                                                                         ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "PHASE III WEST - MAR 1977") & df$Year %in% c(2003:2013), 1,
+                                                                                ifelse(df$ADMIN0 %in% "Niger" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & df$Year %in% c(2003:2013), 1,
+                                                                                       ifelse(df$ADMIN0 %in% "Senegal" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(2003:2013), 1,
+                                                                                              NA)))))))))))
 
-dfOCP_included5$Endemicity_tmp <- dfOCP_included5$Endemicity
+# Update MDA for treatment naive areas
+df$MDA_CDTI <- ifelse(df$MDA_status == "Treatment naive", 0, df$MDA_CDTI)
+#cat("MDA for 2003-2012 applied and updated for Treatment naive areas.\n")
 
-dfOCP_included5_lastyr <- subset(dfOCP_included5, Year == 2022)
-nrow(dfOCP_included5_lastyr) # 670 IUs
+# ============================== #
+# Biannual CDTI (2003-2012)   #
+cat("Applying biannual MDA interventions (2003 onwards)...\n")
 
-#dfOCP_included5_check <- subset(dfOCP_included5, dfOCP_included5$ADMIN0 == "Ghana") # check biannual in Togo
+df$MDA_CDTI_Biannual <- ifelse(df$ADMIN0 %in% "Benin" & df$SIZ_label == "SIZ" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "SOUTHERN EXTENSION - FEB 1988") & df$Year %in% c(2003:2013), 1,
+                               ifelse(df$ADMIN0 %in% "Ghana" & df$SIZ_label == "SIZ" & df$PHASE %in% "PHASE III EAST - JUL 1977" & df$Year %in% c(2003:2013), 1,
+                                      ifelse(df$ADMIN0 %in% "Ghana" & df$endemicity_baseline %in% c("mesoendemic", "hyperendemic") & df$Year %in% c(2009:2022), 1,
+                                             ifelse(df$ADMIN0 %in% "Guinea" & df$SIZ_label == "SIZ" & df$PHASE %in% c("WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990") & df$Year %in% c(2003:2013), 1,
+                                                    ifelse(df$ADMIN0 %in% "Togo" & df$IUs_NAME_MAPPING %in% c("Anie", "OGOU", "AMOU", "HAHO") & df$Year %in% c(2014:2022), 1,
+                                                           ifelse(df$ADMIN0 %in% "Togo" & df$IUs_NAME_MAPPING %in% c("Kpendjal", "Kpendjal-Ouest", "OTI", "OtI-Sud",
+                                                                                                                     "ASSOLI", "BASSAR", "BINAH", "DANKPEN", "DOUFELGOU", "KERAN", "KOZAH",
+                                                                                                                     "TCHAOUDJO", "MO", "SOTOUBOUA") & df$Year %in% c(2003:2022), 1, NA))))))
 
-# =================================================================================================== #
-#                        Add in Coverage & number of rounds values                                    #
+# Update biannual MDA for treatment naive areas
+df$MDA_CDTI_Biannual <- ifelse(df$MDA_status == "Treatment naive", 0, df$MDA_CDTI_Biannual)
+#cat("Biannual MDA for 2003-2012 applied and updated for Treatment naive areas.\n")
 
-dfOCP_included5$MDA_CDTI_raw <- NA
+# check number of IUs at this stage:
+cat("Rows in 2022 after processing (updating interventions after 2002):", nrow(subset(df, Year == 2022)), "\n")
+cat("Unique IU_ID_MAPPING count after processing (updating interventions after 2002):", length(unique(df$IU_ID_MAPPING)), "\n")
 
-dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), 0.52, NA)
-dfOCP_included5$cov_source <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), "assumed", NA)
-dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), "assumed (non-CDTI coverage)", NA)
 
-dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), 0.65, dfOCP_included5$Cov.in2)
-dfOCP_included5$cov_source <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), "assumed", dfOCP_included5$cov_source)
-dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), "assumed (CDTI coverage)", dfOCP_included5$cov_specific_source)
+return(df)
+}
 
-dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), 0.65, dfOCP_included5$Cov.in2)
-dfOCP_included5$cov_source <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), "IU-level coverage", dfOCP_included5$cov_source)
-dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), "ESPEN", dfOCP_included5$cov_specific_source)
+# call function :
+dfOCP_included4 <- apply_OCP_interventions_SIZ_2003_2012_biannual(dfOCP_included4)
 
-dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), 0.25, dfOCP_included5$Cov.in2)
-dfOCP_included5$cov_source <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), "IU-level coverage", dfOCP_included5$cov_source)
-dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), "ESPEN", dfOCP_included5$cov_specific_source)
 
-dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov == 0 & dfOCP_included5$Year %in% c(2014:2022), NA, dfOCP_included5$Cov.in2)
+# # need to remove vector control, annual non-CDTI and CDTI in those IUs where pre_ESPEN = EXCLUDE (expect Ghana meso and hyper endemic IUs)
+# OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+# OCP_DF3$MDA_nonCDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$MDA_nonCDTI) # update, if in treatment naive area = 0 non CDTI
+# 
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$MDA_CDTI) # update, if in treatment naive area = 0 non CDTI
+# 
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 != "Ghana", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 non CDTI
+# OCP_DF3$vector_control <- ifelse(OCP_DF3$Pre_ESPEN_MDA_history == "Exclude" & OCP_DF3$Year < 2014 & OCP_DF3$ADMIN0 == "Ghana" & OCP_DF3$endemicity_baseline == "hypoendemic", 0, OCP_DF3$vector_control) # update, if in treatment naive area = 0 non CDTI
+# 
+# # NOTES:
+# # Togo bi-annual in non-SIZ Plateau region : Anie, OGOU, AMOU, HAHO (2014 - 2023)
+# # Togo biannual in Savanes : Kpendjal, Kpendjal-Ouest, OTI, OtI-Sud (2003 - 2023)
+# # Togo biannual in Kara: all of Kara; ASSOLI, BASSAR, BINAH, DANKPEN, DOUFELGOU, KERAN, KOZAH  (2003-2023)
+# # Togo biannual in Centrale: TCHAOUDJO, MO, SOTOUBOUA (2003 - 2023)
+# 
+# # OCP_DF3_Ghana <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Ghana") # check biannual in Togo
+# #GHA0216421474 (meso) # want to keep pre-ESPEN (even though "Exclude") b/c mesoendemic
+# #GHA0216421476 (hypo) #remove preESPEN because "exclude & hypoendemic
+# 
+# # OCP_DF3_Togo <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Togo") # check biannual in Togo
+# 
+# #OCP_DF3_check <- subset(OCP_DF3, Pre_ESPEN_MDA_history == "Exclude" & ESPEN_MDA_history == "Include")
+# #OCP_DF3_check <- subset(OCP_DF3, Pre_ESPEN_MDA_history == "Include" & ESPEN_MDA_history == "Include")
+# 
+# # Filling in MDA presence based on ESPEN data (2013 - 2022)  #
+# OCP_DF3$MDA_CDTI <- ifelse(OCP_DF3$EpiCov > 0 & OCP_DF3$Year %in% c(2014:2022), 1, OCP_DF3$MDA_CDTI)
+# 
+# # need to remove 1 from biannual where no annual CDTI between 2014-2022
+# OCP_DF3$MDA_CDTI_Biannual <- ifelse(OCP_DF3$MDA_CDTI == 0 | is.na(OCP_DF3$MDA_CDTI) & OCP_DF3$Year %in% c(2014:2022), 0, OCP_DF3$MDA_CDTI_Biannual)
+# 
+# #OCP_DF3_Ghana <- subset(OCP_DF3, OCP_DF3$ADMIN0 == "Ghana") # check biannual in Togo
+# #OCP_DF3$Year_temp <- OCP_DF3$Year
 
-# finally specify number of rounds
-dfOCP_included5$number_rnds <- rowSums(dfOCP_included5[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
 
-#dfOCP_included5_check <- subset(dfOCP_included5, dfOCP_included5$ADMIN0 == "Ghana") # check biannual in Togo
+# ============================================================================= #
+#   Function to update MDA and fill in MDA during ESPEN years                   #
+# ============================================================================= #
 
-dfOCP_included5$vector_control <- ifelse(dfOCP_included5$Year %in% c(2023:2025) & dfOCP_included5$ADMIN0 != "Uganda", 0, dfOCP_included5$vector_control) # remove errenous VC == 1 in 2023 -
-# CIV0163615400 – vector control from 2022? should be 0
+update_MDA_including_ESPENyrs <- function(df) {
+  # Remove vector control, annual non-CDTI, and CDTI for pre-ESPEN EXCLUDE IUs
+  
+  # Update MDA_nonCDTI for pre-ESPEN "Exclude" IUs
+  df$MDA_nonCDTI <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 != "Ghana", 0, df$MDA_nonCDTI)
+  df$MDA_nonCDTI <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 == "Ghana" & df$endemicity_baseline == "hypoendemic", 0, df$MDA_nonCDTI)
+  
+  # Update MDA_CDTI for pre-ESPEN "Exclude" IUs
+  df$MDA_CDTI <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 != "Ghana", 0, df$MDA_CDTI)
+  df$MDA_CDTI <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 == "Ghana" & df$endemicity_baseline == "hypoendemic", 0, df$MDA_CDTI)
+  
+  # Update vector_control for pre-ESPEN "Exclude" IUs
+  df$vector_control <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 != "Ghana", 0, df$vector_control)
+  df$vector_control <- ifelse(df$Pre_ESPEN_MDA_history == "Exclude" & df$Year < 2014 & df$ADMIN0 == "Ghana" & df$endemicity_baseline == "hypoendemic", 0, df$vector_control)
+  
+  cat("MDA for pre-ESPEN Exclude IUs has been updated.\n")
+  
+  # Filling in MDA presence based on ESPEN data (2013 - 2022)
+  df$MDA_CDTI <- ifelse(df$EpiCov > 0 & df$Year %in% c(2014:2022), 1, df$MDA_CDTI)
+  
+  cat("MDA_CDTI updated for ESPEN data from 2014 to 2022.\n")
+  
+  # Remove 1 from biannual where no annual CDTI between 2014-2022
+  df$MDA_CDTI_Biannual <- ifelse(df$MDA_CDTI == 0 | is.na(df$MDA_CDTI) & df$Year %in% c(2014:2022), 0, df$MDA_CDTI_Biannual)
+  
+  cat("Biannual MDA_CDTI has been updated for 2014-2022.\n")
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (updating MDA & including MDA during ESPEN years):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (updating MDA & including MDA during ESPEN years):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-check_df <- subset(dfOCP_included5, Year == 2022)
-nrow(check_df) # 670 IUs
+# Call function:
+dfOCP_included4 <- update_MDA_including_ESPENyrs(dfOCP_included4)
 
-# =================================================================================================== #
-# 5) label each IU on forward status: MDA stopped (post intervention surveillance in 2022 or 2021     #
-#    or all EpiCov == 0 for "unknowns" / MDA continue/ treatment naive
+# # =================================================================================================== #
+# #                                   4) extend by 3 years (2023- 2025)                                 #
+# 
+# dfOCP_included4 <- OCP_DF3
+# dfOCP_included4_lastyr <- subset(dfOCP_included4, Year == 2022)
+# nrow(dfOCP_included4_lastyr) # 670 IUs
+# 
+# #FinalESPENyr <- 2013
+# FinalESPENyr <- 2022
+# 
+# dfls <- split(dfOCP_included4, dfOCP_included4$IU_ID_MAPPING)
+# 
+# ## new list of dfs
+# newdf <- vector("list", length(dfls))
+# 
+# lsid <- split(dfOCP_included4$IU_ID_MAPPING, dfOCP_included4$IU_ID_MAPPING)
+# lsid <- unique(unlist(lsid))
+# 
+# # loop to fill in missing years and columns
+# 
+# #loop_func <- function(dfls, dfAPOC_included5, FinalESPENyr, newdf, lsid) {
+# for (i in 1:length(dfls)) {
+# 
+#   newdf[[i]] <- subset(dfls[[i]], select=colnames(dfOCP_included4))
+# 
+#   #IUStartMDA <- max(min(newdf[[i]]$Year) - min(newdf[[i]]$Cum_MDA) - start)
+# 
+#   IUend <- 2025
+# 
+#   newdf[[i]]$IUend <- IUend
+#   Futureyrs <- IUend - FinalESPENyr ## prior years to include
+# 
+#   #PriorMDA <- FinalESPENyr - IUStartMDA ## prior MDA rounds
+# 
+#   newdf[[i]]$lsID <- i
+# 
+#   i
+# 
+#   if (is.na(IUend)!=T) {
+#     if(IUend>FinalESPENyr) {
+#       # if cumulative rounds greater than 1, augment data frame
+#       # by repeating the first row
+# 
+#       tmp <- newdf[[i]][rep(1, each = (min(IUend - newdf[[i]]$Year))), ]
+# 
+#       # fill in the years from start date of IU to first year on ESPEN
+#       #tmp$Year <- seq(IUstart, min(newdf[[i]]$Year)-1)
+#       tmp$Year <- seq(FinalESPENyr+1, IUend)
+# 
+#     }
+# 
+#     # #enedmicity category given "Augmented Status"
+#     tmp$Endemicity <- "Augmented"
+#     tmp$MDA_scheme <- "Augmented"
+#     # #tmp$Endemicity_ID <- 6
+# 
+#     newdf[[i]] <- rbind(newdf[[i]], tmp) # want tmp at end
+#   }
+# }
+# 
+# #}
+# 
+# 
+# #test <- loop_func(dfls = dfls, dfAPOC_included = dfAPOC_included5, FinalESPENyr = FinalESPENyr, newdf = newdf, lsid = lsid)
+# 
+# newdf <- do.call(rbind, newdf)
+# 
+# dfOCP_included5 <- newdf
+# 
+# dfOCP_included5$Year_tmp <- dfOCP_included5$Year
+# 
+# dfOCP_included5$Endemicity_tmp <- dfOCP_included5$Endemicity
+# 
+# dfOCP_included5_lastyr <- subset(dfOCP_included5, Year == 2022)
+# nrow(dfOCP_included5_lastyr) # 670 IUs
+# 
+# #dfOCP_included5_check <- subset(dfOCP_included5, dfOCP_included5$ADMIN0 == "Ghana") # check biannual in Togo
 
-final_endemic_PIS_yr_check <- dfOCP_included5 %>%
-  filter(Endemicity == "Endemic (under post-intervention surveillance)") %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(LastYear = max(Year))
+# ============================================================================================ #
+#                           Function to extend years from 2023-2025                            #
+# ============================================================================================ #
 
-dfOCP_included6 <- dfOCP_included5 # reset here
-length(unique(dfOCP_included6$IU_ID_MAPPING))
+extend_IU_years_2023_2025 <- function(df, FinalESPENyr = 2022) {
+  
+  # Subset the dataframe for the last year (2022)
+  df_lastyr <- subset(df, Year == FinalESPENyr)
+  
+  # Split the dataframe by IU_ID_MAPPING
+  dfls <- split(df, df$IU_ID_MAPPING)
+  
+  # New list of dataframes to store the extended rows
+  newdf <- vector("list", length(dfls))
+  
+  # Loop through each IU and add rows for 2023-2025
+  for (i in 1:length(dfls)) {
+    
+    newdf[[i]] <- subset(dfls[[i]], select = colnames(df))  # Copy the columns structure of original df
+    
+    # Define the end year for extension (2025)
+    IUend <- 2025
+    
+    newdf[[i]]$IUend <- IUend
+    Futureyrs <- IUend - FinalESPENyr  # Number of years to add
+    
+    newdf[[i]]$lsID <- i  # Store the list ID as a reference
+    
+    # Check if the IU should have rows extended for 2023-2025
+    if (!is.na(IUend)) {
+      if (IUend > FinalESPENyr) {
+        # Create temporary rows for the years 2023-2025
+        tmp <- newdf[[i]][rep(1, each = Futureyrs), ]
+        tmp$Year <- seq(FinalESPENyr + 1, IUend)
+        
+        # Set the Endemicity and MDA_scheme for the new rows
+        tmp$Endemicity <- "Augmented"
+        tmp$MDA_scheme <- "Augmented"
+        
+        # Add the new rows to the existing data
+        newdf[[i]] <- rbind(newdf[[i]], tmp)
+      }
+    }
+  }
+  
+  # Combine the list of dataframes back into a single dataframe
+  newdf_combined <- do.call(rbind, newdf)
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating years 2023-2025):", nrow(subset(newdf_combined, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating years 2023-2025):", length(unique(newdf_combined$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(newdf_combined)
+}
 
-dfOCP_included6 <- dfOCP_included6 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022 = case_when(
-      all(
-        any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-        #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-      ) ~ "MDA continues",
-      all(
-        any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported", "Non-endemic")) &
-          any(EpiCov > 0) &
-          any(Cum_MDA > 0)
-      ) ~ "MDA continues",
-      any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
-      all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-            all(EpiCov == 0) &
-            any(Cum_MDA > 0) &
-            !all(is.na(Cov.in2))
-      ) ~ "MDA stopped",
-      any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
-      any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
-      all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
-      #all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2))) ~ "MDA stopped",
-      all(is.na(Cov.in2)) ~ "Treatment naive",
-      TRUE ~ NA
+# call function:
+dfOCP_included5 <- extend_IU_years_2023_2025(dfOCP_included4, FinalESPENyr = 2022)
+
+
+# # =================================================================================================== #
+# #                        Add in Coverage & number of rounds values                                    #
+# 
+# dfOCP_included5$MDA_CDTI_raw <- NA
+# 
+# dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), 0.52, NA)
+# dfOCP_included5$cov_source <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), "assumed", NA)
+# dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$MDA_nonCDTI == 1 & dfOCP_included5$Year %in% c(1988:2013), "assumed (non-CDTI coverage)", NA)
+# 
+# dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), 0.65, dfOCP_included5$Cov.in2)
+# dfOCP_included5$cov_source <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), "assumed", dfOCP_included5$cov_source)
+# dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$MDA_CDTI == 1 & dfOCP_included5$Year %in% c(1997:2013), "assumed (CDTI coverage)", dfOCP_included5$cov_specific_source)
+# 
+# dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), 0.65, dfOCP_included5$Cov.in2)
+# dfOCP_included5$cov_source <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), "IU-level coverage", dfOCP_included5$cov_source)
+# dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$EpiCov >= 65 & dfOCP_included5$Year %in% c(2014:2022), "ESPEN", dfOCP_included5$cov_specific_source)
+# 
+# dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), 0.25, dfOCP_included5$Cov.in2)
+# dfOCP_included5$cov_source <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), "IU-level coverage", dfOCP_included5$cov_source)
+# dfOCP_included5$cov_specific_source <- ifelse(dfOCP_included5$EpiCov < 65 & dfOCP_included5$Year %in% c(2014:2022), "ESPEN", dfOCP_included5$cov_specific_source)
+# 
+# dfOCP_included5$Cov.in2 <- ifelse(dfOCP_included5$EpiCov == 0 & dfOCP_included5$Year %in% c(2014:2022), NA, dfOCP_included5$Cov.in2)
+# 
+# # finally specify number of rounds
+# dfOCP_included5$number_rnds <- rowSums(dfOCP_included5[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+# 
+# #dfOCP_included5_check <- subset(dfOCP_included5, dfOCP_included5$ADMIN0 == "Ghana") # check biannual in Togo
+# 
+# dfOCP_included5$vector_control <- ifelse(dfOCP_included5$Year %in% c(2023:2025) & dfOCP_included5$ADMIN0 != "Uganda", 0, dfOCP_included5$vector_control) # remove errenous VC == 1 in 2023 -
+# # CIV0163615400 – vector control from 2022? should be 0
+# 
+# check_df <- subset(dfOCP_included5, Year == 2022)
+# nrow(check_df) # 670 IUs
+
+# ============================================================================================ #
+#     Function to create new intervention cols (including source info) & modify existing       #
+# ============================================================================================ #
+
+create_edit_intervention_cols <- function(df) {
+  # Create a new column for raw MDA CDTI
+  df$MDA_CDTI_raw <- NA
+  
+  # Apply interventions for non-CDTI MDA (1988 - 2013)
+  df$Cov.in2 <- ifelse(df$MDA_nonCDTI == 1 & df$Year %in% c(1988:2013), 0.52, NA)
+  df$cov_source <- ifelse(df$MDA_nonCDTI == 1 & df$Year %in% c(1988:2013), "assumed", NA)
+  df$cov_specific_source <- ifelse(df$MDA_nonCDTI == 1 & df$Year %in% c(1988:2013), "assumed (non-CDTI coverage)", NA)
+  
+  # Apply interventions for CDTI MDA (1997 - 2013)
+  df$Cov.in2 <- ifelse(df$MDA_CDTI == 1 & df$Year %in% c(1997:2013), 0.65, df$Cov.in2)
+  df$cov_source <- ifelse(df$MDA_CDTI == 1 & df$Year %in% c(1997:2013), "assumed", df$cov_source)
+  df$cov_specific_source <- ifelse(df$MDA_CDTI == 1 & df$Year %in% c(1997:2013), "assumed (CDTI coverage)", df$cov_specific_source)
+  
+  # Apply interventions for ESPEN MDA (2014 - 2022)
+  df$Cov.in2 <- ifelse(df$EpiCov >= 65 & df$Year %in% c(2014:2022), 0.65, df$Cov.in2)
+  df$cov_source <- ifelse(df$EpiCov >= 65 & df$Year %in% c(2014:2022), "IU-level coverage", df$cov_source)
+  df$cov_specific_source <- ifelse(df$EpiCov >= 65 & df$Year %in% c(2014:2022), "ESPEN", df$cov_specific_source)
+  
+  # For lower coverage values (<65%) between 2014-2022
+  df$Cov.in2 <- ifelse(df$EpiCov < 65 & df$Year %in% c(2014:2022), 0.25, df$Cov.in2)
+  df$cov_source <- ifelse(df$EpiCov < 65 & df$Year %in% c(2014:2022), "IU-level coverage", df$cov_source)
+  df$cov_specific_source <- ifelse(df$EpiCov < 65 & df$Year %in% c(2014:2022), "ESPEN", df$cov_specific_source)
+  
+  # For 0 coverage values, set Cov.in2 to NA
+  df$Cov.in2 <- ifelse(df$EpiCov == 0 & df$Year %in% c(2014:2022), NA, df$Cov.in2)
+  
+  # Calculate the number of rounds (non-CDTI + CDTI + Biannual)
+  df$number_rnds <- rowSums(df[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+  
+  # Adjust vector control for 2023-2025, excluding Uganda
+  df$vector_control <- ifelse(df$Year %in% c(2023:2025) & df$ADMIN0 != "Uganda", 0, df$vector_control)
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating further & editing existing intervention cols):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating further & editing existing intervention cols):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
+
+# call function:
+dfOCP_included5 <- create_edit_intervention_cols(dfOCP_included5)
+
+
+# # =================================================================================================== #
+# # 5) label each IU on forward status: MDA stopped (post intervention surveillance in 2022 or 2021     #
+# #    or all EpiCov == 0 for "unknowns" / MDA continue/ treatment naive
+# 
+# final_endemic_PIS_yr_check <- dfOCP_included5 %>%
+#   filter(Endemicity == "Endemic (under post-intervention surveillance)") %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   summarise(LastYear = max(Year))
+# 
+# dfOCP_included6 <- dfOCP_included5 # reset here
+# length(unique(dfOCP_included6$IU_ID_MAPPING))
+# 
+# dfOCP_included6 <- dfOCP_included6 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022 = case_when(
+#       all(
+#         any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#         #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#       ) ~ "MDA continues",
+#       all(
+#         any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported", "Non-endemic")) &
+#           any(EpiCov > 0) &
+#           any(Cum_MDA > 0)
+#       ) ~ "MDA continues",
+#       any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
+#       all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#             all(EpiCov == 0) &
+#             any(Cum_MDA > 0) &
+#             !all(is.na(Cov.in2))
+#       ) ~ "MDA stopped",
+#       any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+#       any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+#       all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
+#       #all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2))) ~ "MDA stopped",
+#       all(is.na(Cov.in2)) ~ "Treatment naive",
+#       TRUE ~ NA
+#     )
+#   )
+# 
+# dfOCP_included6$Endemicity_tmp <- dfOCP_included6$Endemicity
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# nrow(dfOCP_included6_lastyr) # 670 IUs
+# 
+# # =================== #
+# # NER code from below #
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# merged_OCP <- ESPEN_IUs %>%
+#   left_join(dfOCP_included6_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# merged_NER <- subset(merged_OCP, ADMIN0ISO3.x == "NER" & trt_status_2022 == "MDA stopped") # 14 IUs
+# NER_all_vec <- unique(merged_NER$IUs_NAME_MAPPING)
+# #NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5")
+# # updated March 2025 - include more NER Ius
+# NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5",
+#                     "Boboye", "Gaya", "Dioundiou", "Tera", "Bankilare")
+# # check difference - i.e., those 5 which will be removed
+# difference <- setdiff(NER_all_vec, NER_to_include)
+# print(difference)
+# subset_NER_IUstoremove <- subset(merged_NER, IUs_NAME_MAPPING %in% difference)
+# 
+# merged_NER <- subset(merged_NER, IUs_NAME_MAPPING %in% NER_to_include)
+# pattern <- paste(NER_to_include, collapse="|")
+# NER_remaining_vec <- gsub(pattern, "", NER_all_vec)
+# 
+# # continue here - prune Niger so only border IUs with Nurkina Faso + benin included (with code above isolating those IUs)
+# dfOCP_included6 <- subset(dfOCP_included6, !IUs_NAME_MAPPING %in% NER_remaining_vec ) # need to get NER_remaining_vec from below!
+# 
+# dfOCP_included6$Cum_MDA_tmp <- dfOCP_included6$Cum_MDA
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# nrow(dfOCP_included6_lastyr) # 665 IUs (5 removed from NER)
+#                             #  670 - none now removed from NER in this step (April 25')
+# 
+# # testing/ checking labelling over trt_status_2022
+# dfOCP_included6_check_MDAstopped <- subset(dfOCP_included6, trt_status_2022 == "MDA stopped")
+# length(unique(dfOCP_included6_check_MDAstopped$IU_ID_MAPPING))
+# 
+# dfOCP_included6_check_MDAcont <- subset(dfOCP_included6, trt_status_2022 == "MDA continues")
+# length(unique(dfOCP_included6_check_MDAcont$IU_ID_MAPPING))
+# 
+# dfOCP_included6_check_trtnaive <- subset(dfOCP_included6, trt_status_2022 == "Treatment naive")
+# length(unique(dfOCP_included6_check_trtnaive$IU_ID_MAPPING)) # 57 IUs
+# 
+# # check those where Cov.in2 is 0 for all years pre 2014
+# filtered_df <- dfOCP_included6 %>% filter(Year < 2014) # Filter rows where Year is pre-2014
+# unique_subset <- filtered_df %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   summarise(Cov.in2_sum = sum(Cov.in2, na.rm = TRUE)) %>%
+#   filter(Cov.in2_sum == 0) %>%
+#   select(IU_ID_MAPPING) # Group by IU_ID_Mapping and check if the sum of Cov.in2 for each group is 0
+# 
+# result <- unique_subset$IU_ID_MAPPING # Now, unique_subset contains the unique IU_ID_Mapping where Cov.in2 is 0 for all years pre-2014
+# dfOCP_included6_check_pre2014_Cov0 <- subset(dfOCP_included6, IU_ID_MAPPING %in% result)
+# 
+# # added July 2024 #
+# 
+# dfOCP_included6 <- dfOCP_included6 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     trt_status_2022_v2 = case_when(
+#       all(
+#         any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#         #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+#       ) ~ "MDA continues",
+#       all(
+#         any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#           any(EpiCov > 0) &
+#           any(Cum_MDA > 0)
+#       ) ~ "MDA continues",
+#       any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
+#       all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+#             all(EpiCov == 0) &
+#             any(Cum_MDA > 0) &
+#             !all(is.na(Cov.in2))
+#       ) ~ "MDA stopped: no MDA in ESPEN years",
+#       any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
+#       any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
+#       all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
+#       all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
+#       all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
+#       all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
+#       all(is.na(Cov.in2)) ~ "Treatment naive",
+#       TRUE ~ trt_status_2022
+#     )
+#   )
+# 
+# unique(dfOCP_included6$trt_status_2022_v2)
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# nrow(dfOCP_included6_lastyr) # 665 IUs
+#                              # 670 IUs (April 25') - none now removed from NER at this stage
+
+
+# ================================================================================================== #
+#          Function to create trt_status_2022 and trt_status_2022_v2 columns/variables               #
+# ================================================================================================== #
+
+create_trt_status_variable <- function(df) {
+  
+  # create trt_status_2022 variable:
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      trt_status_2022 = case_when(
+        all(
+          any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+          #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+        ) ~ "MDA continues",
+        all(
+          any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported", "Non-endemic")) &
+            any(EpiCov > 0) &
+            any(Cum_MDA > 0)
+        ) ~ "MDA continues",
+        any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped",
+        all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+              all(EpiCov == 0) &
+              any(Cum_MDA > 0) &
+              !all(is.na(Cov.in2))
+        ) ~ "MDA stopped",
+        any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+        any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped",
+        all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped", # check
+        #all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2))) ~ "MDA stopped",
+        all(is.na(Cov.in2)) ~ "Treatment naive",
+        TRUE ~ NA
+      )
     )
-  )
+  
+  # Perform checks for different `trt_status_2022` categories
+  df_check_MDAstopped <- subset(df, trt_status_2022 == "MDA stopped")
+  cat("Number of IUs consdiered 'MDA stopped':", length(unique(df_check_MDAstopped$IU_ID_MAPPING)), "\n")
+  
+  df_check_MDAcont <- subset(df, trt_status_2022 == "MDA continues")
+  cat("Number of IUs considered 'MDA continues':", length(unique(df_check_MDAcont$IU_ID_MAPPING)), "\n")
+  
+  df_check_trtnaive <- subset(df, trt_status_2022 == "Treatment naive")
+  cat("Number of IUs considered 'Treatment naive':", length(unique(df_check_trtnaive$IU_ID_MAPPING)), "\n")
+  
+  # Check where Cov.in2 is 0 for all years pre-2014
+  filtered_df <- df %>% filter(Year < 2014) # Filter rows where Year is pre-2014
+  unique_subset <- filtered_df %>%
+    group_by(IU_ID_MAPPING) %>%
+    summarise(Cov.in2_sum = sum(Cov.in2, na.rm = TRUE)) %>%
+    filter(Cov.in2_sum == 0) %>%
+    select(IU_ID_MAPPING) # Group by IU_ID_Mapping and check if the sum of Cov.in2 for each group is 0
+  
+  result <- unique_subset$IU_ID_MAPPING # Get the unique IU_ID_Mapping where Cov.in2 is 0 for all years pre-2014
+  df_check_pre2014_Cov0 <- subset(df, IU_ID_MAPPING %in% result)
+  cat("Number of IUs with Cov.in2 = 0 for all years pre-2014:", length(unique(df_check_pre2014_Cov0$IU_ID_MAPPING)), "\n")
+  
+  # Create or update the trt_status_2022_v2 column
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      trt_status_2022_v2 = case_when(
+        all(
+          any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
+        ) ~ "MDA continues",
+        all(
+          any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+            any(EpiCov > 0) &
+            any(Cum_MDA > 0)
+        ) ~ "MDA continues",
+        any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
+        all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
+              all(EpiCov == 0) &
+              any(Cum_MDA > 0) &
+              !all(is.na(Cov.in2))
+        ) ~ "MDA stopped: no MDA in ESPEN years",
+        any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
+        any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
+        all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
+        all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
+        all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
+        all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
+        all(is.na(Cov.in2)) ~ "Treatment naive",
+        TRUE ~ trt_status_2022
+      )
+    ) %>%
+    ungroup()  # Remove grouping information
+  
+  df_check <- subset(df, Year == 2022)
+  
+  # Check unique values of trt_status_2022_v2
+  cat("Frequency of values in 'trt_status_2022_v2':\n")
+  print(table(df_check$trt_status_2022_v2))
+  
+  # check breakdwon of those IUs included:
+  cat("Breakdown of 'included' IUs (should be the same as earlier):\n")
+  print(table(df_check$Included))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating trt_status_2022 variable):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating trt_status_2022 variable):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-dfOCP_included6$Endemicity_tmp <- dfOCP_included6$Endemicity
+# call function:
+dfOCP_included6 <- create_trt_status_variable(dfOCP_included5)
 
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-nrow(dfOCP_included6_lastyr) # 670 IUs
 
-# =================== #
-# NER code from below #
+# # ==================================================== #
+# # MANUALLY PRUNE NIGER (no longer needed- May 2025)    #
+# # ==================================================== #
+# 
+# dfOCP_included6_NER <- subset(dfOCP_included6, ADMIN0ISO3 == "NER")
+# NER_IUs_vec <- unique(dfOCP_included6_NER$IU_ID_MAPPING)
+# 
+# ESPEN_IUs_NER <- ESPEN_IUs[which((ESPEN_IUs$ADMIN0ISO3 == "NER")),]
+# st_geometry_type(ESPEN_IUs_NER )
+# st_crs(ESPEN_IUs_NER )
+# 
+# ESPEN_IUs_NER$included_OCP <- ifelse(ESPEN_IUs_NER$IU_ID %in% NER_IUs_vec, "included", NA)
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# merged_OCP <- ESPEN_IUs %>%
+#   left_join(dfOCP_included6_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
+# 
+# 
+# merged_NER <- subset(merged_OCP, ADMIN0ISO3.x == "NER" & trt_status_2022 == "MDA stopped")
+# NER_all_vec <- unique(merged_NER$IUs_NAME_MAPPING)
+# 
+# # Set the file path to the shapefile
+# shapefile_path <- "C:/Users/mad206/OneDrive/Endgame/OCP mapping/African countries/Africa_Boundaries.shp"
+# # Read the shapefile
+# african_countries <- st_read(dsn = shapefile_path)
+# # View the attributes and structure of the shapefile
+# summary(african_countries)
+# 
+# 
+# # merged_NER <- merged_APOC[which((merged_APOC$ADMIN0ISO3.x == "NER")),]
+# # merged_NER2 <- merged_NER[which((merged_NER$included2 %in% c("included", "included as\ntreatment naive/hypoendemic or impact from LF MDA/hypoendemic"))),]
+# 
+# cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+# 
+# ggplot() +
+#   geom_sf(data = merged_OCP, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
+#   geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
+#   coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
+#   #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
+#   #coord_sf() +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# # # older pre March 2025
+# # NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5")
+# 
+# # updated March 2025 - include more NER Ius
+# NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5",
+#                     "Boboye", "Gaya", "Dioundiou", "Tera", "Bankilare")
+# 
+# merged_NER <- subset(merged_NER, IUs_NAME_MAPPING %in% NER_to_include)
+# 
+# ggplot() +
+#   geom_sf(data = merged_NER, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
+#   geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
+#   coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
+#   #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
+#   #coord_sf() +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# pattern <- paste(NER_to_include, collapse="|")
+# NER_remaining_vec <- gsub(pattern, "", NER_all_vec)
+# 
+# merged_NER <- subset(merged_NER, !IUs_NAME_MAPPING %in% NER_remaining_vec )
+# 
+# ggplot() +
+#   geom_sf(data = merged_NER, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
+#   geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
+#   geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
+#   geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
+#   coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
+#   #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
+#   #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
+#   #coord_sf() +
+#   theme_bw() +
+#   scale_fill_manual(values = cbPalette, na.value = "gray") +
+#   scale_colour_manual(na.value="gray")+
+#   labs(fill='') +
+#   theme(
+#     legend.position = "bottom",  # Place the legend at the bottom
+#     legend.direction = "horizontal")
+# 
+# dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
+# nrow(dfOCP_included6_lastyr) # 665 IUs
+#                              # 670 IUs (April 25') - NER now not trimmed
 
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-merged_OCP <- ESPEN_IUs %>%
-  left_join(dfOCP_included6_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
-merged_NER <- subset(merged_OCP, ADMIN0ISO3.x == "NER" & trt_status_2022 == "MDA stopped") # 14 IUs
-NER_all_vec <- unique(merged_NER$IUs_NAME_MAPPING)
-#NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5")
-# updated March 2025 - include more NER Ius
-NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5",
-                    "Boboye", "Gaya", "Dioundiou", "Tera", "Bankilare")
-# check difference - i.e., those 5 which will be removed
-difference <- setdiff(NER_all_vec, NER_to_include)
-print(difference)
-subset_NER_IUstoremove <- subset(merged_NER, IUs_NAME_MAPPING %in% difference)
+# table(dfOCP_included6_lastyr$Included) # same as earlier 449 included as endemic + 221 included under OCP shape
 
-merged_NER <- subset(merged_NER, IUs_NAME_MAPPING %in% NER_to_include)
-pattern <- paste(NER_to_include, collapse="|")
-NER_remaining_vec <- gsub(pattern, "", NER_all_vec)
+# # ===========================================================================================#
+# # 6) continue MDA (65% coverage) in those IUs with "MDA continuing" or "Treatment naive" (?) #
+# 
+# dfOCP_included7 <- dfOCP_included6
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   mutate(
+#     MDA_CDTI = if_else(
+#       trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+#       1,
+#       MDA_CDTI
+#     )
+#   )
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   mutate(
+#     Cov.in2 = if_else(
+#       trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+#       0.65,
+#       Cov.in2
+#     )
+#   )
+# 
+# # check
+# dfOCP_included7_check_MDAstopped <- subset(dfOCP_included7, trt_status_2022 == "MDA stopped")
+# length(unique(dfOCP_included7_check_MDAstopped$IU_ID_MAPPING))
+# dfOCP_included7_check_MDAstopped <- subset(dfOCP_included7_check_MDAstopped, Year %in% c(2023:2025))
+# 
+# dfOCP_included7_check_MDAcont <- subset(dfOCP_included7, trt_status_2022 == "MDA continues")
+# length(unique(dfOCP_included7_check_MDAcont$IU_ID_MAPPING))
+# dfOCP_included7_check_MDAcont <- subset(dfOCP_included7_check_MDAcont, Year %in% c(2023:2025))
+# 
+# dfOCP_included7_check_trtnaive <- subset(dfOCP_included7, trt_status_2022 == "Treatment naive")
+# length(unique(dfOCP_included7_check_trtnaive$IU_ID_MAPPING)) # 57 Ius
+# 
+# # ============================================================================================== #
+# # need to continue biannual where any biannual in years 2020 - 2022 (NGA and UGA) for 2023-2025
+# 
+# # first find IUs where any biannual in 2020 - 2022 (and MDA continues classification with MDA_CDTI in 2023-25)
+# 
+# filtered_ids <- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(
+#     any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
+#       any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
+#       trt_status_2022 == "MDA continues"
+#   ) %>%
+#   distinct(IU_ID_MAPPING) %>%
+#   pull(IU_ID_MAPPING)
+# 
+# dfOCP_included7$MDA_CDTI_Biannual <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% filtered_ids & dfOCP_included7$Year %in% c(2023,2024,2025), 1, dfOCP_included7$MDA_CDTI_Biannual)
 
-# continue here - prune Niger so only border IUs with Nurkina Faso + benin included (with code above isolating those IUs)
-dfOCP_included6 <- subset(dfOCP_included6, !IUs_NAME_MAPPING %in% NER_remaining_vec ) # need to get NER_remaining_vec from below!
+# # ============================================================================================== #
+# # need to continue VC status (either 2 = vector eliminated or 1 = under VC) in UGA for 2023-2025
+# # where vector control is 1 in 2022 make 1 in 2023 - 2025
+# condition <- dfOCP_included7$vector_control == 1 & dfOCP_included7$Year == 2022
+# indices <- which(condition)
+# selected_rows <- dfOCP_included7[indices, ]
+# unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
+# dfOCP_included7$vector_control <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% unique_IDIU & dfOCP_included7$Year %in% c(2023,2024,2025), 1, dfOCP_included7$vector_control)
+# # shouldnt be any vector control in 2022?
 
-dfOCP_included6$Cum_MDA_tmp <- dfOCP_included6$Cum_MDA
+# ======================================================================== #
+#        Function to update MDA in 2023-2025 including biannual            #
+# ======================================================================== #
 
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-nrow(dfOCP_included6_lastyr) # 665 IUs (5 removed from NER)
-                            #  670 - none now removed from NER in this step (April 25')
-
-# testing/ checking labelling over trt_status_2022
-dfOCP_included6_check_MDAstopped <- subset(dfOCP_included6, trt_status_2022 == "MDA stopped")
-length(unique(dfOCP_included6_check_MDAstopped$IU_ID_MAPPING))
-
-dfOCP_included6_check_MDAcont <- subset(dfOCP_included6, trt_status_2022 == "MDA continues")
-length(unique(dfOCP_included6_check_MDAcont$IU_ID_MAPPING))
-
-dfOCP_included6_check_trtnaive <- subset(dfOCP_included6, trt_status_2022 == "Treatment naive")
-length(unique(dfOCP_included6_check_trtnaive$IU_ID_MAPPING)) # 57 IUs
-
-# check those where Cov.in2 is 0 for all years pre 2014
-filtered_df <- dfOCP_included6 %>% filter(Year < 2014) # Filter rows where Year is pre-2014
-unique_subset <- filtered_df %>%
-  group_by(IU_ID_MAPPING) %>%
-  summarise(Cov.in2_sum = sum(Cov.in2, na.rm = TRUE)) %>%
-  filter(Cov.in2_sum == 0) %>%
-  select(IU_ID_MAPPING) # Group by IU_ID_Mapping and check if the sum of Cov.in2 for each group is 0
-
-result <- unique_subset$IU_ID_MAPPING # Now, unique_subset contains the unique IU_ID_Mapping where Cov.in2 is 0 for all years pre-2014
-dfOCP_included6_check_pre2014_Cov0 <- subset(dfOCP_included6, IU_ID_MAPPING %in% result)
-
-# added July 2024 #
-
-dfOCP_included6 <- dfOCP_included6 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    trt_status_2022_v2 = case_when(
-      all(
-        any(Endemicity %in% c("Endemic (MDA not delivered)", "Endemic (under MDA)") & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-        #& !any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2)))
-      ) ~ "MDA continues",
-      all(
-        any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-          any(EpiCov > 0) &
-          any(Cum_MDA > 0)
-      ) ~ "MDA continues",
-      any(Endemicity == "Unknown (under LF MDA)" & Year %in% c(2021:2022)) & any(Cov.in2 > 0 & Year %in% c(2013:2022)) ~ "MDA stopped: no MDA in 2021/2022 ESPEN",
-      all(any(MAX_Endemicity %in% c("Unknown (under LF MDA)", "Unknown (consider Oncho Elimination Mapping)", "Not reported")) &
-            all(EpiCov == 0) &
-            any(Cum_MDA > 0) &
-            !all(is.na(Cov.in2))
-      ) ~ "MDA stopped: no MDA in ESPEN years",
-      any(Endemicity == "Endemic (under post-intervention surveillance)" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: under PIS (ESPEN)",
-      any(Endemicity == "Non-endemic" & Year %in% c(2021, 2022) & !all(is.na(Cov.in2))) ~ "MDA stopped: non-endemic in 2021/2022 ESPEN",
-      all(Endemicity %in% c("Non-endemic", "Not reported")) & length(unique(Endemicity)) == 2 ~ "MDA stopped: non/endemic & not reported in ESPEN", # check
-      all(ADMIN0ISO3 == "SDN" & !all(is.na(Cov.in2)) & IUs_NAME_MAPPING != "El Radoom") ~ "MDA stopped: under PIS (other sources) or eliminated",
-      all(ADMIN0ISO3 == "SDN" & IUs_NAME_MAPPING == "El Radoom") ~ "MDA continues: remove SDN",
-      all(ADMIN0ISO3 == "SEN") ~ "MDA stopped: under PIS (other sources) or eliminated",
-      all(is.na(Cov.in2)) ~ "Treatment naive",
-      TRUE ~ trt_status_2022
+apply_MDA_interventions_2023_2025 <- function(df) {
+  
+  # Apply MDA for "MDA continues" in 2023-2025
+  df <- df %>%
+    mutate(
+      MDA_CDTI = if_else(
+        trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+        1,
+        MDA_CDTI
+      ),
+      Cov.in2 = if_else(
+        trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
+        0.65,
+        Cov.in2
+      )
     )
-  )
+  
+  # Check the number of IUs in each treatment status for 2023-2025
+  df_check_MDAstopped <- subset(df, trt_status_2022 == "MDA stopped")
+  cat("Number of IUs with 'MDA stopped' in 2023-2025:", length(unique(df_check_MDAstopped$IU_ID_MAPPING)), "\n")
+  
+  df_check_MDAcont <- subset(df, trt_status_2022 == "MDA continues")
+  cat("Number of IUs with 'MDA continues' in 2023-2025:", length(unique(df_check_MDAcont$IU_ID_MAPPING)), "\n")
+  
+  df_check_trtnaive <- subset(df, trt_status_2022 == "Treatment naive")
+  cat("Number of IUs with 'Treatment naive' in 2023-2025:", length(unique(df_check_trtnaive$IU_ID_MAPPING)), "\n")
+  
+  # Identify IUs where biannual coverage occurred in 2020-2022 and MDA continues
+  filtered_ids <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(
+      any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
+        any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
+        trt_status_2022 == "MDA continues"
+    ) %>%
+    distinct(IU_ID_MAPPING) %>%
+    pull(IU_ID_MAPPING)
+  
+  # Continue biannual MDA in 2023-2025 where conditions are met
+  df$MDA_CDTI_Biannual <- ifelse(df$IU_ID_MAPPING %in% filtered_ids & df$Year %in% c(2023, 2024, 2025), 1, df$MDA_CDTI_Biannual)
+  
+  # biannual checks (2023 - 2025)
+  cat("Biannual MDA applied for 2023-2025.\n")
+  
+  check_biannual <- subset(df, MDA_CDTI_Biannual == 1 & Year == 2025)
+  cat("check number of IUs with biannual MDA applied for 2023-2025:", nrow(check_biannual), "\n")
+  
+  # update vector control - shouldnt be any in 2023-2025 but check
+  condition <- df$vector_control == 1 & df$Year == 2022
+  indices <- which(condition)
+  selected_rows <- df[indices, ]
+  unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
+  df$vector_control <- ifelse(df$IU_ID_MAPPING %in% unique_IDIU & df$Year %in% c(2023,2024,2025), 1, df$vector_control)
+  
+  check_vc_2025 <- subset(df, vector_control == 1 & Year == 2025)
+  cat("Number of IUs with vector control in 2023-2025:", nrow(check_vc_2025), "\n")
+  
+  # Check the number of IUs in 2023-2025 for verification
+  check_2023_2025 <- subset(df, Year %in% c(2025))
+  cat("Number of IUs in 2023-2025:", nrow(check_2023_2025), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-unique(dfOCP_included6$trt_status_2022_v2)
-
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-nrow(dfOCP_included6_lastyr) # 665 IUs
-                             # 670 IUs (April 25') - none now removed from NER at this stage
-
-# ==================================================== #
-#             MANUALLY PRUNE NIGER                    #
-# ==================================================== #
-
-dfOCP_included6_NER <- subset(dfOCP_included6, ADMIN0ISO3 == "NER")
-NER_IUs_vec <- unique(dfOCP_included6_NER$IU_ID_MAPPING)
-
-ESPEN_IUs_NER <- ESPEN_IUs[which((ESPEN_IUs$ADMIN0ISO3 == "NER")),]
-st_geometry_type(ESPEN_IUs_NER )
-st_crs(ESPEN_IUs_NER )
-
-ESPEN_IUs_NER$included_OCP <- ifelse(ESPEN_IUs_NER$IU_ID %in% NER_IUs_vec, "included", NA)
-
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-merged_OCP <- ESPEN_IUs %>%
-  left_join(dfOCP_included6_lastyr, by = c("IU_ID" = "IU_ID_MAPPING"))
-
-
-merged_NER <- subset(merged_OCP, ADMIN0ISO3.x == "NER" & trt_status_2022 == "MDA stopped")
-NER_all_vec <- unique(merged_NER$IUs_NAME_MAPPING)
-
-# Set the file path to the shapefile
-shapefile_path <- "C:/Users/mad206/OneDrive/Endgame/OCP mapping/African countries/Africa_Boundaries.shp"
-# Read the shapefile
-african_countries <- st_read(dsn = shapefile_path)
-# View the attributes and structure of the shapefile
-summary(african_countries)
-
-
-# merged_NER <- merged_APOC[which((merged_APOC$ADMIN0ISO3.x == "NER")),]
-# merged_NER2 <- merged_NER[which((merged_NER$included2 %in% c("included", "included as\ntreatment naive/hypoendemic or impact from LF MDA/hypoendemic"))),]
-
-cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-
-ggplot() +
-  geom_sf(data = merged_OCP, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
-  geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
-  coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
-  #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
-  #coord_sf() +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-# # older pre March 2025
-# NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5")
-
-# updated March 2025 - include more NER Ius
-NER_to_include <- c("Gotheye", "Torodi", "Niamey 1", "Kollo", "Say", "Falmey", "Niamey 2", "Niamey 3", "Niamey 4", "Niamey 5",
-                    "Boboye", "Gaya", "Dioundiou", "Tera", "Bankilare")
-
-merged_NER <- subset(merged_NER, IUs_NAME_MAPPING %in% NER_to_include)
-
-ggplot() +
-  geom_sf(data = merged_NER, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
-  geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
-  coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
-  #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
-  #coord_sf() +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-pattern <- paste(NER_to_include, collapse="|")
-NER_remaining_vec <- gsub(pattern, "", NER_all_vec)
-
-merged_NER <- subset(merged_NER, !IUs_NAME_MAPPING %in% NER_remaining_vec )
-
-ggplot() +
-  geom_sf(data = merged_NER, aes(fill = trt_status_2022), colour = NA, alpha = 0.7) +
-  geom_sf(data = ESPEN_IUs_NER, aes(fill = included_OCP), colour = "grey", size = 1, fill = NA, alpha = 0.1) +
-  geom_sf(data = african_countries, aes(), fill = NA, colour = "black", size = 1.3) +
-  geom_sf_text(data = merged_NER, aes(label = IUs_NAME_MAPPING), size = 2.5, color = "red")+
-  coord_sf(xlim = c(0, 4), ylim = c(11.5, 15.2)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(4, 10)) +
-  #coord_sf(xlim = c(38, 44), ylim = c(8, 10)) +
-  #coord_sf(xlim = c(41, 43), ylim = c(8, 10)) +
-  #coord_sf() +
-  theme_bw() +
-  scale_fill_manual(values = cbPalette, na.value = "gray") +
-  scale_colour_manual(na.value="gray")+
-  labs(fill='') +
-  theme(
-    legend.position = "bottom",  # Place the legend at the bottom
-    legend.direction = "horizontal")
-
-dfOCP_included6_lastyr <- subset(dfOCP_included6, Year == 2022)
-nrow(dfOCP_included6_lastyr) # 665 IUs
-                             # 670 IUs (April 25') - NER now not trimmed
-
-table(dfOCP_included6_lastyr$Included) # same as earlier 449 included as endemic + 221 included under OCP shape
-
-# ===========================================================================================#
-# 6) continue MDA (65% coverage) in those IUs with "MDA continuing" or "Treatment naive" (?) #
-
-dfOCP_included7 <- dfOCP_included6
-
-dfOCP_included7 <- dfOCP_included7 %>%
-  mutate(
-    MDA_CDTI = if_else(
-      trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
-      1,
-      MDA_CDTI
-    )
-  )
-
-dfOCP_included7 <- dfOCP_included7 %>%
-  mutate(
-    Cov.in2 = if_else(
-      trt_status_2022 == "MDA continues" & Year %in% c(2023:2025),
-      0.65,
-      Cov.in2
-    )
-  )
-
-# check
-dfOCP_included7_check_MDAstopped <- subset(dfOCP_included7, trt_status_2022 == "MDA stopped")
-length(unique(dfOCP_included7_check_MDAstopped$IU_ID_MAPPING))
-dfOCP_included7_check_MDAstopped <- subset(dfOCP_included7_check_MDAstopped, Year %in% c(2023:2025))
-
-dfOCP_included7_check_MDAcont <- subset(dfOCP_included7, trt_status_2022 == "MDA continues")
-length(unique(dfOCP_included7_check_MDAcont$IU_ID_MAPPING))
-dfOCP_included7_check_MDAcont <- subset(dfOCP_included7_check_MDAcont, Year %in% c(2023:2025))
-
-dfOCP_included7_check_trtnaive <- subset(dfOCP_included7, trt_status_2022 == "Treatment naive")
-length(unique(dfOCP_included7_check_trtnaive$IU_ID_MAPPING)) # 57 Ius
-
-# ============================================================================================== #
-# need to continue biannual where any biannual in years 2020 - 2022 (NGA and UGA) for 2023-2025
-
-# first find IUs where any biannual in 2020 - 2022 (and MDA continues classification with MDA_CDTI in 2023-25)
-
-filtered_ids <- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(
-    any(Year %in% c(2020, 2021, 2022) & MDA_CDTI_Biannual == 1) &
-      any(Year %in% c(2023, 2024, 2025) & MDA_CDTI == 1) &
-      trt_status_2022 == "MDA continues"
-  ) %>%
-  distinct(IU_ID_MAPPING) %>%
-  pull(IU_ID_MAPPING)
-
-dfOCP_included7$MDA_CDTI_Biannual <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% filtered_ids & dfOCP_included7$Year %in% c(2023,2024,2025), 1, dfOCP_included7$MDA_CDTI_Biannual)
-
-# ============================================================================================== #
-# need to continue VC status (either 2 = vector eliminated or 1 = under VC) in UGA for 2023-2025
-# where vector control is 1 in 2022 make 1 in 2023 - 2025
-condition <- dfOCP_included7$vector_control == 1 & dfOCP_included7$Year == 2022
-indices <- which(condition)
-selected_rows <- dfOCP_included7[indices, ]
-unique_IDIU <- unique(selected_rows$IU_ID_MAPPING)
-dfOCP_included7$vector_control <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% unique_IDIU & dfOCP_included7$Year %in% c(2023,2024,2025), 1, dfOCP_included7$vector_control)
-# shouldnt be any vector control in 2022?
-
+# Example usage:
+dfOCP_included7 <- apply_MDA_interventions_2023_2025(dfOCP_included6)
 
 # =============================================================================== #
 # 7) create rho parameter column = start all with 0.3                             #
@@ -1085,53 +2053,100 @@ dfOCP_included7$vector_control <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% uniq
 #     adherence_par = ifelse(MDA_CDTI == 1 | MDA_nonCDTI == 1, 0.5, NA_real_)
 #   ) # for business case
 
-dfOCP_included7 <- dfOCP_included7 %>%
-  mutate(
-    adherence_par = ifelse(MDA_CDTI == 1 | MDA_nonCDTI == 1, 0.3, NA_real_)
-  ) # for Endgame
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   mutate(
+#     adherence_par = ifelse(MDA_CDTI == 1 | MDA_nonCDTI == 1, 0.3, NA_real_)
+#   ) # for Endgame
+# 
+# 
+# # ===================================================== #
+# #  8) create num_rnds and modelled_CUM_MDA cols         #
+# 
+# dfOCP_included7$number_rnds <- rowSums(dfOCP_included7[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+# 
+# dfOCP_included7$any_MDA <- ifelse(dfOCP_included7$number_rnds > 0, 1, 0)
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(CUM_MDA_modelled = cumsum(number_rnds))
+# 
+# dfOCP_included7$Cum_MDA_ESPEN <- dfOCP_included7$Cum_MDA
+# 
+# #unique(dfOCP_included7$ADMIN0ISO3)
+# 
+# dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
+# nrow(dfOCP_included7_lastyr) # 665 IUs
 
+# # =====================================#
+# # 9) label co-endemic IUS with loa     #
+# 
+# co_endemic_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs_OCP.csv")
+# 
+# unique(dfOCP_included7$ADMIN0ISO3)
+# 
+# co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
+# co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
+# co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
+# co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
+# 
+# co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
+# co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
+# 
+# dfOCP_included7$co_endemicity <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
+#                                          ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
+#                                                 ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
+#                                                        ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
 
-# ===================================================== #
-#  8) create num_rnds and modelled_CUM_MDA cols         #
+# ============================================================================ #
+#           Funtion to create co-endemicity column (oncho-LF-loa)              #
+# ============================================================================ #
 
-dfOCP_included7$number_rnds <- rowSums(dfOCP_included7[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+create_co_endemicity_column <- function(df, file_path_input) {
+  
+  # Load the co-endemicity data
+  co_endemic_data_file <- file.path(base_path, file_path_input)
+  co_endemic_IUs <- read.csv(co_endemic_data_file)
+  
+  # Identify unique IUs for different co-endemicity groups
+  co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
+  co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
+  co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
+  co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
+  
+  co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
+  co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
+  
+  # Create the co_endemicity column based on the conditions
+  df$co_endemicity <- ifelse(df$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
+                             ifelse(df$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
+                                    ifelse(df$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
+                                           ifelse(df$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
+  
+  df_check <- subset(df, Year == 2022)
+  
+  # Check unique values of trt_status_2022_v2
+  cat("Frequency of values in 'trt_status_2022_v2':\n")
+  print(table(df_check$co_endemicity))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating biannual_vc_mapping variable):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating biannual_vc_mapping variable):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-dfOCP_included7$any_MDA <- ifelse(dfOCP_included7$number_rnds > 0, 1, 0)
+# Example usage:
+dfOCP_included7 <- create_co_endemicity_column(dfOCP_included7, "co_endemic_IUs_OCP.csv")
 
-dfOCP_included7 <- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(CUM_MDA_modelled = cumsum(number_rnds))
-
-dfOCP_included7$Cum_MDA_ESPEN <- dfOCP_included7$Cum_MDA
-
-#unique(dfOCP_included7$ADMIN0ISO3)
-
-dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
-nrow(dfOCP_included7_lastyr) # 665 IUs
-
-# =====================================#
-# 9) label co-endemic IUS with loa     #
-
-co_endemic_IUs <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs_OCP.csv")
-
-unique(dfOCP_included7$ADMIN0ISO3)
-
-co_endemic_IUs_oncho_LF_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,LF,loa")
-co_endemic_IUs_oncho_LF_loa_vec <- unique(co_endemic_IUs_oncho_LF_loa$IU_ID_MAPPING)
-
-co_endemic_IUs_oncho_LF <- subset(co_endemic_IUs, co_endemicity == "oncho,LF")
-co_endemic_IUs_oncho_LF_vec <- unique(co_endemic_IUs_oncho_LF$IU_ID_MAPPING)
-
-co_endemic_IUs_oncho_loa <- subset(co_endemic_IUs, co_endemicity == "oncho,loa")
-co_endemic_IUs_oncho_loa_vec <- unique(co_endemic_IUs_oncho_loa$IU_ID_MAPPING)
-
-co_endemic_IUs_oncho <- subset(co_endemic_IUs, co_endemicity == "oncho")
-co_endemic_IUs_oncho_vec <- unique(co_endemic_IUs_oncho$IU_ID_MAPPING)
-
-dfOCP_included7$co_endemicity <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_loa_vec, "oncho,LF,loa",
-                                         ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_LF_vec, "oncho,LF",
-                                                ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_loa_vec, "oncho,loa",
-                                                       ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_endemic_IUs_oncho_vec, "oncho", "assumed oncho only"))))
 
 
 # ==========================================================================
@@ -1153,113 +2168,292 @@ dfOCP_included7$co_endemicity <- ifelse(dfOCP_included7$IU_ID_MAPPING %in% co_en
 # dfAPOC_included7$SIZ_label <- NA
 # dfAPOC_included7$MDA_nonCDTI <- NA
 
-dfOCP_included7$IUID <- dfOCP_included7$IU_ID_MAPPING
-dfOCP_included7$IUID[nchar(dfOCP_included7$IU_ID_MAPPING)==4] <-  paste(0, dfOCP_included7$IUID[nchar(dfOCP_included7$IU_ID_MAPPING)==4], sep="")
-dfOCP_included7$IUID <- paste(dfOCP_included7$ADMIN0ISO3, dfOCP_included7$IUID, sep="")
+# dfOCP_included7$IUID <- dfOCP_included7$IU_ID_MAPPING
+# dfOCP_included7$IUID[nchar(dfOCP_included7$IU_ID_MAPPING)==4] <-  paste(0, dfOCP_included7$IUID[nchar(dfOCP_included7$IU_ID_MAPPING)==4], sep="")
+# dfOCP_included7$IUID <- paste(dfOCP_included7$ADMIN0ISO3, dfOCP_included7$IUID, sep="")
+# 
+# # check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)problem_IUS_2013 <- dfAPOC_included4 %>%
+# problem_IUS_2013 <- dfOCP_included7 %>%
+#   filter(MDA_CDTI == 1) %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(n_distinct(Year) == 1 & Year == 2013) %>%
+#   ungroup() %>%
+#   distinct(IU_ID_MAPPING)
+# 
+# # check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)problem_IUS_2013 <- dfAPOC_included4 %>%
+# problem_IUS_2014 <- dfOCP_included7 %>%
+#   filter(MDA_CDTI == 1) %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   filter(n_distinct(Year) == 1 & Year == 2014) %>%
+#   ungroup() %>%
+#   distinct(IU_ID_MAPPING)
 
-# check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)problem_IUS_2013 <- dfAPOC_included4 %>%
-problem_IUS_2013 <- dfOCP_included7 %>%
-  filter(MDA_CDTI == 1) %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(n_distinct(Year) == 1 & Year == 2013) %>%
-  ungroup() %>%
-  distinct(IU_ID_MAPPING)
+# ============================================================================ #
+#         Function to create extra intervention cols and                       #
+#        checks of IUs where only MDA in 2013 or 2014 (incorrect)              #
+# ============================================================================ #
 
-# check if any IUs where only MDA_CDTI == 1 found for 2013 (erroneously coded)problem_IUS_2013 <- dfAPOC_included4 %>%
-problem_IUS_2014 <- dfOCP_included7 %>%
-  filter(MDA_CDTI == 1) %>%
-  group_by(IU_ID_MAPPING) %>%
-  filter(n_distinct(Year) == 1 & Year == 2014) %>%
-  ungroup() %>%
-  distinct(IU_ID_MAPPING)
+create_extra_intervention_cols  <- function(df) {
+  
+  # Add adherence_par column
+  df <- df %>%
+    mutate(
+      adherence_par = ifelse(MDA_CDTI == 1 | MDA_nonCDTI == 1, 0.3, NA_real_)
+    )  # for Endgame
+  
+  # Create num_rnds and modelled_CUM_MDA cols
+  df$number_rnds <- rowSums(df[c("MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual")], na.rm = TRUE)
+  df$any_MDA <- ifelse(df$number_rnds > 0, 1, 0)
+  
+  # Group by IU_ID_MAPPING to calculate CUM_MDA_modelled
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(CUM_MDA_modelled = cumsum(number_rnds)) %>%
+    ungroup()  # remove grouping
+  
+  df$Cum_MDA_ESPEN <- df$Cum_MDA
+  
+  # Create IUID column
+  df$IUID <- df$IU_ID_MAPPING
+  df$IUID[nchar(df$IUID) == 4] <- paste(0, df$IUID[nchar(df$IUID) == 4], sep = "")
+  df$IUID <- paste(df$ADMIN0ISO3, df$IUID, sep = "")
+  
+  # make control programme col
+  df$Control_prog <- "OCP"
+  
+  # update col
+  df$Cov_raw <- df$MDA_CDTI_raw
+  
+  # Check for any IUs where only MDA_CDTI == 1 in 2013 (erroneously coded)
+  problem_IUS_2013 <- df %>%
+    filter(MDA_CDTI == 1) %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(n_distinct(Year) == 1 & Year == 2013) %>%
+    ungroup() %>%
+    distinct(IU_ID_MAPPING)
+  
+  # Check for any IUs where only MDA_CDTI == 1 in 2014 (erroneously coded)
+  problem_IUS_2014 <- df %>%
+    filter(MDA_CDTI == 1) %>%
+    group_by(IU_ID_MAPPING) %>%
+    filter(n_distinct(Year) == 1 & Year == 2014) %>%
+    ungroup() %>%
+    distinct(IU_ID_MAPPING)
+  
+  # Output results of checks (no return value, just printed results)
+  cat("Number of IUs with MDA_CDTI in 2013 (problematic): ", nrow(problem_IUS_2013), "\n")
+  cat("Problematic IUs in 2013 (erroneously coded MDA_CDTI == 1):\n")
+  print(problem_IUS_2013)
+  
+  cat("Number of IUs with MDA_CDTI in 2014 (problematic): ", nrow(problem_IUS_2014), "\n")
+  cat("Problematic IUs in 2014 (erroneously coded MDA_CDTI == 1):\n")
+  print(problem_IUS_2014)
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating extra intervention cols):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating extra intervention cols):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-# =====================================================================================
-#              Biannual_VC_ col mapping                                               #
+# Example usage:
+dfOCP_included7 <- create_extra_intervention_cols(dfOCP_included7)
 
-dfOCP_included7 <- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(biannual_included = any(MDA_CDTI_Biannual == 1))
 
-dfOCP_included7<- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(VC_included = any(vector_control == 1))
+# 
+# # =====================================================================================
+# #              Biannual_VC_ col mapping                                               #
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(biannual_included = any(MDA_CDTI_Biannual == 1))
+# 
+# dfOCP_included7<- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(VC_included = any(vector_control == 1))
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(annual_only_included = all(is.na(biannual_included)) & any(MDA_CDTI == 1))
+# 
+# dfOCP_included7 <- dfOCP_included7 %>%
+#   group_by(IU_ID_MAPPING) %>%
+#   mutate(
+#     biannual_VC_mapping = case_when(
+#       all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(is.na(VC_included | VC_included == FALSE)) ~ "biannual",
+#       all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(VC_included) ~ "biannual & vector control",
+#       all(is.na(biannual_included)) & all(annual_only_included) & (all(is.na(VC_included | VC_included == FALSE)) | all(VC_included == FALSE)) ~ "annual only",
+#       all(is.na(biannual_included)) & all(annual_only_included) & all(VC_included) ~ "annual & vector control",
+#       TRUE ~ "treatment naive"
+#     )
+#   )
+# 
+# dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
+# nrow(dfOCP_included7_lastyr) # 665 IUs
+#                              # 670 IUs (April 25')
 
-dfOCP_included7 <- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(annual_only_included = all(is.na(biannual_included)) & any(MDA_CDTI == 1))
 
-dfOCP_included7 <- dfOCP_included7 %>%
-  group_by(IU_ID_MAPPING) %>%
-  mutate(
-    biannual_VC_mapping = case_when(
-      all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(is.na(VC_included | VC_included == FALSE)) ~ "biannual",
-      all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(VC_included) ~ "biannual & vector control",
-      all(is.na(biannual_included)) & all(annual_only_included) & (all(is.na(VC_included | VC_included == FALSE)) | all(VC_included == FALSE)) ~ "annual only",
-      all(is.na(biannual_included)) & all(annual_only_included) & all(VC_included) ~ "annual & vector control",
-      TRUE ~ "treatment naive"
+# ================================================================================================= #
+#   Function to create biannual_vc_mapping (intervention distribution) variable                     #
+# ================================================================================================= #
+
+create_biannual_vc_mapping <- function(df) {
+  
+  # Group by IU_ID_MAPPING and create biannual_included column
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(biannual_included = any(MDA_CDTI_Biannual == 1))
+  
+  # Group by IU_ID_MAPPING and create VC_included column
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(VC_included = any(vector_control == 1))
+  
+  # Group by IU_ID_MAPPING and create annual_only_included column
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(annual_only_included = all(is.na(biannual_included)) & any(MDA_CDTI == 1))
+  
+  # Group by IU_ID_MAPPING and create biannual_VC_mapping column
+  df <- df %>%
+    group_by(IU_ID_MAPPING) %>%
+    mutate(
+      biannual_VC_mapping = case_when(
+        all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(is.na(VC_included | VC_included == FALSE)) ~ "biannual",
+        all(biannual_included) & (all(is.na(annual_only_included)) | all(annual_only_included == FALSE)) & all(VC_included) ~ "biannual & vector control",
+        all(is.na(biannual_included)) & all(annual_only_included) & (all(is.na(VC_included | VC_included == FALSE)) | all(VC_included == FALSE)) ~ "annual only",
+        all(is.na(biannual_included)) & all(annual_only_included) & all(VC_included) ~ "annual & vector control",
+        TRUE ~ "treatment naive"
+      )
     )
-  )
+  
+  df_check <- subset(df, Year == 2022)
+  
+  # Check unique values of trt_status_2022_v2
+  cat("Frequency of values in 'trt_status_2022_v2':\n")
+  print(table(df_check$biannual_VC_mapping))
+  
+  # check number of IUs at this stage:
+  cat("Rows in 2022 after processing (creating biannual_vc_mapping variable):", nrow(subset(df, Year == 2022)), "\n")
+  cat("Unique IU_ID_MAPPING count after processing (creating biannual_vc_mapping variable):", length(unique(df$IU_ID_MAPPING)), "\n")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
-nrow(dfOCP_included7_lastyr) # 665 IUs
-                             # 670 IUs (April 25')
+# call function:
+dfOCP_included7 <- create_biannual_vc_mapping(dfOCP_included7)
 
-# ================================================================ #
-#   remove treatment naive IUs (with not-reported etc)  - MAY 2024 #
-
-# condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
-#   dfAPOC_included7$MAX_Endemicity == "Not reported"
-# condition <- dfOCP_included7$trt_status_2022 == "Treatment naive" &
-#   dfOCP_included7$MAX_Endemicity %in% c("Non-endemic","Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
+# # ================================================================ #
+# #   remove treatment naive IUs (with not-reported etc)  - MAY 2024 #
+# 
+# # condition <- dfAPOC_included7$trt_status_2022 == "Treatment naive" &
+# #   dfAPOC_included7$MAX_Endemicity == "Not reported"
+# # condition <- dfOCP_included7$trt_status_2022 == "Treatment naive" &
+# #   dfOCP_included7$MAX_Endemicity %in% c("Non-endemic","Not reported","Unknown (under LF MDA)","Unknown (consider Oncho Elimination Mapping)")
+# # indices <- which(condition)
+# # dfOCP_included7$exclude <- NA
+# # dfOCP_included7$exclude[indices] <- "exclude"
+# 
+# condition <- dfOCP_included7$trt_status_2022 == "Treatment naive"
 # indices <- which(condition)
 # dfOCP_included7$exclude <- NA
 # dfOCP_included7$exclude[indices] <- "exclude"
+# 
+# 
+# # check these IUs labelled as "exclude"
+# dfOCP_included7_exclude_subset <- subset(dfOCP_included7, exclude == "exclude")
+# dfOCP_included7_exclude_subset_lastyr <- subset(dfOCP_included7_exclude_subset, Year == 2022)
+# nrow(dfOCP_included7_exclude_subset_lastyr) # 57 IUs considered treatment naive (56 + 1 considered "endemic" in ESPEN)
+# # dfOCP_included7_exclude_subset_lastyr <- subset(dfOCP_included7_exclude_subset, Year == 2022 & !Endemicity == "Non-endemic")
+# # nrow(dfOCP_included7_exclude_subset_lastyr) # 5 IUs
+# # trt_naive_IUs_OCP_exclude <- unique(dfOCP_included7_exclude_subset_lastyr$IU_ID_MAPPING)
+# # trt_naive_IUs_OCP_exclude
+# #writeLines(as.character(trt_naive_IUs_OCP_exclude), "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/trt_naive_IUs_OCP_exclude_n4.txt")
+# 
+# unique(dfOCP_included7_exclude_subset_lastyr$MAX_Endemicity)
+# 
+# table(dfOCP_included7_exclude_subset_lastyr$MAX_Endemicity)
+# check_df <- subset(dfOCP_included7, Year == 2022)
+# table(check_df$exclude) # 57 to 
+# 
+# # filter these out so no longer included as IUs
+# dfOCP_included7 <- subset(dfOCP_included7, is.na(dfOCP_included7$exclude))
+# 
+# dfOCP_included7$Control_prog <- "OCP"
+# 
+# dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
+# nrow(dfOCP_included7_lastyr) # now 609 IUs (56 removed)
+#                              # now 613 IUs (670 - 57) in April 25'
+# 
+# unique(dfOCP_included7_lastyr$MAX_Endemicity)
+# 
+# dfOCP_included7_lastyr_subset <- subset(dfOCP_included7_lastyr, PHASE == "NON-CONTROL")
+# nrow(dfOCP_included7_lastyr_subset) # 15 IUs considered "endemic" in ESPEN but not in OCP phase shape file
+# 
+# dfOCP_included7_lastyr_subset2 <- subset(dfOCP_included7_lastyr, MAX_Endemicity %in% c("Endemic (under MDA)",
+#                                                                                       "Endemic (MDA not delivered)",
+#                                                                                       "Endemic (under post-intervention surveillance)"))
+# nrow(dfOCP_included7_lastyr_subset2) # 438 IUs (instead of 443 IUs - are these endemic ones in NER that have been pruned?)
+# 
+# dfOCP_included7$Cov_raw <- dfOCP_included7$MDA_CDTI_raw
+# 
+# check_df <- subset(dfOCP_included7, Year == 2022)
+# nrow(check_df) # 613 IUs in April 25'
 
-condition <- dfOCP_included7$trt_status_2022 == "Treatment naive"
-indices <- which(condition)
-dfOCP_included7$exclude <- NA
-dfOCP_included7$exclude[indices] <- "exclude"
+# ============================================================================= #
+#     Function to remove treatment naive IUs and checks                         #
+# ============================================================================= #
 
+remove_treatment_naive_IUs_and_check <- function(df) {
+  # Identify treatment naive IUs
+  condition <- df$trt_status_2022 == "Treatment naive"
+  indices <- which(condition)
+  
+  # Mark IUs to exclude
+  df$exclude <- NA
+  df$exclude[indices] <- "exclude"
+  
+  # Check IUs labelled as "exclude"
+  df_exclude_subset <- subset(df, exclude == "exclude")
+  df_exclude_subset_lastyr <- subset(df_exclude_subset, Year == 2022)
+  cat("Number of treatment naive IUs in 2022:", nrow(df_exclude_subset_lastyr), "\n")
+  cat("Unique Endemicity values in treatment naive IUs:", unique(df_exclude_subset_lastyr$MAX_Endemicity), "\n")
+  cat("Frequency of Endemicity in treatment naive IUs:\n")
+  print(table(df_exclude_subset_lastyr$MAX_Endemicity))
+  
+  nIUs_pre <- length(unique(df$IU_ID_MAPPING)) # store
+  
+  # Filter out treatment naive IUs
+  df <- subset(df, is.na(df$exclude))
+  
+  # Check the number of IUs after exclusion
+  df_lastyr <- subset(df, Year == 2022)
+  #cat("Number of IUs after exclusion in 2022:", nrow(df_lastyr), "\n")
+  
+  # Check for "NON-CONTROL" phase IUs
+  df_lastyr_subset <- subset(df_lastyr, PHASE == "NON-CONTROL")
+  cat("Number of NON-CONTROL phase IUs in 2022:", nrow(df_lastyr_subset), "\n")
+  
+  # Check for Endemic IUs in 2022
+  df_lastyr_subset2 <- subset(df_lastyr, MAX_Endemicity %in% c("Endemic (under MDA)", "Endemic (MDA not delivered)", "Endemic (under post-intervention surveillance)"))
+  cat("Number of endemic IUs in 2022:", nrow(df_lastyr_subset2), "\n")
+  
+  # check number of IUs at this stage:
+  cat("Unique IU_ID_MAPPING count BFORE removing treatment-naive IUs:", nIUs_pre, "\n")
+  cat("Unique IU_ID_MAPPING count After removing treatment-naive IUs:", length(unique(df$IU_ID_MAPPING)), "\n")
+  cat("Unique IU_ID_MAPPING removed because treatment-naive IUs:", nIUs_pre - length(unique(df$IU_ID_MAPPING)), "\n")
+  cat("Rows in 2022 after removing treatment-naive IUs (double-check):", nrow(subset(df, Year == 2022)), "\n")
 
-# check these IUs labelled as "exclude"
-dfOCP_included7_exclude_subset <- subset(dfOCP_included7, exclude == "exclude")
-dfOCP_included7_exclude_subset_lastyr <- subset(dfOCP_included7_exclude_subset, Year == 2022)
-nrow(dfOCP_included7_exclude_subset_lastyr) # 57 IUs considered treatment naive (56 + 1 considered "endemic" in ESPEN)
-# dfOCP_included7_exclude_subset_lastyr <- subset(dfOCP_included7_exclude_subset, Year == 2022 & !Endemicity == "Non-endemic")
-# nrow(dfOCP_included7_exclude_subset_lastyr) # 5 IUs
-# trt_naive_IUs_OCP_exclude <- unique(dfOCP_included7_exclude_subset_lastyr$IU_ID_MAPPING)
-# trt_naive_IUs_OCP_exclude
-#writeLines(as.character(trt_naive_IUs_OCP_exclude), "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/trt_naive_IUs_OCP_exclude_n4.txt")
+  
+  # Return the updated dataframe
+  return(df)
+}
 
-unique(dfOCP_included7_exclude_subset_lastyr$MAX_Endemicity)
+# call function:
+dfOCP_included7 <- remove_treatment_naive_IUs_and_check(dfOCP_included7)
 
-table(dfOCP_included7_exclude_subset_lastyr$MAX_Endemicity)
-check_df <- subset(dfOCP_included7, Year == 2022)
-table(check_df$exclude) # 57 to 
-
-# filter these out so no longer included as IUs
-dfOCP_included7 <- subset(dfOCP_included7, is.na(dfOCP_included7$exclude))
-
-dfOCP_included7$Control_prog <- "OCP"
-
-dfOCP_included7_lastyr <- subset(dfOCP_included7, Year == 2022)
-nrow(dfOCP_included7_lastyr) # now 609 IUs (56 removed)
-                             # now 613 IUs (670 - 57) in April 25'
-
-unique(dfOCP_included7_lastyr$MAX_Endemicity)
-
-dfOCP_included7_lastyr_subset <- subset(dfOCP_included7_lastyr, PHASE == "NON-CONTROL")
-nrow(dfOCP_included7_lastyr_subset) # 15 IUs considered "endemic" in ESPEN but not in OCP phase shape file
-
-dfOCP_included7_lastyr_subset2 <- subset(dfOCP_included7_lastyr, MAX_Endemicity %in% c("Endemic (under MDA)",
-                                                                                      "Endemic (MDA not delivered)",
-                                                                                      "Endemic (under post-intervention surveillance)"))
-nrow(dfOCP_included7_lastyr_subset2) # 438 IUs (instead of 443 IUs - are these endemic ones in NER that have been pruned?)
-
-dfOCP_included7$Cov_raw <- dfOCP_included7$MDA_CDTI_raw
-
-check_df <- subset(dfOCP_included7, Year == 2022)
-nrow(check_df) # 613 IUs in April 25'
 
 # =========================================================================
 # 11) final minimal dataframe to share
@@ -1271,12 +2465,12 @@ nrow(check_df) # 613 IUs in April 25'
 #                                                        "Cov.in2","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
 
 
-# adding in raw coverages and source of data (Feb 25)
-Full_OCP_histories_df_popinfo <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity","MAX_Endemicity",
-                                                     "PHASE", "SIZ_label", "endemicity_baseline","Year","PopTot","PopPreSAC","PopSAC","PopAdult","PopReq",
-                                                     "PopTrg","PopTreat", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
-                                                     "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
-                                                     "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
+# # adding in raw coverages and source of data (Feb 25)
+# Full_OCP_histories_df_popinfo <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity","MAX_Endemicity",
+#                                                      "PHASE", "SIZ_label", "endemicity_baseline","Year","PopTot","PopPreSAC","PopSAC","PopAdult","PopReq",
+#                                                      "PopTrg","PopTreat", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+#                                                      "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+#                                                      "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
 
 # Full_OCP_histories_df_popinfo <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity","MAX_Endemicity",
 #                                                      "PHASE", "SIZ_label", "endemicity_baseline","Year", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
@@ -1292,15 +2486,59 @@ Full_OCP_histories_df_popinfo <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_M
 #                                                        "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
 #                                                        "Cov.in2","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
 
-# adding in raw coverages and source of data (Feb 25)
-Full_OCP_histories_df_minimal <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity",
-                                                     "PHASE", "SIZ_label", "endemicity_baseline","Year","MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
-                                                     "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
-                                                     "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
+# # adding in raw coverages and source of data (Feb 25)
+# Full_OCP_histories_df_minimal <- dfOCP_included7[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity",
+#                                                      "PHASE", "SIZ_label", "endemicity_baseline","Year","MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+#                                                      "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+#                                                      "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
+# 
+# 
+# Full_OCP_histories_df_minimal_lastyr_2022 <- subset(Full_OCP_histories_df_popinfo, Year == 2022)
+# Full_OCP_histories_df_minimal_lastyr_2025 <- subset(Full_OCP_histories_df_popinfo, Year == 2025)
 
+# ========================================================================================== #
+#                        Create final dataframes for OCP IUs                                 #
+# ========================================================================================== #
 
-Full_OCP_histories_df_minimal_lastyr_2022 <- subset(Full_OCP_histories_df_popinfo, Year == 2022)
-Full_OCP_histories_df_minimal_lastyr_2025 <- subset(Full_OCP_histories_df_popinfo, Year == 2025)
+create_OCP_histories_dataframes <- function(df) {
+  
+  # Create Full_OCP_histories_df_popinfo dataframe
+  Full_df_popinfo <- df[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity","MAX_Endemicity",
+                                          "PHASE", "SIZ_label", "endemicity_baseline","Year","PopTot","PopPreSAC","PopSAC","PopAdult","PopReq",
+                                          "PopTrg","PopTreat", "MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+                                          "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+                                          "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
+  
+  # Create Full_OCP_histories_df_minimal dataframe
+  Full_df_minimal <- df[, c("IU_ID_MAPPING","IUs_NAME_MAPPING","IU_CODE_MAPPING", "IUID", "ADMIN0ISO3","Endemicity",
+                                          "PHASE", "SIZ_label", "endemicity_baseline","Year","MDA_scheme","Cum_MDA_ESPEN","Cov","EpiCov",
+                                          "vector_control","biannual_VC_mapping","MDA_nonCDTI", "MDA_CDTI", "MDA_CDTI_Biannual","number_rnds",
+                                          "Cov.in2","Cov_raw","cov_source","cov_specific_source","CUM_MDA_modelled","trt_status_2022","trt_status_2022_v2","adherence_par","co_endemicity", "Control_prog")]
+  
+  # Create Full_OCP_histories_df_minimal_lastyr_2022 dataframe (subset for Year == 2022)
+  Full_df_minimal_lastyr_2022 <- subset(Full_df_popinfo, Year == 2022)
+  
+  # Create Full_OCP_histories_df_minimal_lastyr_2025 dataframe (subset for Year == 2025)
+  Full_df_minimal_lastyr_2025 <- subset(Full_df_popinfo, Year == 2025)
+  
+  # Return the dataframes as a list
+  return(list(
+    Full_df_popinfo,
+    Full_df_minimal,
+    Full_df_minimal_lastyr_2022,
+    Full_df_minimal_lastyr_2025
+  ))
+}
+
+# call function:
+OCP_histories_data <- create_OCP_histories_dataframes(dfOCP_included7)
+
+# Access individual dataframes:
+Full_OCP_histories_df_popinfo <- OCP_histories_data[[1]]
+Full_OCP_histories_df_minimal <- OCP_histories_data[[2]]
+Full_OCP_histories_df_minimal_lastyr_2022 <- OCP_histories_data[[3]]
+Full_OCP_histories_df_minimal_lastyr_2025 <- OCP_histories_data[[4]]
+
 
 # Save - endgame runs in March 2024 #
 # write.csv(Full_OCP_histories_df_minimal, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Full_OCP_histories_df_minimal_150324.csv")
