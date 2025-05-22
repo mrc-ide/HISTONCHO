@@ -45,10 +45,13 @@ final_df_oncho_Parent_Child <- update_espen_data(
 # -------------------- #
 #     UGANDA (UGA)     #
 # -------------------- #
+
+ESPEN_UGA_file <- file.path(base_path, "/data-UGA-Oncho-iu-2022.csv")
+
 final_df_oncho_Parent_Child <- update_espen_data(
   final_df_oncho_Parent_Child,
   "UGA",
-  "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-UG-Oncho-iu-2022.csv"
+  ESPEN_UGA_file
 )
 
 # check 1 : check if any IUs with less than 10 rows 

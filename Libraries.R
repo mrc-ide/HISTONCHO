@@ -13,3 +13,9 @@ library(tidyverse)
 library(broom)
 #library(ggplot2)
 
+
+# ====================================== #
+#     Compiling OCP histories  - extra   #
+# ====================================== #
+library(readxl)
+library(stringdist)
