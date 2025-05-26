@@ -46,7 +46,7 @@ final_df_oncho_Parent_Child <- update_espen_data(
 #     UGANDA (UGA)     #
 # -------------------- #
 
-ESPEN_UGA_file <- file.path(base_path, "/data-UGA-Oncho-iu-2022.csv")
+ESPEN_UGA_file <- file.path(base_path, "/data-UG-Oncho-iu-2022.csv")
 
 final_df_oncho_Parent_Child <- update_espen_data(
   final_df_oncho_Parent_Child,
@@ -74,9 +74,9 @@ length(unique(check_df$IU_ID_MAPPING)) # 5121 IUs
 
 # call function:
 extracted_data <- extract_baseline_geostat_mfp_func(
-  "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/IU pre-control fitted prevalence/summaries_apoc.Rdata",
-  "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/IU pre-control fitted prevalence/summaries_liberia.Rdata",
-  "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/IU pre-control fitted prevalence/summaries_ocp.Rdata"
+  "/summaries_apoc.Rdata",
+  "/summaries_liberia.Rdata",
+  "/summaries_ocp.Rdata"
 )
 
 dfAPOC <- extracted_data[[1]]
@@ -231,7 +231,7 @@ dfAPOC_included2 <- define_pre_post_espen_inclusion_func(dfAPOC_included2)
 # ==================================================================================== #
 
 # call function:
-result <- get_biannual_ius("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+result <- get_biannual_ius("/Biannual_APOC_IUs.csv")
 
 # Extract the results
 Biannual_IUs_vec <- result$Biannual_IUs_vec
@@ -242,10 +242,11 @@ Biannual_Sudan_IUs_vec <- result$Biannual_Sudan_IUs_vec
 #   Load in MDA start years based on APOC report (2015) #
 # ===================================================== #
 
-dfAPOC_report2 <- read.csv("C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/APOC/APOC_data_97_13_v2.csv")
-colnames(dfAPOC_report2) <- c("ADMIN0", "EpiCov", "Year")
+dfAPOC_report_path <- file.path(base_path, "/APOC_data_97_13_v2.csv")
+dfAPOC_report <- read.csv(dfAPOC_report_path)
+colnames(dfAPOC_report) <- c("ADMIN0", "EpiCov", "Year")
 
-split_vectors <- setNames(split(dfAPOC_report2$EpiCov, dfAPOC_report2$ADMIN0), unique(dfAPOC_report2$ADMIN0))
+split_vectors <- setNames(split(dfAPOC_report$EpiCov, dfAPOC_report$ADMIN0), unique(dfAPOC_report$ADMIN0))
 
 # ====================================================================================== #
 #     Iterate over country_info list to update the dataframe with MDA data (APOC report) #
@@ -277,7 +278,7 @@ dfAPOC_included3 <- process_all_countries(dfAPOC_included2, split_vectors, count
 # ======================================================================================== #
 
 dfAPOC_included3 <- process_nigeria_data(dfAPOC_included3, split_vectors, 
-                                         "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/oncho_snapshot_NGA.csv")
+                                         "/oncho_snapshot_NGA.csv")
 
 
 # ====================================================================================================== #
@@ -287,7 +288,7 @@ dfAPOC_included3 <- process_nigeria_data(dfAPOC_included3, split_vectors,
 
 # call function:
 result <- process_uganda_data(dfAPOC_included3, 
-                                        "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/UGA_Strt_Stp.csv", 
+                                        "/UGA_Strt_Stp.csv", 
                                         split_vectors)
 
 dfAPOC_included3 <- result[[1]]
@@ -321,10 +322,10 @@ dfAPOC_included4 <- update_mda_coverage_2013_2014(dfAPOC_included4)
 
 # call function #
 dfAPOC_included4 <- update_nigeria_2022_data(dfAPOC_included4, 
-                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_strt_stp_LGA.csv", 
-                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/LGAs_names_missing_tocheck.csv", 
-                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/Sightsavers_2022_LGA_covs.csv",
-                                       "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-NGA-Oncho-iu-2022.csv")
+                                       "/NGA_strt_stp_LGA.csv", 
+                                       "/LGAs_names_missing_tocheck.csv", 
+                                       "/Sightsavers_2022_LGA_covs.csv",
+                                       "/data-NGA-Oncho-iu-2022.csv")
 
 # ============================================================================================== #
 #          Create new coverage (Cov.in2) col and update CDTI cols & ETH (MDA in 2022)            #
@@ -332,7 +333,7 @@ dfAPOC_included4 <- update_nigeria_2022_data(dfAPOC_included4,
 
 # call function
 dfAPOC_included4 <- update_mda_coverage_cols_ETH_update(dfAPOC_included4, 
-                                        "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/ESPEN updates to check/ESPEN updated data for 2022/data-ETH-Oncho-iu-2022.csv")
+                                        "/data-ETH-Oncho-iu-2022.csv")
 
 
 # ================================================================ #
@@ -343,30 +344,31 @@ dfAPOC_included4 <- update_mda_coverage_cols_ETH_update(dfAPOC_included4,
 # Uganda- call function #
 
 dfAPOC_included4 <- update_biannual_uganda_mda(dfAPOC_included4, 
-                                               "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+                                               "/Biannual_APOC_IUs.csv")
 
 # ======================= #
 # Ethiopia- call function #
 
 dfAPOC_included4 <- update_biannual_ethiopia_mda(dfAPOC_included4, 
-                                                 "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+                                                 "/Biannual_APOC_IUs.csv")
 
 # ======================= #
 # Nigeria - call function #
 dfAPOC_included4 <- update_biannual_nigeria_mda(dfAPOC_included4, 
-                                          "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/data from CC/NGA_post2017.csv")
+                                          "/NGA_post2017.csv")
 # ======================= #
 # Sudan - call function   #
 dfAPOC_included4 <- update_biannual_mda_sudan(dfAPOC_included4, 
-                                              "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+                                              "/Biannual_APOC_IUs.csv")
 # ========================== #
 # Tanzania - call function   #
 dfAPOC_included4 <- update_biannual_mda_tanzania(dfAPOC_included4, 
-                                                 "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+                                                 "/Biannual_APOC_IUs.csv")
 
 # ========================== #
 # S Sudan - call function    #
-dfAPOC_included4 <- update_biannual_mda_southsudan(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+dfAPOC_included4 <- update_biannual_mda_southsudan(dfAPOC_included4, 
+                                                   "/Biannual_APOC_IUs.csv")
 
 
 # ================================================================ #
@@ -376,12 +378,14 @@ dfAPOC_included4 <- update_biannual_mda_southsudan(dfAPOC_included4, "C:/Users/m
 # ===================== #
 # Uganda- call function #
 
-dfAPOC_included4 <- update_vector_control_UGA(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+dfAPOC_included4 <- update_vector_control_UGA(dfAPOC_included4, 
+                                              "/Biannual_APOC_IUs.csv")
 
 # ========================== #
 # Eq. Guinea - call function #
 
-dfAPOC_included4 <- update_vector_control_mda_GNQ(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Biannual in APOC/Biannual_APOC_IUs.csv")
+dfAPOC_included4 <- update_vector_control_mda_GNQ(dfAPOC_included4, 
+                                                  "/Biannual_APOC_IUs.csv")
 
 # ===================================================================== #
 #    Create intervention label column (biannual_VC_mapping)             #
@@ -394,7 +398,7 @@ dfAPOC_included4 <- create_intervention_mapping_variable(dfAPOC_included4)
 # ===================================================================== #
 
 # call function
-dfAPOC_included4 <- remove_non_endemic_IUs(dfAPOC_included4, "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/no_map_samples.Rdata")
+dfAPOC_included4 <- remove_non_endemic_IUs(dfAPOC_included4, "/no_map_samples.Rdata")
 
 # ======================================================================= #
 #            Augment (extend) each Iu from 2022 - 2025                    #
@@ -456,7 +460,7 @@ dfAPOC_included7 <- create_final_columns(dfAPOC_included7)
 
 # Call function:
 dfAPOC_included7 <- create_co_endemicity_column(dfAPOC_included7, 
-                                                "C:/Users/mad206/OneDrive - Imperial College London/NTD-MC current/Endgame/Improving histories/Co-endemicity/co_endemic_IUs.csv")
+                                                "/co_endemic_IUs.csv")
 
 # ====================================================================== #
 #              Make final, minimal & single year dataframes              #

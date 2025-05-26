@@ -1,0 +1,239 @@
+country,coverage,year
+Angola,NA,1999
+Angola,NA,2000
+Angola,NA,2001
+Angola,NA,2002
+Angola,NA,2003
+Angola,NA,2004
+Angola,57.8,2005
+Angola,46.8,2006
+Angola,41,2007
+Angola,43.4,2008
+Angola,49.8,2009
+Angola,68,2010
+Angola,19.9,2011
+Angola,35.5,2012
+Burundi,NA,1999
+Burundi,NA,2000
+Burundi,NA,2001
+Burundi,NA,2002
+Burundi,NA,2003
+Burundi,NA,2004
+Burundi,28.9,2005
+Burundi,67.9,2006
+Burundi,70.6,2007
+Burundi,70.1,2008
+Burundi,74.2,2009
+Burundi,78.7,2010
+Burundi,80.1,2011
+Burundi,80.4,2012
+Cameroon,45,1999
+Cameroon,45.7,2000
+Cameroon,37.4,2001
+Cameroon,54.6,2002
+Cameroon,75.9,2003
+Cameroon,73.4,2004
+Cameroon,71.9,2005
+Cameroon,71.5,2006
+Cameroon,74.4,2007
+Cameroon,74.6,2008
+Cameroon,75.5,2009
+Cameroon,78.8,2010
+Cameroon,80.5,2011
+Cameroon,80.3,2012
+Central African Republic,74.5,1999
+Central African Republic,76,2000
+Central African Republic,53.5,2001
+Central African Republic,62,2002
+Central African Republic,75.7,2003
+Central African Republic,70.6,2004
+Central African Republic,84,2005
+Central African Republic,58.2,2006
+Central African Republic,54,2007
+Central African Republic,63.5,2008
+Central African Republic,77.2,2009
+Central African Republic,81.9,2010
+Central African Republic,82,2011
+Central African Republic,58.7,2012
+Chad,44.1,1999
+Chad,41.2,2000
+Chad,70.9,2001
+Chad,68.7,2002
+Chad,67.1,2003
+Chad,66.1,2004
+Chad,66.3,2005
+Chad,73.1,2006
+Chad,81.8,2007
+Chad,80.9,2008
+Chad,80.9,2009
+Chad,81,2010
+Chad,81.1,2011
+Chad,82.4,2012
+Congo,NA,1999
+Congo,NA,2000
+Congo,39.4,2001
+Congo,33.6,2002
+Congo,62,2003
+Congo,66.6,2004
+Congo,69.7,2005
+Congo,70.2,2006
+Congo,73.6,2007
+Congo,74.3,2008
+Congo,80.7,2009
+Congo,81.2,2010
+Congo,81.2,2011
+Congo,81.2,2012
+Democratic Republic of the Congo,NA,1999
+Democratic Republic of the Congo,NA,2000
+Democratic Republic of the Congo,14.9,2001
+Democratic Republic of the Congo,28.7,2002
+Democratic Republic of the Congo,41.6,2003
+Democratic Republic of the Congo,49.5,2004
+Democratic Republic of the Congo,68.6,2005
+Democratic Republic of the Congo,44.7,2006
+Democratic Republic of the Congo,47.2,2007
+Democratic Republic of the Congo,39.1,2008
+Democratic Republic of the Congo,65.5,2009
+Democratic Republic of the Congo,72.7,2010
+Democratic Republic of the Congo,77.1,2011
+Democratic Republic of the Congo,76.1,2012
+Equatorial Guinea,2,1999
+Equatorial Guinea,12.2,2000
+Equatorial Guinea,16.3,2001
+Equatorial Guinea,16.1,2002
+Equatorial Guinea,NA,2003
+Equatorial Guinea,68.5,2004
+Equatorial Guinea,NA,2005
+Equatorial Guinea,NA,2006
+Equatorial Guinea,71.3,2007
+Equatorial Guinea,13.2,2008
+Equatorial Guinea,70.9,2009
+Equatorial Guinea,71,2010
+Equatorial Guinea,NA,2011
+Equatorial Guinea,NA,2012
+Ethiopia,NA,1999
+Ethiopia,NA,2000
+Ethiopia,25.8,2001
+Ethiopia,55.6,2002
+Ethiopia,65.4,2003
+Ethiopia,60.7,2004
+Ethiopia,79.3,2005
+Ethiopia,70.8,2006
+Ethiopia,77.4,2007
+Ethiopia,77,2008
+Ethiopia,80.1,2009
+Ethiopia,80.6,2010
+Ethiopia,79.3,2011
+Ethiopia,80.4,2012
+Gabon,54.3,1999
+Gabon,53.5,2000
+Gabon,62.6,2001
+Gabon,62.9,2002
+Gabon,66.4,2003
+Gabon,63.8,2004
+Gabon,NA,2005
+Gabon,NA,2006
+Gabon,NA,2007
+Gabon,NA,2008
+Gabon,NA,2009
+Gabon,NA,2010
+Gabon,NA,2011
+Gabon,NA,2012
+Liberia,16,1999
+Liberia,23.9,2000
+Liberia,41.9,2001
+Liberia,40.6,2002
+Liberia,NA,2003
+Liberia,9.5,2004
+Liberia,17,2005
+Liberia,27.9,2006
+Liberia,44.3,2007
+Liberia,65.5,2008
+Liberia,62.1,2009
+Liberia,80.9,2010
+Liberia,82.4,2011
+Liberia,81.3,2012
+Malawi,42.8,1999
+Malawi,21.2,2000
+Malawi,21.9,2001
+Malawi,32.8,2002
+Malawi,28.7,2003
+Malawi,64.6,2004
+Malawi,74.2,2005
+Malawi,82.9,2006
+Malawi,82.9,2007
+Malawi,82.5,2008
+Malawi,82.8,2009
+Malawi,82.6,2010
+Malawi,82.7,2011
+Malawi,82.8,2012
+Nigeria,59.7,1999
+Nigeria,66.5,2000
+Nigeria,69.1,2001
+Nigeria,72.3,2002
+Nigeria,68.4,2003
+Nigeria,68.9,2004
+Nigeria,73.1,2005
+Nigeria,75.3,2006
+Nigeria,78.6,2007
+Nigeria,74.6,2008
+Nigeria,79.6,2009
+Nigeria,80,2010
+Nigeria,79.4,2011
+Nigeria,76.3,2012
+South Sudan,21,1999
+South Sudan,2.9,2000
+South Sudan,34.9,2001
+South Sudan,10.8,2002
+South Sudan,NA,2003
+South Sudan,NA,2004
+South Sudan,41.5,2005
+South Sudan,25.6,2006
+South Sudan,35.8,2007
+South Sudan,39.1,2008
+South Sudan,53.7,2009
+South Sudan,52.2,2010
+South Sudan,60.8,2011
+South Sudan,43.3,2012
+Sudan,51.6,1999
+Sudan,77.4,2000
+Sudan,63.7,2001
+Sudan,60.3,2002
+Sudan,42.3,2003
+Sudan,66.8,2004
+Sudan,47.7,2005
+Sudan,84.7,2006
+Sudan,69,2007
+Sudan,18.4,2008
+Sudan,78.7,2009
+Sudan,84.1,2010
+Sudan,81.7,2011
+Sudan,86.5,2012
+Tanzania (Mainland),51.4,1999
+Tanzania (Mainland),55.3,2000
+Tanzania (Mainland),65.1,2001
+Tanzania (Mainland),50.5,2002
+Tanzania (Mainland),69.6,2003
+Tanzania (Mainland),72.8,2004
+Tanzania (Mainland),74.7,2005
+Tanzania (Mainland),73.6,2006
+Tanzania (Mainland),76.3,2007
+Tanzania (Mainland),74.9,2008
+Tanzania (Mainland),73.3,2009
+Tanzania (Mainland),80.1,2010
+Tanzania (Mainland),80.2,2011
+Tanzania (Mainland),79.2,2012
+Uganda,69.7,1999
+Uganda,78.9,2000
+Uganda,78.7,2001
+Uganda,77,2002
+Uganda,80.6,2003
+Uganda,77.5,2004
+Uganda,71.5,2005
+Uganda,73,2006
+Uganda,80,2007
+Uganda,76.6,2008
+Uganda,76.4,2009
+Uganda,64.8,2010
+Uganda,72.2,2011
+Uganda,71.9,2012

@@ -113,7 +113,7 @@ dfOCP_included7 <- apply_MDA_interventions_2023_2025(dfOCP_included6)
 # ============================================================================ #
 
 # call function:
-dfOCP_included7 <- create_co_endemicity_column(dfOCP_included7, "co_endemic_IUs_OCP.csv")
+dfOCP_included7 <- create_co_endemicity_column_OCP(dfOCP_included7, "/co_endemic_IUs_OCP.csv")
 
 # ============================================================================ #
 #                Create extra intervention cols and                            #

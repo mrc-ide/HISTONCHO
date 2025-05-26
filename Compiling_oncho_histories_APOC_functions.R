@@ -31,11 +31,15 @@ update_espen_data <- function(df, country_code, file_path) {
 #   Function to extract & process pre-control IU-level prevalences for decision - tree  #
 # ===================================================================================== #
 
-extract_baseline_geostat_mfp_func <- function(apoc_file, liberia_file, ocp_file) {
+extract_baseline_geostat_mfp_func <- function(apoc_file_input, liberia_file_input, ocp_file_input) {
+  
   # Load the datasets
-  load(apoc_file)
-  load(liberia_file)
-  load(ocp_file)
+  apoc_file_path <- file.path(base_path, apoc_file_input)
+  load(apoc_file_path)
+  liberia_file_path <- file.path(base_path, liberia_file_input)
+  load(liberia_file_path)
+  ocp_file_path <- file.path(base_path, ocp_file_input)
+  load(ocp_file_path)
   
   # =========================================================================== #
   #      1)  Filter out APOC countries                                          #
@@ -864,9 +868,11 @@ define_pre_post_espen_inclusion_func <- function(df) {
 #    Function to extract and process information on IUs with biannual MDA              #
 # ==================================================================================== #
 
-get_biannual_ius <- function(file_path) {
+get_biannual_ius <- function(file_path_input) {
+  
   # Read the Biannual treatment data from the CSV
-  Biannual_APOC_IUs <- read.csv(file_path)
+  biannual_file_path <- file.path(base_path, file_path_input)
+  Biannual_APOC_IUs <- read.csv(biannual_file_path)
   
   # Filter out rows where Biannual is NA
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
@@ -898,7 +904,8 @@ get_biannual_ius <- function(file_path) {
 
 
 # Define the function to process MDA coverage assignment for each country
-process_mda_coverage <- function(df, split_vectors, country_code, coverage_data, start_year, condition_year_start, condition_year_end) {
+process_mda_coverage <- function(df, split_vectors, country_code, coverage_data, start_year, 
+                                 condition_year_start, condition_year_end) {
   
   # Extract the coverage data for the specific country
   coverages <- coverage_data
@@ -976,7 +983,7 @@ process_all_countries <- function(dfAPOC_included2, split_vectors, country_info)
 #         Function to extract, process and integrate oncho snapshot data for Nigeria       #
 # ======================================================================================== #
 
-process_nigeria_data <- function(df, split_vectors, oncho_snapshot_path) {
+process_nigeria_data <- function(df, split_vectors, oncho_snapshot_input) {
   
   # Subset the dataframe for Nigeria (NGA)
   df_NGA <- subset(df, ADMIN0ISO3 == "NGA")
@@ -987,6 +994,7 @@ process_nigeria_data <- function(df, split_vectors, oncho_snapshot_path) {
     summarise(row_count = n())
   
   # APPROACH 2: Process national oncho snapshot data
+  oncho_snapshot_path <- file.path(base_path, oncho_snapshot_input)
   oncho_snapshot <- read.csv(oncho_snapshot_path)
   oncho_snapshot <- oncho_snapshot %>% rename_with(~gsub("^X", "", .), starts_with("X1990"):ends_with("X2021"))
   
@@ -1071,9 +1079,10 @@ process_nigeria_data <- function(df, split_vectors, oncho_snapshot_path) {
 #      Function to extract, process and integrate MDA data for Uganda based on Katabarwa for Uganda      #
 # ====================================================================================================== #
 
-process_uganda_data <- function(df, UGA_strt_stp_path, split_vectors) {
+process_uganda_data <- function(df, UGA_strt_stp_input, split_vectors) {
   
   # get UGA MDa data from Katabarwa et al. 2018 & group districts:
+  UGA_strt_stp_path <- file.path(base_path, UGA_strt_stp_input)
   UGA_strt_stp <- read.csv(UGA_strt_stp_path)
   
   UGA_strt_stp <- subset(UGA_strt_stp, District_updated != "Obongi") # remove and manually include as the Obongi foci
@@ -1438,14 +1447,22 @@ update_mda_coverage_2013_2014 <- function(df) {
 #             Function to update IUs in Nigeria for 2022 with TCC & Sightsavers info       #
 # ======================================================================================== #
 
-update_nigeria_2022_data <- function(df, NGA_strt_stp_LGA_path, NGA_snapshot_LGAnames_path, Sightsavers_data_path, NGA_2022_EPSEN_path) {
+update_nigeria_2022_data <- function(df, NGA_strt_stp_LGA_input, NGA_snapshot_LGAnames_input, 
+                                     Sightsavers_data_input, NGA_2022_EPSEN_input) {
   
   df_updated <- df 
   
   # Load data
+  NGA_strt_stp_LGA_path <- file.path(base_path, NGA_strt_stp_LGA_input)
   NGA_strt_stp_LGA <- read.csv(NGA_strt_stp_LGA_path)
+  
+  NGA_snapshot_LGAnames_path <- file.path(base_path, NGA_snapshot_LGAnames_input)
   NGA_snapshot_LGAnames <- read.csv(NGA_snapshot_LGAnames_path)
+  
+  Sightsavers_data_path <- file.path(base_path, Sightsavers_data_input)
   NGA_sightsavers_2022 <- read.csv(Sightsavers_data_path)
+  
+  NGA_2022_EPSEN_path <- file.path(base_path, NGA_2022_EPSEN_input)
   NGA_2022_EPSEN <- read.csv(NGA_2022_EPSEN_path)
   
   # Convert MDA start and end years to numeric
@@ -1512,7 +1529,7 @@ update_nigeria_2022_data <- function(df, NGA_strt_stp_LGA_path, NGA_snapshot_LGA
 #   Function to create new coverage (Cov.in2) col and update CDTI cols & ETH (MDA in 2022)       #
 # ============================================================================================== #
 
-update_mda_coverage_cols_ETH_update <- function(df, ETH_2022_EPSEN_path) {
+update_mda_coverage_cols_ETH_update <- function(df, ETH_2022_EPSEN_input) {
   
   df_updated <- df
   
@@ -1520,6 +1537,7 @@ update_mda_coverage_cols_ETH_update <- function(df, ETH_2022_EPSEN_path) {
   df_updated$Cov.in2 <- df_updated$MDA_CDTI
   
   # first find new IUs in EtHiopia with latest 2022 data indicating first MDA round in 2022 
+  ETH_2022_EPSEN_path <- file.path(base_path, ETH_2022_EPSEN_input)
   ETH_2022_EPSEN <- read.csv(ETH_2022_EPSEN_path)
   ETH_MDA_2022 <- subset(ETH_2022_EPSEN, EpiCov > 0) #find those IUs with epicov > 0
   
@@ -1571,11 +1589,12 @@ update_mda_coverage_cols_ETH_update <- function(df, ETH_2022_EPSEN_path) {
 #              Function to update biannual MDA in Uganda           #
 # ================================================================ #
 
-update_biannual_uganda_mda <- function(df, biannual_file_path) {
+update_biannual_uganda_mda <- function(df, biannual_file_input) {
   
   df_updated <- df 
   
   # Load the Biannual MDA data
+  biannual_file_path <- file.path(base_path, biannual_file_input)
   Biannual_APOC_IUs <- read.csv(biannual_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
@@ -1630,11 +1649,12 @@ update_biannual_uganda_mda <- function(df, biannual_file_path) {
 #              Function to update biannual MDA in Ethiopia         #
 # ================================================================ #
 
-update_biannual_ethiopia_mda <- function(df, biannual_file_path) {
+update_biannual_ethiopia_mda <- function(df, biannual_file_input) {
   
   df_updated <- df
   
   # Load the Biannual MDA data
+  biannual_file_path <- file.path(base_path, biannual_file_input)
   Biannual_APOC_IUs <- read.csv(biannual_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
@@ -1687,11 +1707,12 @@ update_biannual_ethiopia_mda <- function(df, biannual_file_path) {
 #              Function to update biannual MDA in Nigeria          #
 # ================================================================ #
 
-update_biannual_nigeria_mda <- function(df, cc_data_file_path) {
+update_biannual_nigeria_mda <- function(df, cc_data_file_input) {
   
   df_updated <- df
   
   # Load the CC data for Nigeria (post 2017)
+  cc_data_file_path <- file.path(base_path, cc_data_file_input)
   NGA_post2017 <- read.csv(cc_data_file_path)
   
   # Rename the columns from the CC data
@@ -1750,11 +1771,12 @@ update_biannual_nigeria_mda <- function(df, cc_data_file_path) {
 #              Function to update biannual MDA in Sudan            #
 # ================================================================ #
 
-update_biannual_mda_sudan <- function(df, biannual_data_file_path) {
+update_biannual_mda_sudan <- function(df, biannual_data_file_input) {
   
   df_updated <- df
   
   # Load the Biannual APOC IUs data for Sudan
+  biannual_data_file_path <- file.path(base_path, biannual_data_file_input)
   Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
@@ -1811,12 +1833,13 @@ update_biannual_mda_sudan <- function(df, biannual_data_file_path) {
 #              Function to update biannual MDA in Tanzania         #
 # ================================================================ #
 
-update_biannual_mda_tanzania <- function(df, biannual_file_path) {
+update_biannual_mda_tanzania <- function(df, biannual_file_input) {
   
   df_updated <- df
   
   # Read in the Biannual data
-  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  biannual_data_file_path <- file.path(base_path, biannual_file_input)
+  Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
   # Filter for unique IUs in Tanzania (TZA)
@@ -1860,12 +1883,13 @@ update_biannual_mda_tanzania <- function(df, biannual_file_path) {
 #              Function to update biannual MDA in South Sudan      #
 # ================================================================ #
 
-update_biannual_mda_southsudan <- function(df, biannual_file_path) {
+update_biannual_mda_southsudan <- function(df, biannual_file_input) {
   
   df_updated <- df
   
   # Read in the Biannual data
-  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  biannual_data_file_path <- file.path(base_path, biannual_file_input)
+  Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
   # Filter for unique IUs in South Sudan (SSD)
@@ -1909,12 +1933,13 @@ update_biannual_mda_southsudan <- function(df, biannual_file_path) {
 #           Function to update vector control inn Uganda           #
 # ================================================================ #
 
-update_vector_control_UGA <- function(df, biannual_file_path) {
+update_vector_control_UGA <- function(df, biannual_file_input) {
   
   df_updated <- df
   
   # Read in the Biannual data
-  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  biannual_data_file_path <- file.path(base_path, biannual_file_input)
+  Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
   # Filter for unique IUs in Uganda (UGA)
@@ -2061,12 +2086,13 @@ update_vector_control_UGA <- function(df, biannual_file_path) {
 #     Function to update vector control in Eq. Guinea              #
 # ================================================================ #
 
-update_vector_control_mda_GNQ <- function(df, biannual_file_path) {
+update_vector_control_mda_GNQ <- function(df, biannual_file_input) {
   
   df_updated <- df
   
   # Read in the Biannual data
-  Biannual_APOC_IUs <- read.csv(biannual_file_path)
+  biannual_data_file_path <- file.path(base_path, biannual_file_input)
+  Biannual_APOC_IUs <- read.csv(biannual_data_file_path)
   Biannual_APOC_IUs2 <- Biannual_APOC_IUs[!is.na(Biannual_APOC_IUs$Biannual), ]
   
   # Vector Control (VC) from 2001-2005
@@ -2203,12 +2229,13 @@ create_intervention_mapping_variable <- function(df) {
 #            Function to remove IUs without baseline mapped samples     #
 # ===================================================================== #
 
-remove_non_endemic_IUs <- function(df, baseline_file_path) {
+remove_non_endemic_IUs <- function(df, baseline_file_input) {
   
   # store pre-processed number of IUs
   pre_processed_nIUs <- length(unique(df$IU_ID_MAPPING))
   
   # Load the "no_baseline_IUs" Rdata file
+  baseline_file_path <- file.path(base_path, baseline_file_input)
   load(baseline_file_path)
   
   # Filter non-endemic IUs and select required columns
@@ -2655,11 +2682,12 @@ create_final_columns <- function(df) {
 #                 Function to create a co-endemic column for oncho-LF-loa        #
 # ============================================================================== #
 
-create_co_endemicity_column <- function(df, co_endemicity_file_path) {
+create_co_endemicity_column <- function(df, co_endemicity_file_input) {
   
   df_updated <- df
   
   # Read the co-endemicity data
+  co_endemicity_file_path <- file.path(base_path, co_endemicity_file_input)
   co_endemic_IUs <- read.csv(co_endemicity_file_path)
   
   # Create subsets for each co-endemicity category

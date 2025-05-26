@@ -911,7 +911,7 @@ apply_MDA_interventions_2023_2025 <- function(df) {
 #           Function to create co-endemicity column (oncho-LF-loa)             #
 # ============================================================================ #
 
-create_co_endemicity_column <- function(df, file_path_input) {
+create_co_endemicity_column_OCP <- function(df, file_path_input) {
   
   # Load the co-endemicity data
   co_endemic_data_file <- file.path(base_path, file_path_input)
