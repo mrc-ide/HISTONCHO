@@ -19,3 +19,15 @@ library(broom)
 # ====================================== #
 library(readxl)
 library(stringdist)
+
+
+# ===================================== #
+#      Plotting including maps          #
+# ===================================== #
+
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+library(sf)
+library(readxl)
+library(ragg)

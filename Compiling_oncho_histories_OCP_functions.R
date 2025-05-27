@@ -560,7 +560,7 @@ apply_OCP_interventions_SIZ_2003_2012_biannual <- function(df) {
                                                                          ifelse(df$ADMIN0 %in% "Mali" & df$PHASE %in% c("PHASE 1 - FEB 1975", "PHASE III EAST - JUL 1977", "WESTERN EXTENSION - MAR 1989", "WESTERN EXTENSION - 1990", "PHASE III WEST - MAR 1977") & df$Year %in% c(2003:2013), 1,
                                                                                 ifelse(df$ADMIN0 %in% "Niger" & df$PHASE %in% c("PHASE III EAST - JUL 1977", "NON-CONTROL") & df$Year %in% c(2003:2013), 1,
                                                                                        ifelse(df$ADMIN0 %in% "Senegal" & df$PHASE %in% "WESTERN EXTENSION - 1990" & df$Year %in% c(2003:2013), 1,
-                                                                                              NA)))))))))))
+                                                                                              df$MDA_CDTI)))))))))))
   
   # Update MDA for treatment naive areas
   df$MDA_CDTI <- ifelse(df$MDA_status == "Treatment naive", 0, df$MDA_CDTI)

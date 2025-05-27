@@ -1,0 +1,3010 @@
+IU_ID_MAPPING,ADMIN0,co_endemicity
+2050,AGO,"oncho,LF,loa hyper"
+2053,AGO,"oncho,LF,loa hyper"
+2072,AGO,"oncho,LF,loa hyper"
+2073,AGO,"oncho,LF,loa hyper"
+2074,AGO,"oncho,LF,loa hyper"
+2087,AGO,"oncho,LF,loa hyper"
+2088,AGO,"oncho,LF,loa hyper"
+2089,AGO,"oncho,LF,loa hyper"
+2197,AGO,"oncho,LF,loa hyper"
+2213,AGO,"oncho,LF,loa hyper"
+2049,AGO,"oncho,LF,loa meso"
+2086,AGO,"oncho,LF,loa meso"
+2136,AGO,"oncho,LF,loa meso"
+2211,AGO,"oncho,LF,loa meso"
+2062,AGO,"oncho,LF,loa hypo"
+2068,AGO,"oncho,LF,loa hypo"
+2085,AGO,"oncho,LF,loa hypo"
+2090,AGO,"oncho,LF,loa hypo"
+2092,AGO,"oncho,LF,loa hypo"
+2093,AGO,"oncho,LF,loa hypo"
+2094,AGO,"oncho,LF,loa hypo"
+2097,AGO,"oncho,LF,loa hypo"
+2106,AGO,"oncho,LF,loa hypo"
+2129,AGO,"oncho,LF,loa hypo"
+2132,AGO,"oncho,LF,loa hypo"
+2150,AGO,"oncho,LF,loa hypo"
+2154,AGO,"oncho,LF,loa hypo"
+2157,AGO,"oncho,LF,loa hypo"
+2159,AGO,"oncho,LF,loa hypo"
+2161,AGO,"oncho,LF,loa hypo"
+2166,AGO,"oncho,LF,loa hypo"
+2170,AGO,"oncho,LF,loa hypo"
+2173,AGO,"oncho,LF,loa hypo"
+2190,AGO,"oncho,LF,loa hypo"
+2202,AGO,"oncho,LF,loa hypo"
+2204,AGO,"oncho,LF,loa hypo"
+2205,AGO,"oncho,LF,loa hypo"
+2215,AGO,"oncho,LF,loa hypo"
+2217,AGO,"oncho,LF,loa hypo"
+2222,AGO,"oncho,LF,loa hypo"
+2063,AGO,"oncho,loa hyper"
+2064,AGO,"oncho,loa hyper"
+2069,AGO,"oncho,loa hyper"
+2070,AGO,"oncho,loa hyper"
+2076,AGO,"oncho,loa hyper"
+2077,AGO,"oncho,loa hyper"
+2078,AGO,"oncho,loa hyper"
+2079,AGO,"oncho,loa hyper"
+2082,AGO,"oncho,loa hyper"
+2096,AGO,"oncho,loa hyper"
+2112,AGO,"oncho,loa hyper"
+2113,AGO,"oncho,loa hyper"
+2065,AGO,"oncho,loa meso"
+2067,AGO,"oncho,loa meso"
+2071,AGO,"oncho,loa meso"
+2080,AGO,"oncho,loa meso"
+2081,AGO,"oncho,loa meso"
+2083,AGO,"oncho,loa meso"
+2114,AGO,"oncho,loa meso"
+2115,AGO,"oncho,loa meso"
+2116,AGO,"oncho,loa meso"
+2121,AGO,"oncho,loa meso"
+2124,AGO,"oncho,loa meso"
+2140,AGO,"oncho,loa meso"
+2208,AGO,"oncho,loa meso"
+2209,AGO,"oncho,loa meso"
+2210,AGO,"oncho,loa meso"
+2219,AGO,"oncho,loa meso"
+2051,AGO,"oncho,loa hypo"
+2052,AGO,"oncho,loa hypo"
+2055,AGO,"oncho,loa hypo"
+2057,AGO,"oncho,loa hypo"
+2066,AGO,"oncho,loa hypo"
+2091,AGO,"oncho,loa hypo"
+2098,AGO,"oncho,loa hypo"
+2099,AGO,"oncho,loa hypo"
+2100,AGO,"oncho,loa hypo"
+2101,AGO,"oncho,loa hypo"
+2102,AGO,"oncho,loa hypo"
+2103,AGO,"oncho,loa hypo"
+2104,AGO,"oncho,loa hypo"
+2105,AGO,"oncho,loa hypo"
+2107,AGO,"oncho,loa hypo"
+2108,AGO,"oncho,loa hypo"
+2110,AGO,"oncho,loa hypo"
+2111,AGO,"oncho,loa hypo"
+2118,AGO,"oncho,loa hypo"
+2119,AGO,"oncho,loa hypo"
+2120,AGO,"oncho,loa hypo"
+2122,AGO,"oncho,loa hypo"
+2125,AGO,"oncho,loa hypo"
+2127,AGO,"oncho,loa hypo"
+2130,AGO,"oncho,loa hypo"
+2138,AGO,"oncho,loa hypo"
+2148,AGO,"oncho,loa hypo"
+2149,AGO,"oncho,loa hypo"
+2151,AGO,"oncho,loa hypo"
+2152,AGO,"oncho,loa hypo"
+2153,AGO,"oncho,loa hypo"
+2155,AGO,"oncho,loa hypo"
+2156,AGO,"oncho,loa hypo"
+2158,AGO,"oncho,loa hypo"
+2160,AGO,"oncho,loa hypo"
+2162,AGO,"oncho,loa hypo"
+2163,AGO,"oncho,loa hypo"
+2164,AGO,"oncho,loa hypo"
+2165,AGO,"oncho,loa hypo"
+2167,AGO,"oncho,loa hypo"
+2168,AGO,"oncho,loa hypo"
+2169,AGO,"oncho,loa hypo"
+2171,AGO,"oncho,loa hypo"
+2172,AGO,"oncho,loa hypo"
+2174,AGO,"oncho,loa hypo"
+2176,AGO,"oncho,loa hypo"
+2177,AGO,"oncho,loa hypo"
+2179,AGO,"oncho,loa hypo"
+2181,AGO,"oncho,loa hypo"
+2182,AGO,"oncho,loa hypo"
+2183,AGO,"oncho,loa hypo"
+2184,AGO,"oncho,loa hypo"
+2185,AGO,"oncho,loa hypo"
+2187,AGO,"oncho,loa hypo"
+2188,AGO,"oncho,loa hypo"
+2189,AGO,"oncho,loa hypo"
+2191,AGO,"oncho,loa hypo"
+2192,AGO,"oncho,loa hypo"
+2193,AGO,"oncho,loa hypo"
+2194,AGO,"oncho,loa hypo"
+2195,AGO,"oncho,loa hypo"
+2196,AGO,"oncho,loa hypo"
+2198,AGO,"oncho,loa hypo"
+2199,AGO,"oncho,loa hypo"
+2200,AGO,"oncho,loa hypo"
+2201,AGO,"oncho,loa hypo"
+2203,AGO,"oncho,loa hypo"
+2206,AGO,"oncho,loa hypo"
+2207,AGO,"oncho,loa hypo"
+2220,AGO,"oncho,loa hypo"
+2221,AGO,"oncho,loa hypo"
+2054,AGO,oncho
+2056,AGO,oncho
+2058,AGO,oncho
+2059,AGO,oncho
+2060,AGO,oncho
+2061,AGO,oncho
+2117,AGO,oncho
+2123,AGO,oncho
+2126,AGO,oncho
+2128,AGO,oncho
+2131,AGO,oncho
+2133,AGO,oncho
+2134,AGO,oncho
+2135,AGO,oncho
+2137,AGO,oncho
+2180,AGO,oncho
+2186,AGO,oncho
+2214,AGO,oncho
+2216,AGO,oncho
+2224,AGO,oncho
+3214,BEN,"oncho,LF"
+3215,BEN,"oncho,LF"
+3217,BEN,"oncho,LF"
+3220,BEN,"oncho,LF"
+3221,BEN,"oncho,LF"
+3225,BEN,"oncho,LF"
+3226,BEN,"oncho,LF"
+3228,BEN,"oncho,LF"
+3229,BEN,"oncho,LF"
+3230,BEN,"oncho,LF"
+3233,BEN,"oncho,LF"
+3240,BEN,"oncho,LF"
+3243,BEN,"oncho,LF"
+3244,BEN,"oncho,LF"
+3246,BEN,"oncho,LF"
+3248,BEN,"oncho,LF"
+3254,BEN,"oncho,LF"
+3255,BEN,"oncho,LF"
+3256,BEN,"oncho,LF"
+3257,BEN,"oncho,LF"
+3258,BEN,"oncho,LF"
+3260,BEN,"oncho,LF"
+3261,BEN,"oncho,LF"
+3262,BEN,"oncho,LF"
+3263,BEN,"oncho,LF"
+3264,BEN,"oncho,LF"
+3265,BEN,"oncho,LF"
+3266,BEN,"oncho,LF"
+3268,BEN,"oncho,LF"
+3269,BEN,"oncho,LF"
+3270,BEN,"oncho,LF"
+3271,BEN,"oncho,LF"
+3272,BEN,"oncho,LF"
+3273,BEN,"oncho,LF"
+3276,BEN,"oncho,LF"
+3278,BEN,"oncho,LF"
+3279,BEN,"oncho,LF"
+3280,BEN,"oncho,LF"
+3281,BEN,"oncho,LF"
+3282,BEN,"oncho,LF"
+3283,BEN,"oncho,LF"
+3284,BEN,"oncho,LF"
+3286,BEN,"oncho,LF"
+3287,BEN,"oncho,LF"
+3288,BEN,"oncho,LF"
+3289,BEN,"oncho,LF"
+3212,BEN,oncho
+3213,BEN,oncho
+3216,BEN,oncho
+3218,BEN,oncho
+3219,BEN,oncho
+3222,BEN,oncho
+3223,BEN,oncho
+3224,BEN,oncho
+3227,BEN,oncho
+3231,BEN,oncho
+3232,BEN,oncho
+3234,BEN,oncho
+3235,BEN,oncho
+3236,BEN,oncho
+3237,BEN,oncho
+3238,BEN,oncho
+3239,BEN,oncho
+3241,BEN,oncho
+3242,BEN,oncho
+3245,BEN,oncho
+3247,BEN,oncho
+3249,BEN,oncho
+3250,BEN,oncho
+3251,BEN,oncho
+3252,BEN,oncho
+3274,BEN,oncho
+3285,BEN,oncho
+5312,BFA,"oncho,LF"
+5313,BFA,"oncho,LF"
+5314,BFA,"oncho,LF"
+5315,BFA,"oncho,LF"
+5316,BFA,"oncho,LF"
+5317,BFA,"oncho,LF"
+5318,BFA,"oncho,LF"
+5319,BFA,"oncho,LF"
+5320,BFA,"oncho,LF"
+5321,BFA,"oncho,LF"
+5322,BFA,"oncho,LF"
+5323,BFA,"oncho,LF"
+5324,BFA,"oncho,LF"
+5325,BFA,"oncho,LF"
+5326,BFA,"oncho,LF"
+5327,BFA,"oncho,LF"
+5328,BFA,"oncho,LF"
+5329,BFA,"oncho,LF"
+5330,BFA,"oncho,LF"
+5331,BFA,"oncho,LF"
+5332,BFA,"oncho,LF"
+5333,BFA,"oncho,LF"
+5334,BFA,"oncho,LF"
+5335,BFA,"oncho,LF"
+5336,BFA,"oncho,LF"
+5337,BFA,"oncho,LF"
+5338,BFA,"oncho,LF"
+5339,BFA,"oncho,LF"
+5340,BFA,"oncho,LF"
+5341,BFA,"oncho,LF"
+5342,BFA,"oncho,LF"
+5343,BFA,"oncho,LF"
+5344,BFA,"oncho,LF"
+5345,BFA,"oncho,LF"
+5346,BFA,"oncho,LF"
+5347,BFA,"oncho,LF"
+5348,BFA,"oncho,LF"
+5349,BFA,"oncho,LF"
+5350,BFA,"oncho,LF"
+5351,BFA,"oncho,LF"
+5352,BFA,"oncho,LF"
+5353,BFA,"oncho,LF"
+5354,BFA,"oncho,LF"
+5355,BFA,"oncho,LF"
+5356,BFA,"oncho,LF"
+5357,BFA,"oncho,LF"
+5358,BFA,"oncho,LF"
+5359,BFA,"oncho,LF"
+5361,BFA,"oncho,LF"
+5363,BFA,"oncho,LF"
+5364,BFA,"oncho,LF"
+5365,BFA,"oncho,LF"
+5366,BFA,"oncho,LF"
+5370,BFA,"oncho,LF"
+5371,BFA,"oncho,LF"
+5372,BFA,"oncho,LF"
+5373,BFA,"oncho,LF"
+5374,BFA,"oncho,LF"
+53001,BFA,"oncho,LF"
+53002,BFA,"oncho,LF"
+53003,BFA,"oncho,LF"
+53004,BFA,"oncho,LF"
+53005,BFA,"oncho,LF"
+53007,BFA,"oncho,LF"
+6375,BDI,oncho
+6376,BDI,oncho
+6383,BDI,oncho
+6384,BDI,oncho
+6385,BDI,oncho
+6403,BDI,oncho
+6415,BDI,oncho
+6416,BDI,oncho
+6420,BDI,oncho
+6421,BDI,oncho
+6422,BDI,oncho
+6423,BDI,oncho
+6424,BDI,oncho
+7420,CMR,"oncho,LF,loa hyper"
+7423,CMR,"oncho,LF,loa hyper"
+7432,CMR,"oncho,LF,loa hyper"
+7436,CMR,"oncho,LF,loa hyper"
+7440,CMR,"oncho,LF,loa hyper"
+7441,CMR,"oncho,LF,loa hyper"
+7443,CMR,"oncho,LF,loa hyper"
+7446,CMR,"oncho,LF,loa hyper"
+7447,CMR,"oncho,LF,loa hyper"
+7448,CMR,"oncho,LF,loa hyper"
+7449,CMR,"oncho,LF,loa hyper"
+7453,CMR,"oncho,LF,loa hyper"
+7454,CMR,"oncho,LF,loa hyper"
+7455,CMR,"oncho,LF,loa hyper"
+7456,CMR,"oncho,LF,loa hyper"
+7458,CMR,"oncho,LF,loa hyper"
+7461,CMR,"oncho,LF,loa hyper"
+7462,CMR,"oncho,LF,loa hyper"
+7466,CMR,"oncho,LF,loa hyper"
+7468,CMR,"oncho,LF,loa hyper"
+7509,CMR,"oncho,LF,loa hyper"
+7512,CMR,"oncho,LF,loa hyper"
+7518,CMR,"oncho,LF,loa hyper"
+7520,CMR,"oncho,LF,loa hyper"
+7525,CMR,"oncho,LF,loa hyper"
+7526,CMR,"oncho,LF,loa hyper"
+7547,CMR,"oncho,LF,loa hyper"
+7553,CMR,"oncho,LF,loa hyper"
+7555,CMR,"oncho,LF,loa hyper"
+7556,CMR,"oncho,LF,loa hyper"
+7560,CMR,"oncho,LF,loa hyper"
+7566,CMR,"oncho,LF,loa hyper"
+7575,CMR,"oncho,LF,loa hyper"
+7576,CMR,"oncho,LF,loa hyper"
+7581,CMR,"oncho,LF,loa hyper"
+7582,CMR,"oncho,LF,loa hyper"
+7586,CMR,"oncho,LF,loa hyper"
+7588,CMR,"oncho,LF,loa hyper"
+7589,CMR,"oncho,LF,loa hyper"
+7590,CMR,"oncho,LF,loa hyper"
+7612,CMR,"oncho,LF,loa hyper"
+7421,CMR,"oncho,LF,loa meso"
+7513,CMR,"oncho,LF,loa meso"
+7515,CMR,"oncho,LF,loa meso"
+7517,CMR,"oncho,LF,loa meso"
+7521,CMR,"oncho,LF,loa meso"
+7522,CMR,"oncho,LF,loa meso"
+7523,CMR,"oncho,LF,loa meso"
+7542,CMR,"oncho,LF,loa meso"
+7544,CMR,"oncho,LF,loa meso"
+7546,CMR,"oncho,LF,loa meso"
+7549,CMR,"oncho,LF,loa meso"
+7551,CMR,"oncho,LF,loa meso"
+7554,CMR,"oncho,LF,loa meso"
+7558,CMR,"oncho,LF,loa meso"
+7561,CMR,"oncho,LF,loa meso"
+7562,CMR,"oncho,LF,loa meso"
+7563,CMR,"oncho,LF,loa meso"
+7564,CMR,"oncho,LF,loa meso"
+7567,CMR,"oncho,LF,loa meso"
+7569,CMR,"oncho,LF,loa meso"
+7573,CMR,"oncho,LF,loa meso"
+7591,CMR,"oncho,LF,loa meso"
+7593,CMR,"oncho,LF,loa meso"
+7595,CMR,"oncho,LF,loa meso"
+7596,CMR,"oncho,LF,loa meso"
+7597,CMR,"oncho,LF,loa meso"
+7599,CMR,"oncho,LF,loa meso"
+7600,CMR,"oncho,LF,loa meso"
+7601,CMR,"oncho,LF,loa meso"
+7602,CMR,"oncho,LF,loa meso"
+7604,CMR,"oncho,LF,loa meso"
+7605,CMR,"oncho,LF,loa meso"
+7606,CMR,"oncho,LF,loa meso"
+7607,CMR,"oncho,LF,loa meso"
+7616,CMR,"oncho,LF,loa meso"
+7425,CMR,"oncho,LF,loa hypo"
+7426,CMR,"oncho,LF,loa hypo"
+7477,CMR,"oncho,LF,loa hypo"
+7539,CMR,"oncho,LF,loa hypo"
+7540,CMR,"oncho,LF,loa hypo"
+7541,CMR,"oncho,LF,loa hypo"
+7543,CMR,"oncho,LF,loa hypo"
+7545,CMR,"oncho,LF,loa hypo"
+7548,CMR,"oncho,LF,loa hypo"
+7550,CMR,"oncho,LF,loa hypo"
+7552,CMR,"oncho,LF,loa hypo"
+7557,CMR,"oncho,LF,loa hypo"
+7559,CMR,"oncho,LF,loa hypo"
+7565,CMR,"oncho,LF,loa hypo"
+7568,CMR,"oncho,LF,loa hypo"
+7572,CMR,"oncho,LF,loa hypo"
+7577,CMR,"oncho,LF,loa hypo"
+7578,CMR,"oncho,LF,loa hypo"
+7579,CMR,"oncho,LF,loa hypo"
+7594,CMR,"oncho,LF,loa hypo"
+7598,CMR,"oncho,LF,loa hypo"
+7603,CMR,"oncho,LF,loa hypo"
+7613,CMR,"oncho,LF,loa hypo"
+7615,CMR,"oncho,LF,loa hypo"
+7428,CMR,"oncho,LF"
+7473,CMR,"oncho,LF"
+7475,CMR,"oncho,LF"
+7476,CMR,"oncho,LF"
+7478,CMR,"oncho,LF"
+7480,CMR,"oncho,LF"
+7481,CMR,"oncho,LF"
+7483,CMR,"oncho,LF"
+7485,CMR,"oncho,LF"
+7486,CMR,"oncho,LF"
+7487,CMR,"oncho,LF"
+7489,CMR,"oncho,LF"
+7490,CMR,"oncho,LF"
+7492,CMR,"oncho,LF"
+7496,CMR,"oncho,LF"
+7497,CMR,"oncho,LF"
+7501,CMR,"oncho,LF"
+7502,CMR,"oncho,LF"
+7527,CMR,"oncho,LF"
+7528,CMR,"oncho,LF"
+7529,CMR,"oncho,LF"
+7530,CMR,"oncho,LF"
+7531,CMR,"oncho,LF"
+7532,CMR,"oncho,LF"
+7533,CMR,"oncho,LF"
+7534,CMR,"oncho,LF"
+7535,CMR,"oncho,LF"
+7536,CMR,"oncho,LF"
+7537,CMR,"oncho,LF"
+7538,CMR,"oncho,LF"
+7609,CMR,"oncho,LF"
+7422,CMR,"oncho,loa hyper"
+7429,CMR,"oncho,loa hyper"
+7430,CMR,"oncho,loa hyper"
+7431,CMR,"oncho,loa hyper"
+7433,CMR,"oncho,loa hyper"
+7434,CMR,"oncho,loa hyper"
+7435,CMR,"oncho,loa hyper"
+7437,CMR,"oncho,loa hyper"
+7438,CMR,"oncho,loa hyper"
+7439,CMR,"oncho,loa hyper"
+7442,CMR,"oncho,loa hyper"
+7444,CMR,"oncho,loa hyper"
+7445,CMR,"oncho,loa hyper"
+7450,CMR,"oncho,loa hyper"
+7451,CMR,"oncho,loa hyper"
+7452,CMR,"oncho,loa hyper"
+7457,CMR,"oncho,loa hyper"
+7459,CMR,"oncho,loa hyper"
+7460,CMR,"oncho,loa hyper"
+7463,CMR,"oncho,loa hyper"
+7464,CMR,"oncho,loa hyper"
+7465,CMR,"oncho,loa hyper"
+7467,CMR,"oncho,loa hyper"
+7469,CMR,"oncho,loa hyper"
+7470,CMR,"oncho,loa hyper"
+7471,CMR,"oncho,loa hyper"
+7472,CMR,"oncho,loa hyper"
+7503,CMR,"oncho,loa hyper"
+7506,CMR,"oncho,loa hyper"
+7507,CMR,"oncho,loa hyper"
+7516,CMR,"oncho,loa hyper"
+7570,CMR,"oncho,loa hyper"
+7574,CMR,"oncho,loa hyper"
+7583,CMR,"oncho,loa hyper"
+7584,CMR,"oncho,loa hyper"
+7585,CMR,"oncho,loa hyper"
+7587,CMR,"oncho,loa hyper"
+7424,CMR,"oncho,loa meso"
+7427,CMR,"oncho,loa meso"
+7504,CMR,"oncho,loa meso"
+7505,CMR,"oncho,loa meso"
+7508,CMR,"oncho,loa meso"
+7510,CMR,"oncho,loa meso"
+7511,CMR,"oncho,loa meso"
+7514,CMR,"oncho,loa meso"
+7519,CMR,"oncho,loa meso"
+7524,CMR,"oncho,loa meso"
+7571,CMR,"oncho,loa meso"
+7580,CMR,"oncho,loa meso"
+7608,CMR,"oncho,loa meso"
+7474,CMR,"oncho,LF"
+7479,CMR,"oncho,LF"
+7482,CMR,"oncho,LF"
+7484,CMR,"oncho,LF"
+7488,CMR,"oncho,LF"
+7491,CMR,"oncho,LF"
+7493,CMR,"oncho,LF"
+7494,CMR,"oncho,LF"
+7495,CMR,"oncho,LF"
+7498,CMR,"oncho,LF"
+7499,CMR,"oncho,LF"
+7500,CMR,"oncho,LF"
+7614,CMR,"oncho,LF"
+7592,CMR,oncho
+9661,CAF,"oncho,LF,loa hyper"
+9662,CAF,"oncho,LF,loa hyper"
+9663,CAF,"oncho,LF,loa hyper"
+9664,CAF,"oncho,LF,loa hyper"
+9665,CAF,"oncho,LF,loa hyper"
+9666,CAF,"oncho,LF,loa hyper"
+9667,CAF,"oncho,LF,loa hyper"
+9668,CAF,"oncho,LF,loa hyper"
+9669,CAF,"oncho,LF,loa hyper"
+9670,CAF,"oncho,LF,loa hyper"
+9671,CAF,"oncho,LF,loa hyper"
+9672,CAF,"oncho,LF,loa hyper"
+9674,CAF,"oncho,LF,loa hyper"
+9675,CAF,"oncho,LF,loa hyper"
+9681,CAF,"oncho,LF,loa hyper"
+9682,CAF,"oncho,LF,loa hyper"
+9683,CAF,"oncho,LF,loa hyper"
+9688,CAF,"oncho,LF,loa hyper"
+9689,CAF,"oncho,LF,loa hyper"
+9690,CAF,"oncho,LF,loa hyper"
+9673,CAF,"oncho,LF,loa meso"
+9676,CAF,"oncho,LF,loa meso"
+9677,CAF,"oncho,LF,loa meso"
+9678,CAF,"oncho,LF,loa meso"
+9680,CAF,"oncho,LF,loa meso"
+9685,CAF,"oncho,LF,loa meso"
+9692,CAF,"oncho,LF,loa meso"
+9679,CAF,"oncho,LF,loa hypo"
+9684,CAF,"oncho,LF,loa hypo"
+9687,CAF,"oncho,LF"
+9691,CAF,"oncho,LF"
+9686,CAF,"oncho,LF"
+10697,TCD,"oncho,LF,loa hyper"
+10698,TCD,"oncho,LF,loa hyper"
+10699,TCD,"oncho,LF,loa hyper"
+10701,TCD,"oncho,LF,loa hyper"
+10736,TCD,"oncho,LF,loa hyper"
+10759,TCD,"oncho,LF,loa hyper"
+10765,TCD,"oncho,LF,loa hyper"
+10766,TCD,"oncho,LF,loa hyper"
+10790,TCD,"oncho,LF,loa hyper"
+10703,TCD,"oncho,LF,loa meso"
+10704,TCD,"oncho,LF,loa meso"
+10734,TCD,"oncho,LF,loa meso"
+10768,TCD,"oncho,LF,loa meso"
+10709,TCD,"oncho,LF,loa hypo"
+10718,TCD,"oncho,LF,loa hypo"
+10719,TCD,"oncho,LF,loa hypo"
+10720,TCD,"oncho,LF,loa hypo"
+10773,TCD,"oncho,LF,loa hypo"
+10774,TCD,"oncho,LF,loa hypo"
+10780,TCD,"oncho,LF,loa hypo"
+10781,TCD,"oncho,LF,loa hypo"
+10782,TCD,"oncho,LF,loa hypo"
+10700,TCD,"oncho,LF"
+10769,TCD,"oncho,LF"
+10775,TCD,"oncho,LF"
+10777,TCD,"oncho,LF"
+10705,TCD,"oncho,LF"
+10717,TCD,"oncho,LF"
+10767,TCD,"oncho,LF"
+10710,TCD,"oncho,loa meso"
+10770,TCD,"oncho,loa meso"
+10668,TCD,"oncho,loa hypo"
+10681,TCD,"oncho,loa hypo"
+10706,TCD,"oncho,loa hypo"
+10707,TCD,"oncho,loa hypo"
+10713,TCD,"oncho,loa hypo"
+10715,TCD,"oncho,loa hypo"
+10732,TCD,"oncho,loa hypo"
+10752,TCD,"oncho,loa hypo"
+10763,TCD,"oncho,loa hypo"
+10771,TCD,"oncho,loa hypo"
+10747,TCD,oncho
+10712,TCD,oncho
+10716,TCD,oncho
+10751,TCD,oncho
+10754,TCD,oncho
+10755,TCD,oncho
+10756,TCD,oncho
+10757,TCD,oncho
+10758,TCD,oncho
+10772,TCD,oncho
+10667,TCD,oncho
+10669,TCD,oncho
+10671,TCD,oncho
+10672,TCD,oncho
+10679,TCD,oncho
+10680,TCD,oncho
+10682,TCD,oncho
+10731,TCD,oncho
+10725,TCD,oncho
+10674,TCD,oncho
+10726,TCD,oncho
+10733,TCD,oncho
+10753,TCD,oncho
+12765,COG,"oncho,LF,loa hyper"
+12768,COG,"oncho,LF,loa hyper"
+12789,COG,"oncho,LF,loa hyper"
+12813,COG,"oncho,LF,loa hyper"
+12814,COG,"oncho,LF,loa hyper"
+12822,COG,"oncho,LF,loa hyper"
+12828,COG,"oncho,LF,loa hyper"
+12836,COG,"oncho,LF,loa hyper"
+12763,COG,"oncho,LF,loa meso"
+12775,COG,"oncho,LF,loa meso"
+12823,COG,"oncho,LF,loa meso"
+12835,COG,"oncho,LF,loa meso"
+12791,COG,"oncho,LF,loa hypo"
+12784,COG,"oncho,loa hyper"
+12785,COG,"oncho,loa hyper"
+12786,COG,"oncho,loa hyper"
+12798,COG,"oncho,loa hyper"
+12800,COG,"oncho,loa hyper"
+12802,COG,"oncho,loa hyper"
+12803,COG,"oncho,loa hyper"
+12806,COG,"oncho,loa hyper"
+12825,COG,"oncho,loa hyper"
+12826,COG,"oncho,loa hyper"
+12830,COG,"oncho,loa hyper"
+12831,COG,"oncho,loa hyper"
+12832,COG,"oncho,loa hyper"
+12834,COG,"oncho,loa hyper"
+12837,COG,"oncho,loa hyper"
+12838,COG,"oncho,loa hyper"
+12839,COG,"oncho,loa hyper"
+12840,COG,"oncho,loa hyper"
+12841,COG,"oncho,loa hyper"
+12842,COG,"oncho,loa hyper"
+12843,COG,"oncho,loa hyper"
+12844,COG,"oncho,loa hyper"
+12846,COG,"oncho,loa hyper"
+12848,COG,"oncho,loa hyper"
+12850,COG,"oncho,loa hyper"
+12773,COG,"oncho,loa meso"
+12805,COG,"oncho,loa meso"
+12807,COG,"oncho,loa meso"
+12824,COG,"oncho,loa meso"
+12829,COG,"oncho,loa meso"
+12849,COG,"oncho,loa meso"
+15330,CIV,"oncho,LF"
+15331,CIV,"oncho,LF"
+15332,CIV,"oncho,LF"
+15333,CIV,"oncho,LF"
+15334,CIV,"oncho,LF"
+15338,CIV,"oncho,LF"
+15342,CIV,"oncho,LF"
+15343,CIV,"oncho,LF"
+15344,CIV,"oncho,LF"
+15345,CIV,"oncho,LF"
+15346,CIV,"oncho,LF"
+15347,CIV,"oncho,LF"
+15348,CIV,"oncho,LF"
+15349,CIV,"oncho,LF"
+15350,CIV,"oncho,LF"
+15353,CIV,"oncho,LF"
+15355,CIV,"oncho,LF"
+15356,CIV,"oncho,LF"
+15357,CIV,"oncho,LF"
+15359,CIV,"oncho,LF"
+15360,CIV,"oncho,LF"
+15361,CIV,"oncho,LF"
+15362,CIV,"oncho,LF"
+15364,CIV,"oncho,LF"
+15365,CIV,"oncho,LF"
+15366,CIV,"oncho,LF"
+15367,CIV,"oncho,LF"
+15368,CIV,"oncho,LF"
+15370,CIV,"oncho,LF"
+15372,CIV,"oncho,LF"
+15373,CIV,"oncho,LF"
+15374,CIV,"oncho,LF"
+15375,CIV,"oncho,LF"
+15377,CIV,"oncho,LF"
+15378,CIV,"oncho,LF"
+15379,CIV,"oncho,LF"
+15380,CIV,"oncho,LF"
+15381,CIV,"oncho,LF"
+15385,CIV,"oncho,LF"
+15386,CIV,"oncho,LF"
+15387,CIV,"oncho,LF"
+15388,CIV,"oncho,LF"
+15389,CIV,"oncho,LF"
+15390,CIV,"oncho,LF"
+15393,CIV,"oncho,LF"
+15394,CIV,"oncho,LF"
+15395,CIV,"oncho,LF"
+15396,CIV,"oncho,LF"
+15400,CIV,"oncho,LF"
+15401,CIV,"oncho,LF"
+15402,CIV,"oncho,LF"
+15404,CIV,"oncho,LF"
+15405,CIV,"oncho,LF"
+15406,CIV,"oncho,LF"
+15407,CIV,"oncho,LF"
+15408,CIV,"oncho,LF"
+15411,CIV,"oncho,LF"
+15412,CIV,"oncho,LF"
+15413,CIV,"oncho,LF"
+15414,CIV,"oncho,LF"
+15419,CIV,"oncho,LF"
+15420,CIV,"oncho,LF"
+15421,CIV,"oncho,LF"
+15422,CIV,"oncho,LF"
+15423,CIV,"oncho,LF"
+15424,CIV,"oncho,LF"
+15425,CIV,"oncho,LF"
+15426,CIV,"oncho,LF"
+15427,CIV,"oncho,LF"
+15428,CIV,"oncho,LF"
+15429,CIV,"oncho,LF"
+15430,CIV,"oncho,LF"
+15431,CIV,"oncho,LF"
+15432,CIV,"oncho,LF"
+15433,CIV,"oncho,LF"
+15434,CIV,"oncho,LF"
+15435,CIV,"oncho,LF"
+15436,CIV,"oncho,LF"
+15439,CIV,"oncho,LF"
+15440,CIV,"oncho,LF"
+15441,CIV,"oncho,LF"
+15442,CIV,"oncho,LF"
+15443,CIV,"oncho,LF"
+15446,CIV,"oncho,LF"
+15447,CIV,"oncho,LF"
+15448,CIV,"oncho,LF"
+15449,CIV,"oncho,LF"
+15450,CIV,"oncho,LF"
+15451,CIV,"oncho,LF"
+15452,CIV,"oncho,LF"
+15453,CIV,"oncho,LF"
+15454,CIV,"oncho,LF"
+15455,CIV,"oncho,LF"
+15456,CIV,"oncho,LF"
+15457,CIV,"oncho,LF"
+15461,CIV,"oncho,LF"
+15462,CIV,"oncho,LF"
+15463,CIV,"oncho,LF"
+15464,CIV,"oncho,LF"
+15329,CIV,oncho
+15335,CIV,oncho
+15336,CIV,oncho
+15337,CIV,oncho
+15340,CIV,oncho
+15417,CIV,oncho
+15418,CIV,oncho
+15437,CIV,oncho
+15438,CIV,oncho
+15444,CIV,oncho
+15445,CIV,oncho
+15458,CIV,oncho
+15459,CIV,oncho
+15460,CIV,oncho
+13870,COD,"oncho,LF,loa hyper"
+13881,COD,"oncho,LF,loa hyper"
+13882,COD,"oncho,LF,loa hyper"
+13890,COD,"oncho,LF,loa hyper"
+13897,COD,"oncho,LF,loa hyper"
+13898,COD,"oncho,LF,loa hyper"
+13906,COD,"oncho,LF,loa hyper"
+13911,COD,"oncho,LF,loa hyper"
+13915,COD,"oncho,LF,loa hyper"
+13919,COD,"oncho,LF,loa hyper"
+13923,COD,"oncho,LF,loa hyper"
+13927,COD,"oncho,LF,loa hyper"
+13932,COD,"oncho,LF,loa hyper"
+13934,COD,"oncho,LF,loa hyper"
+13936,COD,"oncho,LF,loa hyper"
+13937,COD,"oncho,LF,loa hyper"
+13946,COD,"oncho,LF,loa hyper"
+13955,COD,"oncho,LF,loa hyper"
+13963,COD,"oncho,LF,loa hyper"
+13964,COD,"oncho,LF,loa hyper"
+13965,COD,"oncho,LF,loa hyper"
+13967,COD,"oncho,LF,loa hyper"
+13992,COD,"oncho,LF,loa hyper"
+14164,COD,"oncho,LF,loa hyper"
+14165,COD,"oncho,LF,loa hyper"
+14171,COD,"oncho,LF,loa hyper"
+14173,COD,"oncho,LF,loa hyper"
+14175,COD,"oncho,LF,loa hyper"
+14187,COD,"oncho,LF,loa hyper"
+14194,COD,"oncho,LF,loa hyper"
+14212,COD,"oncho,LF,loa hyper"
+14216,COD,"oncho,LF,loa hyper"
+14222,COD,"oncho,LF,loa hyper"
+14223,COD,"oncho,LF,loa hyper"
+14224,COD,"oncho,LF,loa hyper"
+14225,COD,"oncho,LF,loa hyper"
+14226,COD,"oncho,LF,loa hyper"
+14228,COD,"oncho,LF,loa hyper"
+14229,COD,"oncho,LF,loa hyper"
+14232,COD,"oncho,LF,loa hyper"
+14233,COD,"oncho,LF,loa hyper"
+14234,COD,"oncho,LF,loa hyper"
+14235,COD,"oncho,LF,loa hyper"
+14236,COD,"oncho,LF,loa hyper"
+14239,COD,"oncho,LF,loa hyper"
+14243,COD,"oncho,LF,loa hyper"
+14245,COD,"oncho,LF,loa hyper"
+14249,COD,"oncho,LF,loa hyper"
+14250,COD,"oncho,LF,loa hyper"
+14252,COD,"oncho,LF,loa hyper"
+14257,COD,"oncho,LF,loa hyper"
+14259,COD,"oncho,LF,loa hyper"
+14261,COD,"oncho,LF,loa hyper"
+14262,COD,"oncho,LF,loa hyper"
+14266,COD,"oncho,LF,loa hyper"
+14268,COD,"oncho,LF,loa hyper"
+14269,COD,"oncho,LF,loa hyper"
+14275,COD,"oncho,LF,loa hyper"
+14276,COD,"oncho,LF,loa hyper"
+14279,COD,"oncho,LF,loa hyper"
+14280,COD,"oncho,LF,loa hyper"
+14284,COD,"oncho,LF,loa hyper"
+14285,COD,"oncho,LF,loa hyper"
+14287,COD,"oncho,LF,loa hyper"
+14288,COD,"oncho,LF,loa hyper"
+14292,COD,"oncho,LF,loa hyper"
+14293,COD,"oncho,LF,loa hyper"
+14305,COD,"oncho,LF,loa hyper"
+14319,COD,"oncho,LF,loa hyper"
+14321,COD,"oncho,LF,loa hyper"
+13816,COD,"oncho,LF,loa meso"
+13820,COD,"oncho,LF,loa meso"
+13821,COD,"oncho,LF,loa meso"
+13822,COD,"oncho,LF,loa meso"
+13835,COD,"oncho,LF,loa meso"
+13844,COD,"oncho,LF,loa meso"
+13854,COD,"oncho,LF,loa meso"
+13863,COD,"oncho,LF,loa meso"
+13867,COD,"oncho,LF,loa meso"
+13869,COD,"oncho,LF,loa meso"
+13874,COD,"oncho,LF,loa meso"
+13880,COD,"oncho,LF,loa meso"
+13886,COD,"oncho,LF,loa meso"
+13893,COD,"oncho,LF,loa meso"
+13895,COD,"oncho,LF,loa meso"
+13903,COD,"oncho,LF,loa meso"
+13907,COD,"oncho,LF,loa meso"
+13912,COD,"oncho,LF,loa meso"
+13914,COD,"oncho,LF,loa meso"
+13918,COD,"oncho,LF,loa meso"
+13924,COD,"oncho,LF,loa meso"
+13926,COD,"oncho,LF,loa meso"
+13933,COD,"oncho,LF,loa meso"
+13935,COD,"oncho,LF,loa meso"
+13938,COD,"oncho,LF,loa meso"
+13943,COD,"oncho,LF,loa meso"
+13947,COD,"oncho,LF,loa meso"
+13952,COD,"oncho,LF,loa meso"
+13958,COD,"oncho,LF,loa meso"
+13959,COD,"oncho,LF,loa meso"
+13960,COD,"oncho,LF,loa meso"
+14167,COD,"oncho,LF,loa meso"
+14200,COD,"oncho,LF,loa meso"
+14213,COD,"oncho,LF,loa meso"
+14227,COD,"oncho,LF,loa meso"
+14230,COD,"oncho,LF,loa meso"
+14231,COD,"oncho,LF,loa meso"
+14240,COD,"oncho,LF,loa meso"
+14244,COD,"oncho,LF,loa meso"
+14246,COD,"oncho,LF,loa meso"
+14248,COD,"oncho,LF,loa meso"
+14263,COD,"oncho,LF,loa meso"
+14270,COD,"oncho,LF,loa meso"
+14271,COD,"oncho,LF,loa meso"
+14273,COD,"oncho,LF,loa meso"
+14281,COD,"oncho,LF,loa meso"
+14283,COD,"oncho,LF,loa meso"
+14289,COD,"oncho,LF,loa meso"
+14290,COD,"oncho,LF,loa meso"
+14291,COD,"oncho,LF,loa meso"
+14294,COD,"oncho,LF,loa meso"
+14296,COD,"oncho,LF,loa meso"
+14304,COD,"oncho,LF,loa meso"
+14309,COD,"oncho,LF,loa meso"
+14311,COD,"oncho,LF,loa meso"
+14326,COD,"oncho,LF,loa meso"
+13818,COD,"oncho,LF,loa hypo"
+13823,COD,"oncho,LF,loa hypo"
+13824,COD,"oncho,LF,loa hypo"
+13825,COD,"oncho,LF,loa hypo"
+13826,COD,"oncho,LF,loa hypo"
+13827,COD,"oncho,LF,loa hypo"
+13829,COD,"oncho,LF,loa hypo"
+13832,COD,"oncho,LF,loa hypo"
+13834,COD,"oncho,LF,loa hypo"
+13841,COD,"oncho,LF,loa hypo"
+13842,COD,"oncho,LF,loa hypo"
+13848,COD,"oncho,LF,loa hypo"
+13852,COD,"oncho,LF,loa hypo"
+13856,COD,"oncho,LF,loa hypo"
+13857,COD,"oncho,LF,loa hypo"
+13860,COD,"oncho,LF,loa hypo"
+13861,COD,"oncho,LF,loa hypo"
+13871,COD,"oncho,LF,loa hypo"
+13877,COD,"oncho,LF,loa hypo"
+13896,COD,"oncho,LF,loa hypo"
+13901,COD,"oncho,LF,loa hypo"
+13902,COD,"oncho,LF,loa hypo"
+13908,COD,"oncho,LF,loa hypo"
+13910,COD,"oncho,LF,loa hypo"
+13913,COD,"oncho,LF,loa hypo"
+13925,COD,"oncho,LF,loa hypo"
+13930,COD,"oncho,LF,loa hypo"
+13941,COD,"oncho,LF,loa hypo"
+13944,COD,"oncho,LF,loa hypo"
+13948,COD,"oncho,LF,loa hypo"
+13950,COD,"oncho,LF,loa hypo"
+13951,COD,"oncho,LF,loa hypo"
+13953,COD,"oncho,LF,loa hypo"
+13956,COD,"oncho,LF,loa hypo"
+13957,COD,"oncho,LF,loa hypo"
+13968,COD,"oncho,LF,loa hypo"
+13970,COD,"oncho,LF,loa hypo"
+13979,COD,"oncho,LF,loa hypo"
+13980,COD,"oncho,LF,loa hypo"
+13983,COD,"oncho,LF,loa hypo"
+13985,COD,"oncho,LF,loa hypo"
+13986,COD,"oncho,LF,loa hypo"
+13988,COD,"oncho,LF,loa hypo"
+13989,COD,"oncho,LF,loa hypo"
+13991,COD,"oncho,LF,loa hypo"
+13994,COD,"oncho,LF,loa hypo"
+13995,COD,"oncho,LF,loa hypo"
+13997,COD,"oncho,LF,loa hypo"
+13998,COD,"oncho,LF,loa hypo"
+14003,COD,"oncho,LF,loa hypo"
+14004,COD,"oncho,LF,loa hypo"
+14005,COD,"oncho,LF,loa hypo"
+14009,COD,"oncho,LF,loa hypo"
+14027,COD,"oncho,LF,loa hypo"
+14029,COD,"oncho,LF,loa hypo"
+14046,COD,"oncho,LF,loa hypo"
+14053,COD,"oncho,LF,loa hypo"
+14062,COD,"oncho,LF,loa hypo"
+14069,COD,"oncho,LF,loa hypo"
+14088,COD,"oncho,LF,loa hypo"
+14097,COD,"oncho,LF,loa hypo"
+14101,COD,"oncho,LF,loa hypo"
+14103,COD,"oncho,LF,loa hypo"
+14108,COD,"oncho,LF,loa hypo"
+14109,COD,"oncho,LF,loa hypo"
+14112,COD,"oncho,LF,loa hypo"
+14116,COD,"oncho,LF,loa hypo"
+14122,COD,"oncho,LF,loa hypo"
+14123,COD,"oncho,LF,loa hypo"
+14203,COD,"oncho,LF,loa hypo"
+14204,COD,"oncho,LF,loa hypo"
+14207,COD,"oncho,LF,loa hypo"
+14218,COD,"oncho,LF,loa hypo"
+14219,COD,"oncho,LF,loa hypo"
+14253,COD,"oncho,LF,loa hypo"
+14277,COD,"oncho,LF,loa hypo"
+14297,COD,"oncho,LF,loa hypo"
+14298,COD,"oncho,LF,loa hypo"
+14300,COD,"oncho,LF,loa hypo"
+14313,COD,"oncho,LF,loa hypo"
+14318,COD,"oncho,LF,loa hypo"
+14323,COD,"oncho,LF,loa hypo"
+14329,COD,"oncho,LF,loa hypo"
+14332,COD,"oncho,LF,loa hypo"
+14340,COD,"oncho,LF,loa hypo"
+13996,COD,"oncho,LF"
+14008,COD,"oncho,LF"
+14010,COD,"oncho,LF"
+14018,COD,"oncho,LF"
+14034,COD,"oncho,LF"
+14036,COD,"oncho,LF"
+14040,COD,"oncho,LF"
+14044,COD,"oncho,LF"
+14056,COD,"oncho,LF"
+14057,COD,"oncho,LF"
+14060,COD,"oncho,LF"
+14065,COD,"oncho,LF"
+14077,COD,"oncho,LF"
+14078,COD,"oncho,LF"
+14082,COD,"oncho,LF"
+14083,COD,"oncho,LF"
+14086,COD,"oncho,LF"
+14087,COD,"oncho,LF"
+14091,COD,"oncho,LF"
+14094,COD,"oncho,LF"
+14095,COD,"oncho,LF"
+14099,COD,"oncho,LF"
+14102,COD,"oncho,LF"
+14106,COD,"oncho,LF"
+14110,COD,"oncho,LF"
+14121,COD,"oncho,LF"
+14334,COD,"oncho,LF"
+13976,COD,"oncho,LF"
+14272,COD,"oncho,LF"
+13873,COD,"oncho,loa hyper"
+13878,COD,"oncho,loa hyper"
+13884,COD,"oncho,loa hyper"
+13894,COD,"oncho,loa hyper"
+13899,COD,"oncho,loa hyper"
+13900,COD,"oncho,loa hyper"
+13904,COD,"oncho,loa hyper"
+13916,COD,"oncho,loa hyper"
+13920,COD,"oncho,loa hyper"
+13921,COD,"oncho,loa hyper"
+13922,COD,"oncho,loa hyper"
+13945,COD,"oncho,loa hyper"
+13962,COD,"oncho,loa hyper"
+14026,COD,"oncho,loa hyper"
+14038,COD,"oncho,loa hyper"
+14055,COD,"oncho,loa hyper"
+14162,COD,"oncho,loa hyper"
+14166,COD,"oncho,loa hyper"
+14168,COD,"oncho,loa hyper"
+14169,COD,"oncho,loa hyper"
+14170,COD,"oncho,loa hyper"
+14174,COD,"oncho,loa hyper"
+14178,COD,"oncho,loa hyper"
+14217,COD,"oncho,loa hyper"
+14238,COD,"oncho,loa hyper"
+14241,COD,"oncho,loa hyper"
+14256,COD,"oncho,loa hyper"
+14264,COD,"oncho,loa hyper"
+14267,COD,"oncho,loa hyper"
+14274,COD,"oncho,loa hyper"
+14282,COD,"oncho,loa hyper"
+14286,COD,"oncho,loa hyper"
+14301,COD,"oncho,loa hyper"
+14307,COD,"oncho,loa hyper"
+14312,COD,"oncho,loa hyper"
+14330,COD,"oncho,loa hyper"
+13819,COD,"oncho,loa meso"
+13872,COD,"oncho,loa meso"
+13879,COD,"oncho,loa meso"
+13885,COD,"oncho,loa meso"
+13887,COD,"oncho,loa meso"
+13892,COD,"oncho,loa meso"
+13917,COD,"oncho,loa meso"
+13940,COD,"oncho,loa meso"
+13942,COD,"oncho,loa meso"
+13954,COD,"oncho,loa meso"
+13961,COD,"oncho,loa meso"
+14015,COD,"oncho,loa meso"
+14030,COD,"oncho,loa meso"
+14052,COD,"oncho,loa meso"
+14129,COD,"oncho,loa meso"
+14130,COD,"oncho,loa meso"
+14136,COD,"oncho,loa meso"
+14148,COD,"oncho,loa meso"
+14149,COD,"oncho,loa meso"
+14151,COD,"oncho,loa meso"
+14153,COD,"oncho,loa meso"
+14154,COD,"oncho,loa meso"
+14158,COD,"oncho,loa meso"
+14176,COD,"oncho,loa meso"
+14177,COD,"oncho,loa meso"
+14199,COD,"oncho,loa meso"
+14208,COD,"oncho,loa meso"
+14214,COD,"oncho,loa meso"
+14215,COD,"oncho,loa meso"
+14221,COD,"oncho,loa meso"
+14237,COD,"oncho,loa meso"
+14242,COD,"oncho,loa meso"
+14247,COD,"oncho,loa meso"
+14251,COD,"oncho,loa meso"
+14254,COD,"oncho,loa meso"
+14260,COD,"oncho,loa meso"
+14278,COD,"oncho,loa meso"
+14308,COD,"oncho,loa meso"
+14314,COD,"oncho,loa meso"
+14316,COD,"oncho,loa meso"
+14320,COD,"oncho,loa meso"
+14336,COD,"oncho,loa meso"
+13828,COD,"oncho,loa hypo"
+13830,COD,"oncho,loa hypo"
+13831,COD,"oncho,loa hypo"
+13833,COD,"oncho,loa hypo"
+13836,COD,"oncho,loa hypo"
+13838,COD,"oncho,loa hypo"
+13839,COD,"oncho,loa hypo"
+13840,COD,"oncho,loa hypo"
+13843,COD,"oncho,loa hypo"
+13845,COD,"oncho,loa hypo"
+13846,COD,"oncho,loa hypo"
+13847,COD,"oncho,loa hypo"
+13849,COD,"oncho,loa hypo"
+13850,COD,"oncho,loa hypo"
+13851,COD,"oncho,loa hypo"
+13853,COD,"oncho,loa hypo"
+13855,COD,"oncho,loa hypo"
+13858,COD,"oncho,loa hypo"
+13859,COD,"oncho,loa hypo"
+13862,COD,"oncho,loa hypo"
+13864,COD,"oncho,loa hypo"
+13865,COD,"oncho,loa hypo"
+13868,COD,"oncho,loa hypo"
+13875,COD,"oncho,loa hypo"
+13876,COD,"oncho,loa hypo"
+13883,COD,"oncho,loa hypo"
+13889,COD,"oncho,loa hypo"
+13891,COD,"oncho,loa hypo"
+13905,COD,"oncho,loa hypo"
+13909,COD,"oncho,loa hypo"
+13928,COD,"oncho,loa hypo"
+13929,COD,"oncho,loa hypo"
+13931,COD,"oncho,loa hypo"
+13939,COD,"oncho,loa hypo"
+13949,COD,"oncho,loa hypo"
+13966,COD,"oncho,loa hypo"
+13969,COD,"oncho,loa hypo"
+13971,COD,"oncho,loa hypo"
+13972,COD,"oncho,loa hypo"
+13973,COD,"oncho,loa hypo"
+13974,COD,"oncho,loa hypo"
+13977,COD,"oncho,loa hypo"
+13978,COD,"oncho,loa hypo"
+13981,COD,"oncho,loa hypo"
+13982,COD,"oncho,loa hypo"
+13984,COD,"oncho,loa hypo"
+13993,COD,"oncho,loa hypo"
+13999,COD,"oncho,loa hypo"
+14000,COD,"oncho,loa hypo"
+14001,COD,"oncho,loa hypo"
+14002,COD,"oncho,loa hypo"
+14006,COD,"oncho,loa hypo"
+14007,COD,"oncho,loa hypo"
+14017,COD,"oncho,loa hypo"
+14021,COD,"oncho,loa hypo"
+14028,COD,"oncho,loa hypo"
+14035,COD,"oncho,loa hypo"
+14047,COD,"oncho,loa hypo"
+14054,COD,"oncho,loa hypo"
+14058,COD,"oncho,loa hypo"
+14059,COD,"oncho,loa hypo"
+14061,COD,"oncho,loa hypo"
+14063,COD,"oncho,loa hypo"
+14067,COD,"oncho,loa hypo"
+14068,COD,"oncho,loa hypo"
+14073,COD,"oncho,loa hypo"
+14075,COD,"oncho,loa hypo"
+14079,COD,"oncho,loa hypo"
+14084,COD,"oncho,loa hypo"
+14092,COD,"oncho,loa hypo"
+14093,COD,"oncho,loa hypo"
+14096,COD,"oncho,loa hypo"
+14104,COD,"oncho,loa hypo"
+14105,COD,"oncho,loa hypo"
+14107,COD,"oncho,loa hypo"
+14113,COD,"oncho,loa hypo"
+14114,COD,"oncho,loa hypo"
+14117,COD,"oncho,loa hypo"
+14163,COD,"oncho,loa hypo"
+14172,COD,"oncho,loa hypo"
+14179,COD,"oncho,loa hypo"
+14180,COD,"oncho,loa hypo"
+14181,COD,"oncho,loa hypo"
+14182,COD,"oncho,loa hypo"
+14183,COD,"oncho,loa hypo"
+14184,COD,"oncho,loa hypo"
+14185,COD,"oncho,loa hypo"
+14188,COD,"oncho,loa hypo"
+14189,COD,"oncho,loa hypo"
+14190,COD,"oncho,loa hypo"
+14192,COD,"oncho,loa hypo"
+14193,COD,"oncho,loa hypo"
+14195,COD,"oncho,loa hypo"
+14196,COD,"oncho,loa hypo"
+14197,COD,"oncho,loa hypo"
+14198,COD,"oncho,loa hypo"
+14201,COD,"oncho,loa hypo"
+14202,COD,"oncho,loa hypo"
+14205,COD,"oncho,loa hypo"
+14206,COD,"oncho,loa hypo"
+14209,COD,"oncho,loa hypo"
+14210,COD,"oncho,loa hypo"
+14211,COD,"oncho,loa hypo"
+14255,COD,"oncho,loa hypo"
+14258,COD,"oncho,loa hypo"
+14302,COD,"oncho,loa hypo"
+14306,COD,"oncho,loa hypo"
+14310,COD,"oncho,loa hypo"
+14315,COD,"oncho,loa hypo"
+14317,COD,"oncho,loa hypo"
+14322,COD,"oncho,loa hypo"
+14325,COD,"oncho,loa hypo"
+14327,COD,"oncho,loa hypo"
+14328,COD,"oncho,loa hypo"
+14335,COD,"oncho,loa hypo"
+14338,COD,"oncho,loa hypo"
+13975,COD,oncho
+13987,COD,oncho
+13990,COD,oncho
+14016,COD,oncho
+14019,COD,oncho
+14020,COD,oncho
+14022,COD,oncho
+14023,COD,oncho
+14025,COD,oncho
+14032,COD,oncho
+14037,COD,oncho
+14041,COD,oncho
+14043,COD,oncho
+14049,COD,oncho
+14050,COD,oncho
+14051,COD,oncho
+14064,COD,oncho
+14066,COD,oncho
+14070,COD,oncho
+14071,COD,oncho
+14072,COD,oncho
+14074,COD,oncho
+14076,COD,oncho
+14080,COD,oncho
+14081,COD,oncho
+14085,COD,oncho
+14089,COD,oncho
+14090,COD,oncho
+14100,COD,oncho
+14111,COD,oncho
+14115,COD,oncho
+14118,COD,oncho
+14119,COD,oncho
+14120,COD,oncho
+14124,COD,oncho
+14048,COD,oncho
+14337,COD,oncho
+14220,COD,oncho
+16416,GNQ,"oncho,LF,loa hyper"
+16417,GNQ,"oncho,LF,loa hyper"
+16418,GNQ,"oncho,LF,loa hyper"
+16419,GNQ,"oncho,LF,loa hyper"
+16420,GNQ,"oncho,LF,loa hyper"
+16421,GNQ,"oncho,LF,loa hyper"
+16422,GNQ,"oncho,LF,loa hyper"
+16423,GNQ,"oncho,LF,loa hyper"
+16424,GNQ,"oncho,LF,loa hyper"
+16425,GNQ,"oncho,LF,loa hyper"
+16426,GNQ,"oncho,LF,loa hyper"
+16427,GNQ,"oncho,LF,loa hyper"
+16428,GNQ,"oncho,LF,loa hyper"
+16412,GNQ,"oncho,LF,loa meso"
+16415,GNQ,"oncho,LF,loa meso"
+16413,GNQ,"oncho,loa meso"
+16414,GNQ,"oncho,loa meso"
+18561,ETH,"oncho,LF"
+18598,ETH,"oncho,LF"
+18616,ETH,"oncho,LF"
+18641,ETH,"oncho,LF"
+18650,ETH,"oncho,LF"
+18679,ETH,"oncho,LF"
+18684,ETH,"oncho,LF"
+18685,ETH,"oncho,LF"
+18686,ETH,"oncho,LF"
+18688,ETH,"oncho,LF"
+18690,ETH,"oncho,LF"
+18692,ETH,"oncho,LF"
+18698,ETH,"oncho,LF"
+18699,ETH,"oncho,LF"
+18701,ETH,"oncho,LF"
+18702,ETH,"oncho,LF"
+18703,ETH,"oncho,LF"
+18704,ETH,"oncho,LF"
+18714,ETH,"oncho,LF"
+18717,ETH,"oncho,LF"
+18718,ETH,"oncho,LF"
+18725,ETH,"oncho,LF"
+18756,ETH,"oncho,LF"
+18757,ETH,"oncho,LF"
+18760,ETH,"oncho,LF"
+18763,ETH,"oncho,LF"
+18787,ETH,"oncho,LF"
+18791,ETH,"oncho,LF"
+18799,ETH,"oncho,LF"
+18814,ETH,"oncho,LF"
+18815,ETH,"oncho,LF"
+18853,ETH,"oncho,LF"
+18899,ETH,"oncho,LF"
+19000,ETH,"oncho,LF"
+19028,ETH,"oncho,LF"
+19038,ETH,"oncho,LF"
+19138,ETH,"oncho,LF"
+19140,ETH,"oncho,LF"
+19178,ETH,"oncho,LF"
+19180,ETH,"oncho,LF"
+19192,ETH,"oncho,LF"
+19204,ETH,"oncho,LF"
+19214,ETH,"oncho,LF"
+19220,ETH,"oncho,LF"
+19221,ETH,"oncho,LF"
+19228,ETH,"oncho,LF"
+19229,ETH,"oncho,LF"
+19233,ETH,"oncho,LF"
+19243,ETH,"oncho,LF"
+19248,ETH,"oncho,LF"
+19249,ETH,"oncho,LF"
+19253,ETH,"oncho,LF"
+19254,ETH,"oncho,LF"
+19255,ETH,"oncho,LF"
+19273,ETH,"oncho,LF"
+19377,ETH,"oncho,LF"
+19410,ETH,"oncho,LF"
+19458,ETH,"oncho,LF"
+19459,ETH,"oncho,LF"
+19461,ETH,"oncho,LF"
+19462,ETH,"oncho,LF"
+19463,ETH,"oncho,LF"
+19501,ETH,"oncho,LF"
+19524,ETH,"oncho,LF"
+19530,ETH,"oncho,LF"
+19531,ETH,"oncho,LF"
+19533,ETH,"oncho,LF"
+19543,ETH,"oncho,LF"
+19545,ETH,"oncho,LF"
+19567,ETH,"oncho,LF"
+19572,ETH,"oncho,LF"
+18535,ETH,oncho
+18549,ETH,oncho
+18560,ETH,oncho
+18567,ETH,oncho
+18568,ETH,oncho
+18576,ETH,oncho
+18593,ETH,oncho
+18606,ETH,oncho
+18607,ETH,oncho
+18612,ETH,oncho
+18644,ETH,oncho
+18658,ETH,oncho
+18665,ETH,oncho
+18666,ETH,oncho
+18670,ETH,oncho
+18675,ETH,oncho
+18689,ETH,oncho
+18691,ETH,oncho
+18695,ETH,oncho
+18700,ETH,oncho
+18715,ETH,oncho
+18721,ETH,oncho
+18722,ETH,oncho
+18723,ETH,oncho
+18724,ETH,oncho
+18726,ETH,oncho
+18737,ETH,oncho
+18738,ETH,oncho
+18739,ETH,oncho
+18741,ETH,oncho
+18752,ETH,oncho
+18754,ETH,oncho
+18770,ETH,oncho
+18771,ETH,oncho
+18772,ETH,oncho
+18773,ETH,oncho
+18774,ETH,oncho
+18777,ETH,oncho
+18782,ETH,oncho
+18794,ETH,oncho
+18801,ETH,oncho
+18802,ETH,oncho
+18807,ETH,oncho
+18808,ETH,oncho
+18810,ETH,oncho
+18811,ETH,oncho
+18824,ETH,oncho
+18830,ETH,oncho
+18831,ETH,oncho
+18843,ETH,oncho
+18847,ETH,oncho
+18852,ETH,oncho
+18854,ETH,oncho
+18857,ETH,oncho
+18860,ETH,oncho
+18861,ETH,oncho
+18863,ETH,oncho
+18865,ETH,oncho
+18866,ETH,oncho
+18867,ETH,oncho
+18875,ETH,oncho
+18878,ETH,oncho
+18883,ETH,oncho
+18885,ETH,oncho
+18890,ETH,oncho
+18892,ETH,oncho
+18893,ETH,oncho
+18894,ETH,oncho
+18897,ETH,oncho
+18903,ETH,oncho
+18908,ETH,oncho
+18909,ETH,oncho
+18910,ETH,oncho
+18913,ETH,oncho
+18914,ETH,oncho
+18917,ETH,oncho
+18919,ETH,oncho
+18921,ETH,oncho
+18922,ETH,oncho
+18923,ETH,oncho
+18924,ETH,oncho
+18926,ETH,oncho
+18928,ETH,oncho
+18929,ETH,oncho
+18936,ETH,oncho
+18941,ETH,oncho
+18944,ETH,oncho
+18946,ETH,oncho
+18947,ETH,oncho
+18948,ETH,oncho
+18952,ETH,oncho
+18953,ETH,oncho
+18961,ETH,oncho
+18962,ETH,oncho
+18972,ETH,oncho
+18973,ETH,oncho
+18976,ETH,oncho
+18977,ETH,oncho
+18978,ETH,oncho
+18979,ETH,oncho
+18980,ETH,oncho
+18988,ETH,oncho
+18991,ETH,oncho
+18995,ETH,oncho
+18998,ETH,oncho
+19005,ETH,oncho
+19007,ETH,oncho
+19008,ETH,oncho
+19012,ETH,oncho
+19019,ETH,oncho
+19030,ETH,oncho
+19034,ETH,oncho
+19039,ETH,oncho
+19115,ETH,oncho
+19120,ETH,oncho
+19126,ETH,oncho
+19131,ETH,oncho
+19141,ETH,oncho
+19143,ETH,oncho
+19150,ETH,oncho
+19151,ETH,oncho
+19153,ETH,oncho
+19167,ETH,oncho
+19183,ETH,oncho
+19184,ETH,oncho
+19186,ETH,oncho
+19188,ETH,oncho
+19218,ETH,oncho
+19223,ETH,oncho
+19225,ETH,oncho
+19226,ETH,oncho
+19230,ETH,oncho
+19235,ETH,oncho
+19236,ETH,oncho
+19245,ETH,oncho
+19256,ETH,oncho
+19258,ETH,oncho
+19259,ETH,oncho
+19260,ETH,oncho
+19272,ETH,oncho
+19338,ETH,oncho
+19339,ETH,oncho
+19371,ETH,oncho
+19373,ETH,oncho
+19374,ETH,oncho
+19375,ETH,oncho
+19376,ETH,oncho
+19383,ETH,oncho
+19385,ETH,oncho
+19386,ETH,oncho
+19408,ETH,oncho
+19409,ETH,oncho
+19411,ETH,oncho
+19427,ETH,oncho
+19449,ETH,oncho
+19457,ETH,oncho
+19460,ETH,oncho
+19477,ETH,oncho
+19479,ETH,oncho
+19480,ETH,oncho
+19488,ETH,oncho
+19489,ETH,oncho
+19508,ETH,oncho
+19521,ETH,oncho
+19529,ETH,oncho
+19532,ETH,oncho
+19535,ETH,oncho
+19536,ETH,oncho
+19537,ETH,oncho
+19538,ETH,oncho
+19539,ETH,oncho
+19555,ETH,oncho
+19556,ETH,oncho
+19557,ETH,oncho
+19570,ETH,oncho
+19588,ETH,oncho
+20333,GAB,"oncho,LF,loa hyper"
+20338,GAB,"oncho,LF,loa hyper"
+20347,GAB,"oncho,LF,loa hyper"
+20349,GAB,"oncho,LF,loa hyper"
+20350,GAB,"oncho,LF,loa hyper"
+20351,GAB,"oncho,LF,loa hyper"
+20352,GAB,"oncho,LF,loa hyper"
+20353,GAB,"oncho,LF,loa hyper"
+20354,GAB,"oncho,LF,loa hyper"
+20356,GAB,"oncho,LF,loa hyper"
+20358,GAB,"oncho,LF,loa hyper"
+20363,GAB,"oncho,LF,loa hyper"
+20364,GAB,"oncho,LF,loa hyper"
+20365,GAB,"oncho,LF,loa hyper"
+20366,GAB,"oncho,LF,loa hyper"
+20367,GAB,"oncho,LF,loa hyper"
+20368,GAB,"oncho,LF,loa hyper"
+20369,GAB,"oncho,LF,loa hyper"
+20328,GAB,"oncho,loa hyper"
+20329,GAB,"oncho,loa hyper"
+20330,GAB,"oncho,loa hyper"
+20331,GAB,"oncho,loa hyper"
+20332,GAB,"oncho,loa hyper"
+20334,GAB,"oncho,loa hyper"
+20336,GAB,"oncho,loa hyper"
+20337,GAB,"oncho,loa hyper"
+20339,GAB,"oncho,loa hyper"
+20340,GAB,"oncho,loa hyper"
+20341,GAB,"oncho,loa hyper"
+20342,GAB,"oncho,loa hyper"
+20343,GAB,"oncho,loa hyper"
+20344,GAB,"oncho,loa hyper"
+20345,GAB,"oncho,loa hyper"
+20346,GAB,"oncho,loa hyper"
+20348,GAB,"oncho,loa hyper"
+20355,GAB,"oncho,loa hyper"
+20357,GAB,"oncho,loa hyper"
+20359,GAB,"oncho,loa hyper"
+20360,GAB,"oncho,loa hyper"
+20361,GAB,"oncho,loa hyper"
+20362,GAB,"oncho,loa hyper"
+20370,GAB,"oncho,loa hyper"
+20371,GAB,"oncho,loa hyper"
+20372,GAB,"oncho,loa hyper"
+20373,GAB,"oncho,loa hyper"
+20374,GAB,"oncho,loa hyper"
+20375,GAB,"oncho,loa hyper"
+20376,GAB,"oncho,loa hyper"
+20377,GAB,"oncho,loa hyper"
+20378,GAB,"oncho,loa hyper"
+20335,GAB,oncho
+21429,GHA,"oncho,LF"
+21430,GHA,"oncho,LF"
+21434,GHA,"oncho,LF"
+21435,GHA,"oncho,LF"
+21437,GHA,"oncho,LF"
+21438,GHA,"oncho,LF"
+21439,GHA,"oncho,LF"
+21440,GHA,"oncho,LF"
+21441,GHA,"oncho,LF"
+21443,GHA,"oncho,LF"
+21444,GHA,"oncho,LF"
+21445,GHA,"oncho,LF"
+21446,GHA,"oncho,LF"
+21447,GHA,"oncho,LF"
+21448,GHA,"oncho,LF"
+21450,GHA,"oncho,LF"
+21451,GHA,"oncho,LF"
+21453,GHA,"oncho,LF"
+21454,GHA,"oncho,LF"
+21455,GHA,"oncho,LF"
+21459,GHA,"oncho,LF"
+21463,GHA,"oncho,LF"
+21480,GHA,"oncho,LF"
+21481,GHA,"oncho,LF"
+21483,GHA,"oncho,LF"
+21484,GHA,"oncho,LF"
+21492,GHA,"oncho,LF"
+21493,GHA,"oncho,LF"
+21497,GHA,"oncho,LF"
+21498,GHA,"oncho,LF"
+21503,GHA,"oncho,LF"
+21505,GHA,"oncho,LF"
+21506,GHA,"oncho,LF"
+21508,GHA,"oncho,LF"
+21509,GHA,"oncho,LF"
+21510,GHA,"oncho,LF"
+21511,GHA,"oncho,LF"
+21512,GHA,"oncho,LF"
+21513,GHA,"oncho,LF"
+21514,GHA,"oncho,LF"
+21515,GHA,"oncho,LF"
+21516,GHA,"oncho,LF"
+21517,GHA,"oncho,LF"
+21518,GHA,"oncho,LF"
+21519,GHA,"oncho,LF"
+21521,GHA,"oncho,LF"
+21523,GHA,"oncho,LF"
+21524,GHA,"oncho,LF"
+21525,GHA,"oncho,LF"
+21526,GHA,"oncho,LF"
+21527,GHA,"oncho,LF"
+21528,GHA,"oncho,LF"
+21529,GHA,"oncho,LF"
+21530,GHA,"oncho,LF"
+21531,GHA,"oncho,LF"
+21532,GHA,"oncho,LF"
+21534,GHA,"oncho,LF"
+21536,GHA,"oncho,LF"
+21537,GHA,"oncho,LF"
+21539,GHA,"oncho,LF"
+21540,GHA,"oncho,LF"
+21541,GHA,"oncho,LF"
+21542,GHA,"oncho,LF"
+21543,GHA,"oncho,LF"
+21544,GHA,"oncho,LF"
+21545,GHA,"oncho,LF"
+21546,GHA,"oncho,LF"
+21547,GHA,"oncho,LF"
+21548,GHA,"oncho,LF"
+21549,GHA,"oncho,LF"
+21550,GHA,"oncho,LF"
+21551,GHA,"oncho,LF"
+21552,GHA,"oncho,LF"
+21553,GHA,"oncho,LF"
+21554,GHA,"oncho,LF"
+21580,GHA,"oncho,LF"
+21581,GHA,"oncho,LF"
+21587,GHA,"oncho,LF"
+21588,GHA,"oncho,LF"
+21590,GHA,"oncho,LF"
+21592,GHA,"oncho,LF"
+21593,GHA,"oncho,LF"
+21597,GHA,"oncho,LF"
+21598,GHA,"oncho,LF"
+21599,GHA,"oncho,LF"
+21601,GHA,"oncho,LF"
+21629,GHA,"oncho,LF"
+21630,GHA,"oncho,LF"
+21631,GHA,"oncho,LF"
+21632,GHA,"oncho,LF"
+21648,GHA,"oncho,LF"
+21652,GHA,"oncho,LF"
+21653,GHA,"oncho,LF"
+21655,GHA,"oncho,LF"
+21656,GHA,"oncho,LF"
+21658,GHA,"oncho,LF"
+21659,GHA,"oncho,LF"
+21660,GHA,"oncho,LF"
+21665,GHA,"oncho,LF"
+21666,GHA,"oncho,LF"
+21667,GHA,"oncho,LF"
+21668,GHA,"oncho,LF"
+21669,GHA,"oncho,LF"
+21670,GHA,"oncho,LF"
+21671,GHA,"oncho,LF"
+21672,GHA,"oncho,LF"
+21673,GHA,"oncho,LF"
+21674,GHA,"oncho,LF"
+21677,GHA,"oncho,LF"
+21378,GHA,oncho
+21380,GHA,oncho
+21382,GHA,oncho
+21384,GHA,oncho
+21386,GHA,oncho
+21387,GHA,oncho
+21388,GHA,oncho
+21389,GHA,oncho
+21390,GHA,oncho
+21391,GHA,oncho
+21392,GHA,oncho
+21393,GHA,oncho
+21394,GHA,oncho
+21395,GHA,oncho
+21397,GHA,oncho
+21399,GHA,oncho
+21400,GHA,oncho
+21402,GHA,oncho
+21403,GHA,oncho
+21404,GHA,oncho
+21405,GHA,oncho
+21406,GHA,oncho
+21407,GHA,oncho
+21408,GHA,oncho
+21409,GHA,oncho
+21411,GHA,oncho
+21412,GHA,oncho
+21413,GHA,oncho
+21414,GHA,oncho
+21416,GHA,oncho
+21417,GHA,oncho
+21418,GHA,oncho
+21419,GHA,oncho
+21420,GHA,oncho
+21421,GHA,oncho
+21422,GHA,oncho
+21423,GHA,oncho
+21424,GHA,oncho
+21427,GHA,oncho
+21428,GHA,oncho
+21431,GHA,oncho
+21432,GHA,oncho
+21433,GHA,oncho
+21436,GHA,oncho
+21456,GHA,oncho
+21457,GHA,oncho
+21460,GHA,oncho
+21461,GHA,oncho
+21465,GHA,oncho
+21468,GHA,oncho
+21471,GHA,oncho
+21472,GHA,oncho
+21473,GHA,oncho
+21474,GHA,oncho
+21476,GHA,oncho
+21477,GHA,oncho
+21478,GHA,oncho
+21482,GHA,oncho
+21485,GHA,oncho
+21487,GHA,oncho
+21488,GHA,oncho
+21489,GHA,oncho
+21490,GHA,oncho
+21496,GHA,oncho
+21500,GHA,oncho
+21501,GHA,oncho
+21555,GHA,oncho
+21556,GHA,oncho
+21557,GHA,oncho
+21558,GHA,oncho
+21559,GHA,oncho
+21560,GHA,oncho
+21561,GHA,oncho
+21562,GHA,oncho
+21563,GHA,oncho
+21564,GHA,oncho
+21565,GHA,oncho
+21566,GHA,oncho
+21568,GHA,oncho
+21569,GHA,oncho
+21570,GHA,oncho
+21571,GHA,oncho
+21572,GHA,oncho
+21573,GHA,oncho
+21574,GHA,oncho
+21575,GHA,oncho
+21576,GHA,oncho
+21577,GHA,oncho
+21578,GHA,oncho
+21579,GHA,oncho
+21583,GHA,oncho
+21584,GHA,oncho
+21585,GHA,oncho
+21586,GHA,oncho
+21589,GHA,oncho
+21594,GHA,oncho
+21595,GHA,oncho
+21600,GHA,oncho
+21602,GHA,oncho
+21603,GHA,oncho
+21604,GHA,oncho
+21605,GHA,oncho
+21606,GHA,oncho
+21607,GHA,oncho
+21608,GHA,oncho
+21609,GHA,oncho
+21610,GHA,oncho
+21611,GHA,oncho
+21613,GHA,oncho
+21614,GHA,oncho
+21615,GHA,oncho
+21616,GHA,oncho
+21617,GHA,oncho
+21618,GHA,oncho
+21619,GHA,oncho
+21620,GHA,oncho
+21621,GHA,oncho
+21622,GHA,oncho
+21623,GHA,oncho
+21624,GHA,oncho
+21625,GHA,oncho
+21626,GHA,oncho
+21627,GHA,oncho
+21628,GHA,oncho
+21633,GHA,oncho
+21634,GHA,oncho
+21635,GHA,oncho
+21636,GHA,oncho
+21637,GHA,oncho
+21638,GHA,oncho
+21639,GHA,oncho
+21640,GHA,oncho
+21641,GHA,oncho
+21642,GHA,oncho
+21643,GHA,oncho
+21644,GHA,oncho
+21645,GHA,oncho
+21646,GHA,oncho
+21664,GHA,oncho
+21675,GHA,oncho
+21676,GHA,oncho
+22604,GIN,"oncho,LF"
+22606,GIN,"oncho,LF"
+22607,GIN,"oncho,LF"
+22608,GIN,"oncho,LF"
+22610,GIN,"oncho,LF"
+22612,GIN,"oncho,LF"
+22615,GIN,"oncho,LF"
+22616,GIN,"oncho,LF"
+22618,GIN,"oncho,LF"
+22620,GIN,"oncho,LF"
+22621,GIN,"oncho,LF"
+22622,GIN,"oncho,LF"
+22623,GIN,"oncho,LF"
+22625,GIN,"oncho,LF"
+22627,GIN,"oncho,LF"
+22629,GIN,"oncho,LF"
+22630,GIN,"oncho,LF"
+22631,GIN,"oncho,LF"
+22632,GIN,"oncho,LF"
+22638,GIN,"oncho,LF"
+22639,GIN,"oncho,LF"
+22640,GIN,"oncho,LF"
+22617,GIN,oncho
+22624,GIN,oncho
+22626,GIN,oncho
+22628,GIN,oncho
+22635,GIN,oncho
+22641,GIN,oncho
+23656,GNB,"oncho,LF"
+23657,GNB,"oncho,LF"
+23658,GNB,"oncho,LF"
+23659,GNB,"oncho,LF"
+23660,GNB,"oncho,LF"
+23661,GNB,"oncho,LF"
+23662,GNB,"oncho,LF"
+23663,GNB,"oncho,LF"
+23664,GNB,"oncho,LF"
+23665,GNB,"oncho,LF"
+23666,GNB,"oncho,LF"
+23667,GNB,"oncho,LF"
+23668,GNB,"oncho,LF"
+23669,GNB,"oncho,LF"
+23709,GNB,"oncho,LF"
+23710,GNB,"oncho,LF"
+23711,GNB,"oncho,LF"
+23712,GNB,"oncho,LF"
+23713,GNB,"oncho,LF"
+23714,GNB,"oncho,LF"
+23715,GNB,"oncho,LF"
+23716,GNB,"oncho,LF"
+23717,GNB,"oncho,LF"
+23719,GNB,"oncho,LF"
+23720,GNB,"oncho,LF"
+23721,GNB,"oncho,LF"
+23722,GNB,"oncho,LF"
+23723,GNB,"oncho,LF"
+23724,GNB,"oncho,LF"
+23725,GNB,"oncho,LF"
+23726,GNB,"oncho,LF"
+23727,GNB,"oncho,LF"
+23728,GNB,"oncho,LF"
+26819,LBR,"oncho,LF"
+26821,LBR,"oncho,LF"
+26822,LBR,"oncho,LF"
+26823,LBR,"oncho,LF"
+26824,LBR,"oncho,LF"
+26825,LBR,"oncho,LF"
+26826,LBR,"oncho,LF"
+26827,LBR,"oncho,LF"
+26828,LBR,"oncho,LF"
+26829,LBR,"oncho,LF"
+26830,LBR,"oncho,LF"
+26831,LBR,"oncho,LF"
+26832,LBR,"oncho,LF"
+26818,LBR,oncho
+26820,LBR,oncho
+28945,MWI,"oncho,LF"
+28946,MWI,"oncho,LF"
+28947,MWI,"oncho,LF"
+28958,MWI,"oncho,LF"
+28959,MWI,"oncho,LF"
+28961,MWI,"oncho,LF"
+28967,MWI,"oncho,LF"
+28970,MWI,"oncho,LF"
+29972,MLI,"oncho,LF"
+29973,MLI,"oncho,LF"
+29974,MLI,"oncho,LF"
+29975,MLI,"oncho,LF"
+29976,MLI,"oncho,LF"
+29977,MLI,"oncho,LF"
+29982,MLI,"oncho,LF"
+29984,MLI,"oncho,LF"
+29985,MLI,"oncho,LF"
+29986,MLI,"oncho,LF"
+29988,MLI,"oncho,LF"
+29995,MLI,"oncho,LF"
+29996,MLI,"oncho,LF"
+29997,MLI,"oncho,LF"
+29998,MLI,"oncho,LF"
+29999,MLI,"oncho,LF"
+30000,MLI,"oncho,LF"
+30001,MLI,"oncho,LF"
+30003,MLI,"oncho,LF"
+30004,MLI,"oncho,LF"
+30005,MLI,"oncho,LF"
+30006,MLI,"oncho,LF"
+30012,MLI,"oncho,LF"
+30013,MLI,"oncho,LF"
+30017,MLI,"oncho,LF"
+30019,MLI,"oncho,LF"
+30020,MLI,"oncho,LF"
+30021,MLI,"oncho,LF"
+30022,MLI,"oncho,LF"
+30023,MLI,"oncho,LF"
+30024,MLI,"oncho,LF"
+30025,MLI,"oncho,LF"
+30026,MLI,"oncho,LF"
+30027,MLI,"oncho,LF"
+30028,MLI,"oncho,LF"
+30029,MLI,"oncho,LF"
+30039,MLI,"oncho,LF"
+30040,MLI,"oncho,LF"
+33204,MOZ,"oncho,LF"
+33204,MOZ,oncho
+35315,NER,"oncho,LF"
+35326,NER,"oncho,LF"
+35348,NER,"oncho,LF"
+35349,NER,"oncho,LF"
+35352,NER,"oncho,LF"
+35353,NER,"oncho,LF"
+35360,NER,"oncho,LF"
+35361,NER,"oncho,LF"
+35376,NER,"oncho,LF"
+35377,NER,"oncho,LF"
+35378,NER,"oncho,LF"
+35379,NER,"oncho,LF"
+35380,NER,"oncho,LF"
+35358,NER,oncho
+37072,NGA,"oncho,LF,loa hyper"
+36337,NGA,"oncho,LF,loa meso"
+36338,NGA,"oncho,LF,loa meso"
+36339,NGA,"oncho,LF,loa meso"
+36340,NGA,"oncho,LF,loa meso"
+36341,NGA,"oncho,LF,loa meso"
+36342,NGA,"oncho,LF,loa meso"
+36343,NGA,"oncho,LF,loa meso"
+36344,NGA,"oncho,LF,loa meso"
+36345,NGA,"oncho,LF,loa meso"
+36346,NGA,"oncho,LF,loa meso"
+36347,NGA,"oncho,LF,loa meso"
+36348,NGA,"oncho,LF,loa meso"
+36349,NGA,"oncho,LF,loa meso"
+36350,NGA,"oncho,LF,loa meso"
+36352,NGA,"oncho,LF,loa meso"
+36353,NGA,"oncho,LF,loa meso"
+36376,NGA,"oncho,LF,loa meso"
+36380,NGA,"oncho,LF,loa meso"
+36382,NGA,"oncho,LF,loa meso"
+36398,NGA,"oncho,LF,loa meso"
+36403,NGA,"oncho,LF,loa meso"
+36464,NGA,"oncho,LF,loa meso"
+36465,NGA,"oncho,LF,loa meso"
+36471,NGA,"oncho,LF,loa meso"
+36505,NGA,"oncho,LF,loa meso"
+36506,NGA,"oncho,LF,loa meso"
+36509,NGA,"oncho,LF,loa meso"
+36510,NGA,"oncho,LF,loa meso"
+36511,NGA,"oncho,LF,loa meso"
+36515,NGA,"oncho,LF,loa meso"
+36517,NGA,"oncho,LF,loa meso"
+36520,NGA,"oncho,LF,loa meso"
+36522,NGA,"oncho,LF,loa meso"
+36548,NGA,"oncho,LF,loa meso"
+36549,NGA,"oncho,LF,loa meso"
+36551,NGA,"oncho,LF,loa meso"
+36552,NGA,"oncho,LF,loa meso"
+36554,NGA,"oncho,LF,loa meso"
+36557,NGA,"oncho,LF,loa meso"
+36558,NGA,"oncho,LF,loa meso"
+36559,NGA,"oncho,LF,loa meso"
+36575,NGA,"oncho,LF,loa meso"
+36579,NGA,"oncho,LF,loa meso"
+36581,NGA,"oncho,LF,loa meso"
+36583,NGA,"oncho,LF,loa meso"
+36584,NGA,"oncho,LF,loa meso"
+36588,NGA,"oncho,LF,loa meso"
+36591,NGA,"oncho,LF,loa meso"
+36629,NGA,"oncho,LF,loa meso"
+36630,NGA,"oncho,LF,loa meso"
+36631,NGA,"oncho,LF,loa meso"
+36632,NGA,"oncho,LF,loa meso"
+36635,NGA,"oncho,LF,loa meso"
+36636,NGA,"oncho,LF,loa meso"
+36637,NGA,"oncho,LF,loa meso"
+36639,NGA,"oncho,LF,loa meso"
+36640,NGA,"oncho,LF,loa meso"
+36644,NGA,"oncho,LF,loa meso"
+36646,NGA,"oncho,LF,loa meso"
+36647,NGA,"oncho,LF,loa meso"
+36648,NGA,"oncho,LF,loa meso"
+36653,NGA,"oncho,LF,loa meso"
+36654,NGA,"oncho,LF,loa meso"
+36901,NGA,"oncho,LF,loa meso"
+36903,NGA,"oncho,LF,loa meso"
+36912,NGA,"oncho,LF,loa meso"
+36924,NGA,"oncho,LF,loa meso"
+36927,NGA,"oncho,LF,loa meso"
+36928,NGA,"oncho,LF,loa meso"
+36930,NGA,"oncho,LF,loa meso"
+36932,NGA,"oncho,LF,loa meso"
+36934,NGA,"oncho,LF,loa meso"
+36935,NGA,"oncho,LF,loa meso"
+36936,NGA,"oncho,LF,loa meso"
+36937,NGA,"oncho,LF,loa meso"
+36941,NGA,"oncho,LF,loa meso"
+36943,NGA,"oncho,LF,loa meso"
+36944,NGA,"oncho,LF,loa meso"
+36945,NGA,"oncho,LF,loa meso"
+36946,NGA,"oncho,LF,loa meso"
+36947,NGA,"oncho,LF,loa meso"
+36953,NGA,"oncho,LF,loa meso"
+36955,NGA,"oncho,LF,loa meso"
+36957,NGA,"oncho,LF,loa meso"
+36961,NGA,"oncho,LF,loa meso"
+36964,NGA,"oncho,LF,loa meso"
+36965,NGA,"oncho,LF,loa meso"
+36967,NGA,"oncho,LF,loa meso"
+36980,NGA,"oncho,LF,loa meso"
+36990,NGA,"oncho,LF,loa meso"
+37028,NGA,"oncho,LF,loa meso"
+37036,NGA,"oncho,LF,loa meso"
+37066,NGA,"oncho,LF,loa meso"
+36351,NGA,"oncho,LF,loa hypo"
+36378,NGA,"oncho,LF,loa hypo"
+36387,NGA,"oncho,LF,loa hypo"
+36397,NGA,"oncho,LF,loa hypo"
+36399,NGA,"oncho,LF,loa hypo"
+36401,NGA,"oncho,LF,loa hypo"
+36406,NGA,"oncho,LF,loa hypo"
+36407,NGA,"oncho,LF,loa hypo"
+36408,NGA,"oncho,LF,loa hypo"
+36409,NGA,"oncho,LF,loa hypo"
+36410,NGA,"oncho,LF,loa hypo"
+36412,NGA,"oncho,LF,loa hypo"
+36413,NGA,"oncho,LF,loa hypo"
+36414,NGA,"oncho,LF,loa hypo"
+36415,NGA,"oncho,LF,loa hypo"
+36416,NGA,"oncho,LF,loa hypo"
+36417,NGA,"oncho,LF,loa hypo"
+36418,NGA,"oncho,LF,loa hypo"
+36419,NGA,"oncho,LF,loa hypo"
+36420,NGA,"oncho,LF,loa hypo"
+36421,NGA,"oncho,LF,loa hypo"
+36423,NGA,"oncho,LF,loa hypo"
+36425,NGA,"oncho,LF,loa hypo"
+36426,NGA,"oncho,LF,loa hypo"
+36427,NGA,"oncho,LF,loa hypo"
+36429,NGA,"oncho,LF,loa hypo"
+36431,NGA,"oncho,LF,loa hypo"
+36434,NGA,"oncho,LF,loa hypo"
+36435,NGA,"oncho,LF,loa hypo"
+36436,NGA,"oncho,LF,loa hypo"
+36440,NGA,"oncho,LF,loa hypo"
+36441,NGA,"oncho,LF,loa hypo"
+36443,NGA,"oncho,LF,loa hypo"
+36444,NGA,"oncho,LF,loa hypo"
+36445,NGA,"oncho,LF,loa hypo"
+36455,NGA,"oncho,LF,loa hypo"
+36457,NGA,"oncho,LF,loa hypo"
+36459,NGA,"oncho,LF,loa hypo"
+36460,NGA,"oncho,LF,loa hypo"
+36461,NGA,"oncho,LF,loa hypo"
+36466,NGA,"oncho,LF,loa hypo"
+36467,NGA,"oncho,LF,loa hypo"
+36468,NGA,"oncho,LF,loa hypo"
+36470,NGA,"oncho,LF,loa hypo"
+36473,NGA,"oncho,LF,loa hypo"
+36474,NGA,"oncho,LF,loa hypo"
+36475,NGA,"oncho,LF,loa hypo"
+36512,NGA,"oncho,LF,loa hypo"
+36523,NGA,"oncho,LF,loa hypo"
+36529,NGA,"oncho,LF,loa hypo"
+36530,NGA,"oncho,LF,loa hypo"
+36533,NGA,"oncho,LF,loa hypo"
+36536,NGA,"oncho,LF,loa hypo"
+36555,NGA,"oncho,LF,loa hypo"
+36561,NGA,"oncho,LF,loa hypo"
+36564,NGA,"oncho,LF,loa hypo"
+36565,NGA,"oncho,LF,loa hypo"
+36567,NGA,"oncho,LF,loa hypo"
+36569,NGA,"oncho,LF,loa hypo"
+36576,NGA,"oncho,LF,loa hypo"
+36580,NGA,"oncho,LF,loa hypo"
+36582,NGA,"oncho,LF,loa hypo"
+36585,NGA,"oncho,LF,loa hypo"
+36586,NGA,"oncho,LF,loa hypo"
+36587,NGA,"oncho,LF,loa hypo"
+36589,NGA,"oncho,LF,loa hypo"
+36590,NGA,"oncho,LF,loa hypo"
+36592,NGA,"oncho,LF,loa hypo"
+36593,NGA,"oncho,LF,loa hypo"
+36594,NGA,"oncho,LF,loa hypo"
+36596,NGA,"oncho,LF,loa hypo"
+36597,NGA,"oncho,LF,loa hypo"
+36598,NGA,"oncho,LF,loa hypo"
+36599,NGA,"oncho,LF,loa hypo"
+36600,NGA,"oncho,LF,loa hypo"
+36601,NGA,"oncho,LF,loa hypo"
+36603,NGA,"oncho,LF,loa hypo"
+36604,NGA,"oncho,LF,loa hypo"
+36605,NGA,"oncho,LF,loa hypo"
+36606,NGA,"oncho,LF,loa hypo"
+36607,NGA,"oncho,LF,loa hypo"
+36608,NGA,"oncho,LF,loa hypo"
+36609,NGA,"oncho,LF,loa hypo"
+36610,NGA,"oncho,LF,loa hypo"
+36613,NGA,"oncho,LF,loa hypo"
+36614,NGA,"oncho,LF,loa hypo"
+36615,NGA,"oncho,LF,loa hypo"
+36620,NGA,"oncho,LF,loa hypo"
+36621,NGA,"oncho,LF,loa hypo"
+36623,NGA,"oncho,LF,loa hypo"
+36625,NGA,"oncho,LF,loa hypo"
+36626,NGA,"oncho,LF,loa hypo"
+36628,NGA,"oncho,LF,loa hypo"
+36633,NGA,"oncho,LF,loa hypo"
+36634,NGA,"oncho,LF,loa hypo"
+36642,NGA,"oncho,LF,loa hypo"
+36643,NGA,"oncho,LF,loa hypo"
+36645,NGA,"oncho,LF,loa hypo"
+36649,NGA,"oncho,LF,loa hypo"
+36650,NGA,"oncho,LF,loa hypo"
+36651,NGA,"oncho,LF,loa hypo"
+36656,NGA,"oncho,LF,loa hypo"
+36658,NGA,"oncho,LF,loa hypo"
+36660,NGA,"oncho,LF,loa hypo"
+36661,NGA,"oncho,LF,loa hypo"
+36665,NGA,"oncho,LF,loa hypo"
+36666,NGA,"oncho,LF,loa hypo"
+36668,NGA,"oncho,LF,loa hypo"
+36669,NGA,"oncho,LF,loa hypo"
+36670,NGA,"oncho,LF,loa hypo"
+36671,NGA,"oncho,LF,loa hypo"
+36673,NGA,"oncho,LF,loa hypo"
+36674,NGA,"oncho,LF,loa hypo"
+36676,NGA,"oncho,LF,loa hypo"
+36677,NGA,"oncho,LF,loa hypo"
+36678,NGA,"oncho,LF,loa hypo"
+36681,NGA,"oncho,LF,loa hypo"
+36683,NGA,"oncho,LF,loa hypo"
+36690,NGA,"oncho,LF,loa hypo"
+36693,NGA,"oncho,LF,loa hypo"
+36699,NGA,"oncho,LF,loa hypo"
+36706,NGA,"oncho,LF,loa hypo"
+36707,NGA,"oncho,LF,loa hypo"
+36716,NGA,"oncho,LF,loa hypo"
+36719,NGA,"oncho,LF,loa hypo"
+36721,NGA,"oncho,LF,loa hypo"
+36741,NGA,"oncho,LF,loa hypo"
+36742,NGA,"oncho,LF,loa hypo"
+36746,NGA,"oncho,LF,loa hypo"
+36770,NGA,"oncho,LF,loa hypo"
+36798,NGA,"oncho,LF,loa hypo"
+36799,NGA,"oncho,LF,loa hypo"
+36803,NGA,"oncho,LF,loa hypo"
+36806,NGA,"oncho,LF,loa hypo"
+36807,NGA,"oncho,LF,loa hypo"
+36808,NGA,"oncho,LF,loa hypo"
+36813,NGA,"oncho,LF,loa hypo"
+36814,NGA,"oncho,LF,loa hypo"
+36816,NGA,"oncho,LF,loa hypo"
+36820,NGA,"oncho,LF,loa hypo"
+36821,NGA,"oncho,LF,loa hypo"
+36822,NGA,"oncho,LF,loa hypo"
+36823,NGA,"oncho,LF,loa hypo"
+36824,NGA,"oncho,LF,loa hypo"
+36826,NGA,"oncho,LF,loa hypo"
+36827,NGA,"oncho,LF,loa hypo"
+36828,NGA,"oncho,LF,loa hypo"
+36830,NGA,"oncho,LF,loa hypo"
+36833,NGA,"oncho,LF,loa hypo"
+36835,NGA,"oncho,LF,loa hypo"
+36836,NGA,"oncho,LF,loa hypo"
+36837,NGA,"oncho,LF,loa hypo"
+36838,NGA,"oncho,LF,loa hypo"
+36840,NGA,"oncho,LF,loa hypo"
+36841,NGA,"oncho,LF,loa hypo"
+36853,NGA,"oncho,LF,loa hypo"
+36854,NGA,"oncho,LF,loa hypo"
+36863,NGA,"oncho,LF,loa hypo"
+36864,NGA,"oncho,LF,loa hypo"
+36866,NGA,"oncho,LF,loa hypo"
+36869,NGA,"oncho,LF,loa hypo"
+36870,NGA,"oncho,LF,loa hypo"
+36872,NGA,"oncho,LF,loa hypo"
+36873,NGA,"oncho,LF,loa hypo"
+36875,NGA,"oncho,LF,loa hypo"
+36876,NGA,"oncho,LF,loa hypo"
+36878,NGA,"oncho,LF,loa hypo"
+36879,NGA,"oncho,LF,loa hypo"
+36886,NGA,"oncho,LF,loa hypo"
+36888,NGA,"oncho,LF,loa hypo"
+36889,NGA,"oncho,LF,loa hypo"
+36890,NGA,"oncho,LF,loa hypo"
+36891,NGA,"oncho,LF,loa hypo"
+36893,NGA,"oncho,LF,loa hypo"
+36894,NGA,"oncho,LF,loa hypo"
+36895,NGA,"oncho,LF,loa hypo"
+36896,NGA,"oncho,LF,loa hypo"
+36898,NGA,"oncho,LF,loa hypo"
+36899,NGA,"oncho,LF,loa hypo"
+36900,NGA,"oncho,LF,loa hypo"
+36902,NGA,"oncho,LF,loa hypo"
+36904,NGA,"oncho,LF,loa hypo"
+36905,NGA,"oncho,LF,loa hypo"
+36907,NGA,"oncho,LF,loa hypo"
+36909,NGA,"oncho,LF,loa hypo"
+36913,NGA,"oncho,LF,loa hypo"
+36914,NGA,"oncho,LF,loa hypo"
+36916,NGA,"oncho,LF,loa hypo"
+36918,NGA,"oncho,LF,loa hypo"
+36919,NGA,"oncho,LF,loa hypo"
+36920,NGA,"oncho,LF,loa hypo"
+36921,NGA,"oncho,LF,loa hypo"
+36922,NGA,"oncho,LF,loa hypo"
+36923,NGA,"oncho,LF,loa hypo"
+36926,NGA,"oncho,LF,loa hypo"
+36929,NGA,"oncho,LF,loa hypo"
+36931,NGA,"oncho,LF,loa hypo"
+36933,NGA,"oncho,LF,loa hypo"
+36938,NGA,"oncho,LF,loa hypo"
+36939,NGA,"oncho,LF,loa hypo"
+36942,NGA,"oncho,LF,loa hypo"
+36949,NGA,"oncho,LF,loa hypo"
+36950,NGA,"oncho,LF,loa hypo"
+36951,NGA,"oncho,LF,loa hypo"
+36952,NGA,"oncho,LF,loa hypo"
+36954,NGA,"oncho,LF,loa hypo"
+36958,NGA,"oncho,LF,loa hypo"
+36959,NGA,"oncho,LF,loa hypo"
+36960,NGA,"oncho,LF,loa hypo"
+36962,NGA,"oncho,LF,loa hypo"
+36963,NGA,"oncho,LF,loa hypo"
+36979,NGA,"oncho,LF,loa hypo"
+36986,NGA,"oncho,LF,loa hypo"
+36992,NGA,"oncho,LF,loa hypo"
+36994,NGA,"oncho,LF,loa hypo"
+36997,NGA,"oncho,LF,loa hypo"
+37001,NGA,"oncho,LF,loa hypo"
+37002,NGA,"oncho,LF,loa hypo"
+37004,NGA,"oncho,LF,loa hypo"
+37005,NGA,"oncho,LF,loa hypo"
+37006,NGA,"oncho,LF,loa hypo"
+37007,NGA,"oncho,LF,loa hypo"
+37008,NGA,"oncho,LF,loa hypo"
+37011,NGA,"oncho,LF,loa hypo"
+37013,NGA,"oncho,LF,loa hypo"
+37014,NGA,"oncho,LF,loa hypo"
+37016,NGA,"oncho,LF,loa hypo"
+37017,NGA,"oncho,LF,loa hypo"
+37019,NGA,"oncho,LF,loa hypo"
+37025,NGA,"oncho,LF,loa hypo"
+37030,NGA,"oncho,LF,loa hypo"
+37031,NGA,"oncho,LF,loa hypo"
+37034,NGA,"oncho,LF,loa hypo"
+37035,NGA,"oncho,LF,loa hypo"
+37037,NGA,"oncho,LF,loa hypo"
+37065,NGA,"oncho,LF,loa hypo"
+37067,NGA,"oncho,LF,loa hypo"
+37069,NGA,"oncho,LF,loa hypo"
+37077,NGA,"oncho,LF,loa hypo"
+37080,NGA,"oncho,LF,loa hypo"
+37084,NGA,"oncho,LF,loa hypo"
+37091,NGA,"oncho,LF,loa hypo"
+37022,NGA,"oncho,LF"
+37024,NGA,"oncho,LF"
+36355,NGA,"oncho,LF"
+36356,NGA,"oncho,LF"
+36361,NGA,"oncho,LF"
+36364,NGA,"oncho,LF"
+36365,NGA,"oncho,LF"
+36371,NGA,"oncho,LF"
+36372,NGA,"oncho,LF"
+36374,NGA,"oncho,LF"
+36502,NGA,"oncho,LF"
+36545,NGA,"oncho,LF"
+36881,NGA,"oncho,LF"
+36885,NGA,"oncho,LF"
+36887,NGA,"oncho,LF"
+37071,NGA,"oncho,LF"
+36354,NGA,"oncho,LF"
+36357,NGA,"oncho,LF"
+36358,NGA,"oncho,LF"
+36359,NGA,"oncho,LF"
+36362,NGA,"oncho,LF"
+36366,NGA,"oncho,LF"
+36367,NGA,"oncho,LF"
+36368,NGA,"oncho,LF"
+36369,NGA,"oncho,LF"
+36370,NGA,"oncho,LF"
+36411,NGA,"oncho,LF"
+36424,NGA,"oncho,LF"
+36447,NGA,"oncho,LF"
+36449,NGA,"oncho,LF"
+36450,NGA,"oncho,LF"
+36451,NGA,"oncho,LF"
+36452,NGA,"oncho,LF"
+36453,NGA,"oncho,LF"
+36454,NGA,"oncho,LF"
+36478,NGA,"oncho,LF"
+36479,NGA,"oncho,LF"
+36482,NGA,"oncho,LF"
+36484,NGA,"oncho,LF"
+36486,NGA,"oncho,LF"
+36487,NGA,"oncho,LF"
+36489,NGA,"oncho,LF"
+36490,NGA,"oncho,LF"
+36495,NGA,"oncho,LF"
+36496,NGA,"oncho,LF"
+36497,NGA,"oncho,LF"
+36498,NGA,"oncho,LF"
+36500,NGA,"oncho,LF"
+36501,NGA,"oncho,LF"
+36503,NGA,"oncho,LF"
+36504,NGA,"oncho,LF"
+36524,NGA,"oncho,LF"
+36525,NGA,"oncho,LF"
+36527,NGA,"oncho,LF"
+36531,NGA,"oncho,LF"
+36532,NGA,"oncho,LF"
+36538,NGA,"oncho,LF"
+36540,NGA,"oncho,LF"
+36543,NGA,"oncho,LF"
+36546,NGA,"oncho,LF"
+36547,NGA,"oncho,LF"
+36616,NGA,"oncho,LF"
+36619,NGA,"oncho,LF"
+36622,NGA,"oncho,LF"
+36624,NGA,"oncho,LF"
+36627,NGA,"oncho,LF"
+36638,NGA,"oncho,LF"
+36641,NGA,"oncho,LF"
+36657,NGA,"oncho,LF"
+36659,NGA,"oncho,LF"
+36662,NGA,"oncho,LF"
+36663,NGA,"oncho,LF"
+36664,NGA,"oncho,LF"
+36667,NGA,"oncho,LF"
+36672,NGA,"oncho,LF"
+36675,NGA,"oncho,LF"
+36679,NGA,"oncho,LF"
+36680,NGA,"oncho,LF"
+36682,NGA,"oncho,LF"
+36685,NGA,"oncho,LF"
+36686,NGA,"oncho,LF"
+36687,NGA,"oncho,LF"
+36688,NGA,"oncho,LF"
+36689,NGA,"oncho,LF"
+36691,NGA,"oncho,LF"
+36696,NGA,"oncho,LF"
+36697,NGA,"oncho,LF"
+36700,NGA,"oncho,LF"
+36701,NGA,"oncho,LF"
+36702,NGA,"oncho,LF"
+36703,NGA,"oncho,LF"
+36704,NGA,"oncho,LF"
+36708,NGA,"oncho,LF"
+36709,NGA,"oncho,LF"
+36710,NGA,"oncho,LF"
+36711,NGA,"oncho,LF"
+36713,NGA,"oncho,LF"
+36714,NGA,"oncho,LF"
+36715,NGA,"oncho,LF"
+36718,NGA,"oncho,LF"
+36720,NGA,"oncho,LF"
+36722,NGA,"oncho,LF"
+36724,NGA,"oncho,LF"
+36725,NGA,"oncho,LF"
+36727,NGA,"oncho,LF"
+36728,NGA,"oncho,LF"
+36729,NGA,"oncho,LF"
+36730,NGA,"oncho,LF"
+36731,NGA,"oncho,LF"
+36732,NGA,"oncho,LF"
+36733,NGA,"oncho,LF"
+36734,NGA,"oncho,LF"
+36735,NGA,"oncho,LF"
+36737,NGA,"oncho,LF"
+36738,NGA,"oncho,LF"
+36739,NGA,"oncho,LF"
+36740,NGA,"oncho,LF"
+36744,NGA,"oncho,LF"
+36745,NGA,"oncho,LF"
+36748,NGA,"oncho,LF"
+36749,NGA,"oncho,LF"
+36751,NGA,"oncho,LF"
+36752,NGA,"oncho,LF"
+36753,NGA,"oncho,LF"
+36754,NGA,"oncho,LF"
+36755,NGA,"oncho,LF"
+36756,NGA,"oncho,LF"
+36757,NGA,"oncho,LF"
+36759,NGA,"oncho,LF"
+36760,NGA,"oncho,LF"
+36761,NGA,"oncho,LF"
+36762,NGA,"oncho,LF"
+36764,NGA,"oncho,LF"
+36765,NGA,"oncho,LF"
+36767,NGA,"oncho,LF"
+36768,NGA,"oncho,LF"
+36769,NGA,"oncho,LF"
+36771,NGA,"oncho,LF"
+36772,NGA,"oncho,LF"
+36773,NGA,"oncho,LF"
+36774,NGA,"oncho,LF"
+36775,NGA,"oncho,LF"
+36776,NGA,"oncho,LF"
+36777,NGA,"oncho,LF"
+36778,NGA,"oncho,LF"
+36779,NGA,"oncho,LF"
+36780,NGA,"oncho,LF"
+36781,NGA,"oncho,LF"
+36782,NGA,"oncho,LF"
+36783,NGA,"oncho,LF"
+36785,NGA,"oncho,LF"
+36786,NGA,"oncho,LF"
+36787,NGA,"oncho,LF"
+36788,NGA,"oncho,LF"
+36789,NGA,"oncho,LF"
+36790,NGA,"oncho,LF"
+36791,NGA,"oncho,LF"
+36792,NGA,"oncho,LF"
+36793,NGA,"oncho,LF"
+36794,NGA,"oncho,LF"
+36795,NGA,"oncho,LF"
+36796,NGA,"oncho,LF"
+36797,NGA,"oncho,LF"
+36800,NGA,"oncho,LF"
+36801,NGA,"oncho,LF"
+36802,NGA,"oncho,LF"
+36804,NGA,"oncho,LF"
+36862,NGA,"oncho,LF"
+36865,NGA,"oncho,LF"
+36867,NGA,"oncho,LF"
+36868,NGA,"oncho,LF"
+36871,NGA,"oncho,LF"
+36874,NGA,"oncho,LF"
+37003,NGA,"oncho,LF"
+37009,NGA,"oncho,LF"
+37010,NGA,"oncho,LF"
+37012,NGA,"oncho,LF"
+37015,NGA,"oncho,LF"
+37021,NGA,"oncho,LF"
+37041,NGA,"oncho,LF"
+37042,NGA,"oncho,LF"
+37043,NGA,"oncho,LF"
+37044,NGA,"oncho,LF"
+37045,NGA,"oncho,LF"
+37046,NGA,"oncho,LF"
+37047,NGA,"oncho,LF"
+37048,NGA,"oncho,LF"
+37050,NGA,"oncho,LF"
+37051,NGA,"oncho,LF"
+37052,NGA,"oncho,LF"
+37053,NGA,"oncho,LF"
+37054,NGA,"oncho,LF"
+37055,NGA,"oncho,LF"
+37058,NGA,"oncho,LF"
+37059,NGA,"oncho,LF"
+37060,NGA,"oncho,LF"
+37062,NGA,"oncho,LF"
+37063,NGA,"oncho,LF"
+37064,NGA,"oncho,LF"
+37068,NGA,"oncho,LF"
+37070,NGA,"oncho,LF"
+37073,NGA,"oncho,LF"
+37078,NGA,"oncho,LF"
+37079,NGA,"oncho,LF"
+37082,NGA,"oncho,LF"
+37086,NGA,"oncho,LF"
+37087,NGA,"oncho,LF"
+37089,NGA,"oncho,LF"
+37090,NGA,"oncho,LF"
+37092,NGA,"oncho,LF"
+37095,NGA,"oncho,LF"
+37096,NGA,"oncho,LF"
+37097,NGA,"oncho,LF"
+37098,NGA,"oncho,LF"
+37099,NGA,"oncho,LF"
+37100,NGA,"oncho,LF"
+37101,NGA,"oncho,LF"
+37102,NGA,"oncho,LF"
+37103,NGA,"oncho,LF"
+37104,NGA,"oncho,LF"
+37105,NGA,"oncho,LF"
+37106,NGA,"oncho,LF"
+37107,NGA,"oncho,LF"
+37108,NGA,"oncho,LF"
+37109,NGA,"oncho,LF"
+37110,NGA,"oncho,LF"
+37074,NGA,"oncho,loa hyper"
+37076,NGA,"oncho,loa hyper"
+36377,NGA,"oncho,loa meso"
+36379,NGA,"oncho,loa meso"
+36384,NGA,"oncho,loa meso"
+36385,NGA,"oncho,loa meso"
+36386,NGA,"oncho,loa meso"
+36389,NGA,"oncho,loa meso"
+36390,NGA,"oncho,loa meso"
+36395,NGA,"oncho,loa meso"
+36396,NGA,"oncho,loa meso"
+36514,NGA,"oncho,loa meso"
+36518,NGA,"oncho,loa meso"
+36519,NGA,"oncho,loa meso"
+36521,NGA,"oncho,loa meso"
+36550,NGA,"oncho,loa meso"
+36553,NGA,"oncho,loa meso"
+36556,NGA,"oncho,loa meso"
+36560,NGA,"oncho,loa meso"
+36574,NGA,"oncho,loa meso"
+36925,NGA,"oncho,loa meso"
+36940,NGA,"oncho,loa meso"
+36948,NGA,"oncho,loa meso"
+36956,NGA,"oncho,loa meso"
+36978,NGA,"oncho,loa meso"
+36985,NGA,"oncho,loa meso"
+36988,NGA,"oncho,loa meso"
+36989,NGA,"oncho,loa meso"
+37000,NGA,"oncho,loa meso"
+37075,NGA,"oncho,loa meso"
+36375,NGA,"oncho,loa hypo"
+36391,NGA,"oncho,loa hypo"
+36392,NGA,"oncho,loa hypo"
+36393,NGA,"oncho,loa hypo"
+36400,NGA,"oncho,loa hypo"
+36402,NGA,"oncho,loa hypo"
+36404,NGA,"oncho,loa hypo"
+36428,NGA,"oncho,loa hypo"
+36430,NGA,"oncho,loa hypo"
+36432,NGA,"oncho,loa hypo"
+36433,NGA,"oncho,loa hypo"
+36437,NGA,"oncho,loa hypo"
+36438,NGA,"oncho,loa hypo"
+36439,NGA,"oncho,loa hypo"
+36442,NGA,"oncho,loa hypo"
+36446,NGA,"oncho,loa hypo"
+36456,NGA,"oncho,loa hypo"
+36458,NGA,"oncho,loa hypo"
+36462,NGA,"oncho,loa hypo"
+36469,NGA,"oncho,loa hypo"
+36472,NGA,"oncho,loa hypo"
+36476,NGA,"oncho,loa hypo"
+36477,NGA,"oncho,loa hypo"
+36507,NGA,"oncho,loa hypo"
+36508,NGA,"oncho,loa hypo"
+36513,NGA,"oncho,loa hypo"
+36516,NGA,"oncho,loa hypo"
+36537,NGA,"oncho,loa hypo"
+36563,NGA,"oncho,loa hypo"
+36566,NGA,"oncho,loa hypo"
+36568,NGA,"oncho,loa hypo"
+36570,NGA,"oncho,loa hypo"
+36571,NGA,"oncho,loa hypo"
+36573,NGA,"oncho,loa hypo"
+36577,NGA,"oncho,loa hypo"
+36578,NGA,"oncho,loa hypo"
+36595,NGA,"oncho,loa hypo"
+36602,NGA,"oncho,loa hypo"
+36611,NGA,"oncho,loa hypo"
+36612,NGA,"oncho,loa hypo"
+36617,NGA,"oncho,loa hypo"
+36618,NGA,"oncho,loa hypo"
+36684,NGA,"oncho,loa hypo"
+36805,NGA,"oncho,loa hypo"
+36809,NGA,"oncho,loa hypo"
+36810,NGA,"oncho,loa hypo"
+36811,NGA,"oncho,loa hypo"
+36812,NGA,"oncho,loa hypo"
+36815,NGA,"oncho,loa hypo"
+36817,NGA,"oncho,loa hypo"
+36818,NGA,"oncho,loa hypo"
+36819,NGA,"oncho,loa hypo"
+36825,NGA,"oncho,loa hypo"
+36829,NGA,"oncho,loa hypo"
+36831,NGA,"oncho,loa hypo"
+36832,NGA,"oncho,loa hypo"
+36834,NGA,"oncho,loa hypo"
+36839,NGA,"oncho,loa hypo"
+36845,NGA,"oncho,loa hypo"
+36847,NGA,"oncho,loa hypo"
+36848,NGA,"oncho,loa hypo"
+36850,NGA,"oncho,loa hypo"
+36855,NGA,"oncho,loa hypo"
+36858,NGA,"oncho,loa hypo"
+36882,NGA,"oncho,loa hypo"
+36883,NGA,"oncho,loa hypo"
+36884,NGA,"oncho,loa hypo"
+36892,NGA,"oncho,loa hypo"
+36897,NGA,"oncho,loa hypo"
+36906,NGA,"oncho,loa hypo"
+36908,NGA,"oncho,loa hypo"
+36910,NGA,"oncho,loa hypo"
+36911,NGA,"oncho,loa hypo"
+36915,NGA,"oncho,loa hypo"
+36917,NGA,"oncho,loa hypo"
+36968,NGA,"oncho,loa hypo"
+36969,NGA,"oncho,loa hypo"
+36970,NGA,"oncho,loa hypo"
+36971,NGA,"oncho,loa hypo"
+36972,NGA,"oncho,loa hypo"
+36981,NGA,"oncho,loa hypo"
+36983,NGA,"oncho,loa hypo"
+36984,NGA,"oncho,loa hypo"
+36987,NGA,"oncho,loa hypo"
+36991,NGA,"oncho,loa hypo"
+36993,NGA,"oncho,loa hypo"
+36995,NGA,"oncho,loa hypo"
+36996,NGA,"oncho,loa hypo"
+36998,NGA,"oncho,loa hypo"
+36999,NGA,"oncho,loa hypo"
+37026,NGA,"oncho,loa hypo"
+37027,NGA,"oncho,loa hypo"
+37032,NGA,"oncho,loa hypo"
+37033,NGA,"oncho,loa hypo"
+37038,NGA,"oncho,loa hypo"
+37040,NGA,"oncho,loa hypo"
+37083,NGA,"oncho,loa hypo"
+37088,NGA,"oncho,loa hypo"
+37093,NGA,"oncho,loa hypo"
+36480,NGA,oncho
+36485,NGA,oncho
+36492,NGA,oncho
+36360,NGA,oncho
+36363,NGA,oncho
+36373,NGA,oncho
+36448,NGA,oncho
+36481,NGA,oncho
+36483,NGA,oncho
+36488,NGA,oncho
+36491,NGA,oncho
+36493,NGA,oncho
+36494,NGA,oncho
+36499,NGA,oncho
+36526,NGA,oncho
+36528,NGA,oncho
+36534,NGA,oncho
+36535,NGA,oncho
+36539,NGA,oncho
+36541,NGA,oncho
+36542,NGA,oncho
+36544,NGA,oncho
+36562,NGA,oncho
+36572,NGA,oncho
+36694,NGA,oncho
+36695,NGA,oncho
+36698,NGA,oncho
+36750,NGA,oncho
+36758,NGA,oncho
+36763,NGA,oncho
+36766,NGA,oncho
+36784,NGA,oncho
+36982,NGA,oncho
+37018,NGA,oncho
+37020,NGA,oncho
+37049,NGA,oncho
+37061,NGA,oncho
+37081,NGA,oncho
+37085,NGA,oncho
+37094,NGA,oncho
+40179,SEN,"oncho,LF"
+40180,SEN,"oncho,LF"
+40184,SEN,"oncho,LF"
+40206,SEN,"oncho,LF"
+40207,SEN,"oncho,LF"
+40208,SEN,"oncho,LF"
+40210,SEN,"oncho,LF"
+40212,SEN,"oncho,LF"
+42253,SEN,"oncho,LF"
+42254,SEN,"oncho,LF"
+42255,SEN,"oncho,LF"
+42256,SEN,"oncho,LF"
+42257,SEN,"oncho,LF"
+42258,SEN,"oncho,LF"
+42259,SEN,"oncho,LF"
+42260,SEN,"oncho,LF"
+42261,SEN,"oncho,LF"
+42262,SEN,"oncho,LF"
+42263,SEN,"oncho,LF"
+42264,SEN,"oncho,LF"
+42267,SEN,"oncho,LF"
+42268,SEN,"oncho,LF"
+44390,SSD,"oncho,LF,loa hyper"
+44396,SSD,"oncho,LF,loa hyper"
+44397,SSD,"oncho,LF,loa hyper"
+44400,SSD,"oncho,LF,loa hyper"
+44319,SSD,"oncho,LF,loa meso"
+44321,SSD,"oncho,LF,loa meso"
+44322,SSD,"oncho,LF,loa meso"
+44323,SSD,"oncho,LF,loa meso"
+44324,SSD,"oncho,LF,loa meso"
+44325,SSD,"oncho,LF,loa meso"
+44327,SSD,"oncho,LF,loa meso"
+44354,SSD,"oncho,LF,loa meso"
+44391,SSD,"oncho,LF,loa meso"
+44392,SSD,"oncho,LF,loa meso"
+44393,SSD,"oncho,LF,loa meso"
+44394,SSD,"oncho,LF,loa meso"
+44395,SSD,"oncho,LF,loa meso"
+44320,SSD,"oncho,LF,loa hypo"
+44326,SSD,"oncho,LF,loa hypo"
+44329,SSD,"oncho,LF,loa hypo"
+44331,SSD,"oncho,LF,loa hypo"
+44332,SSD,"oncho,LF,loa hypo"
+44342,SSD,"oncho,LF,loa hypo"
+44349,SSD,"oncho,LF,loa hypo"
+44351,SSD,"oncho,LF,loa hypo"
+44353,SSD,"oncho,LF,loa hypo"
+44357,SSD,"oncho,LF,loa hypo"
+44358,SSD,"oncho,LF,loa hypo"
+44361,SSD,"oncho,LF,loa hypo"
+44365,SSD,"oncho,LF,loa hypo"
+44369,SSD,"oncho,LF,loa hypo"
+44384,SSD,"oncho,LF,loa hypo"
+44385,SSD,"oncho,LF,loa hypo"
+44388,SSD,"oncho,LF,loa hypo"
+44389,SSD,"oncho,LF,loa hypo"
+44401,SSD,"oncho,LF,loa hypo"
+44338,SSD,"oncho,LF"
+44371,SSD,"oncho,LF"
+44372,SSD,"oncho,LF"
+44374,SSD,"oncho,LF"
+44375,SSD,"oncho,LF"
+44377,SSD,"oncho,LF"
+44378,SSD,"oncho,LF"
+44379,SSD,"oncho,LF"
+44380,SSD,"oncho,LF"
+44381,SSD,"oncho,LF"
+44382,SSD,"oncho,LF"
+44343,SSD,"oncho,LF"
+44344,SSD,"oncho,LF"
+44399,SSD,"oncho,LF"
+44356,SSD,"oncho,loa meso"
+44402,SSD,"oncho,loa meso"
+44403,SSD,"oncho,loa meso"
+44328,SSD,"oncho,loa hypo"
+44330,SSD,"oncho,loa hypo"
+44334,SSD,"oncho,loa hypo"
+44335,SSD,"oncho,loa hypo"
+44347,SSD,"oncho,loa hypo"
+44350,SSD,"oncho,loa hypo"
+44352,SSD,"oncho,loa hypo"
+44355,SSD,"oncho,loa hypo"
+44359,SSD,"oncho,loa hypo"
+44360,SSD,"oncho,loa hypo"
+44362,SSD,"oncho,loa hypo"
+44363,SSD,"oncho,loa hypo"
+44364,SSD,"oncho,loa hypo"
+44366,SSD,"oncho,loa hypo"
+44367,SSD,"oncho,loa hypo"
+44368,SSD,"oncho,loa hypo"
+44370,SSD,"oncho,loa hypo"
+44386,SSD,"oncho,loa hypo"
+44387,SSD,"oncho,loa hypo"
+44333,SSD,oncho
+44336,SSD,oncho
+44341,SSD,oncho
+44346,SSD,oncho
+44373,SSD,oncho
+44376,SSD,oncho
+44383,SSD,oncho
+66010,SDN,oncho
+66012,SDN,oncho
+66016,SDN,oncho
+66035,SDN,oncho
+66039,SDN,oncho
+66042,SDN,oncho
+66045,SDN,oncho
+66046,SDN,oncho
+66054,SDN,oncho
+66055,SDN,oncho
+66056,SDN,oncho
+66057,SDN,oncho
+66061,SDN,oncho
+66090,SDN,oncho
+66099,SDN,oncho
+66101,SDN,oncho
+66102,SDN,oncho
+66103,SDN,oncho
+66104,SDN,oncho
+66113,SDN,oncho
+66114,SDN,oncho
+66116,SDN,oncho
+66119,SDN,oncho
+66127,SDN,oncho
+66128,SDN,oncho
+66151,SDN,oncho
+66156,SDN,oncho
+66160,SDN,oncho
+66161,SDN,oncho
+66162,SDN,oncho
+66163,SDN,oncho
+66164,SDN,oncho
+66165,SDN,oncho
+66167,SDN,oncho
+46485,TZA,"oncho,LF"
+46533,TZA,"oncho,LF"
+46535,TZA,"oncho,LF"
+46536,TZA,"oncho,LF"
+46542,TZA,"oncho,LF"
+46544,TZA,"oncho,LF"
+46545,TZA,"oncho,LF"
+46546,TZA,"oncho,LF"
+46547,TZA,"oncho,LF"
+46549,TZA,"oncho,LF"
+46550,TZA,"oncho,LF"
+46565,TZA,"oncho,LF"
+46568,TZA,"oncho,LF"
+46582,TZA,"oncho,LF"
+46583,TZA,"oncho,LF"
+46584,TZA,"oncho,LF"
+46585,TZA,"oncho,LF"
+46586,TZA,"oncho,LF"
+46587,TZA,"oncho,LF"
+46612,TZA,"oncho,LF"
+46616,TZA,"oncho,LF"
+46618,TZA,"oncho,LF"
+46619,TZA,"oncho,LF"
+46620,TZA,"oncho,LF"
+46626,TZA,"oncho,LF"
+46628,TZA,"oncho,LF"
+46632,TZA,"oncho,LF"
+46633,TZA,"oncho,LF"
+46634,TZA,"oncho,LF"
+46635,TZA,"oncho,LF"
+46638,TZA,"oncho,LF"
+46640,TZA,"oncho,LF"
+46641,TZA,"oncho,LF"
+46644,TZA,"oncho,LF"
+46645,TZA,"oncho,LF"
+46532,TZA,oncho
+48672,TGO,"oncho,LF"
+48674,TGO,"oncho,LF"
+48676,TGO,"oncho,LF"
+48690,TGO,"oncho,LF"
+48695,TGO,"oncho,LF"
+48701,TGO,"oncho,LF"
+48705,TGO,"oncho,LF"
+48708,TGO,"oncho,LF"
+48709,TGO,"oncho,LF"
+48666,TGO,oncho
+48668,TGO,oncho
+48669,TGO,oncho
+48670,TGO,oncho
+48671,TGO,oncho
+48673,TGO,oncho
+48675,TGO,oncho
+48677,TGO,oncho
+48678,TGO,oncho
+48680,TGO,oncho
+48681,TGO,oncho
+48682,TGO,oncho
+48683,TGO,oncho
+48685,TGO,oncho
+48688,TGO,oncho
+48689,TGO,oncho
+48691,TGO,oncho
+48692,TGO,oncho
+48693,TGO,oncho
+48694,TGO,oncho
+48696,TGO,oncho
+48697,TGO,oncho
+48698,TGO,oncho
+48699,TGO,oncho
+48700,TGO,oncho
+48704,TGO,oncho
+48706,TGO,oncho
+48707,TGO,oncho
+48710,TGO,oncho
+48711,TGO,oncho
+48712,TGO,oncho
+48713,TGO,oncho
+49706,UGA,"oncho,LF"
+49707,UGA,"oncho,LF"
+49708,UGA,"oncho,LF"
+49709,UGA,"oncho,LF"
+49710,UGA,"oncho,LF"
+49711,UGA,"oncho,LF"
+49712,UGA,"oncho,LF"
+49713,UGA,"oncho,LF"
+49714,UGA,"oncho,LF"
+49715,UGA,"oncho,LF"
+49716,UGA,"oncho,LF"
+49718,UGA,"oncho,LF"
+49719,UGA,"oncho,LF"
+49721,UGA,"oncho,LF"
+49729,UGA,"oncho,LF"
+49732,UGA,"oncho,LF"
+49733,UGA,"oncho,LF"
+49734,UGA,"oncho,LF"
+49738,UGA,"oncho,LF"
+49743,UGA,"oncho,LF"
+49744,UGA,"oncho,LF"
+49746,UGA,"oncho,LF"
+49747,UGA,"oncho,LF"
+49751,UGA,"oncho,LF"
+49754,UGA,"oncho,LF"
+49755,UGA,"oncho,LF"
+49756,UGA,"oncho,LF"
+49763,UGA,"oncho,LF"
+49766,UGA,"oncho,LF"
+49767,UGA,"oncho,LF"
+49771,UGA,"oncho,LF"
+49772,UGA,"oncho,LF"
+49773,UGA,"oncho,LF"
+49779,UGA,"oncho,LF"
+49781,UGA,"oncho,LF"
+49782,UGA,"oncho,LF"
+49784,UGA,"oncho,LF"
+49792,UGA,"oncho,LF"
+49793,UGA,"oncho,LF"
+49794,UGA,"oncho,LF"
+49796,UGA,"oncho,LF"
+49797,UGA,"oncho,LF"
+49798,UGA,"oncho,LF"
+49799,UGA,"oncho,LF"
+49801,UGA,"oncho,LF"
+49802,UGA,"oncho,LF"
+49803,UGA,"oncho,LF"
+49804,UGA,"oncho,LF"
+49805,UGA,"oncho,LF"
+49810,UGA,"oncho,LF"
+49812,UGA,"oncho,LF"
+49814,UGA,"oncho,LF"
+49816,UGA,"oncho,LF"
+49817,UGA,"oncho,LF"
+49818,UGA,"oncho,LF"
+49824,UGA,"oncho,LF"
+49826,UGA,"oncho,LF"
+49827,UGA,"oncho,LF"
+49832,UGA,"oncho,LF"
+49833,UGA,"oncho,LF"
+49835,UGA,"oncho,LF"
+49836,UGA,"oncho,LF"
+49837,UGA,"oncho,LF"
+49838,UGA,"oncho,LF"
+49843,UGA,"oncho,LF"
+49717,UGA,oncho
+49720,UGA,oncho
+49722,UGA,oncho
+49723,UGA,oncho
+49724,UGA,oncho
+49725,UGA,oncho
+49726,UGA,oncho
+49727,UGA,oncho
+49728,UGA,oncho
+49730,UGA,oncho
+49731,UGA,oncho
+49735,UGA,oncho
+49736,UGA,oncho
+49737,UGA,oncho
+49739,UGA,oncho
+49740,UGA,oncho
+49741,UGA,oncho
+49742,UGA,oncho
+49745,UGA,oncho
+49748,UGA,oncho
+49749,UGA,oncho
+49750,UGA,oncho
+49752,UGA,oncho
+49753,UGA,oncho
+49757,UGA,oncho
+49758,UGA,oncho
+49760,UGA,oncho
+49761,UGA,oncho
+49762,UGA,oncho
+49764,UGA,oncho
+49765,UGA,oncho
+49768,UGA,oncho
+49769,UGA,oncho
+49770,UGA,oncho
+49774,UGA,oncho
+49775,UGA,oncho
+49776,UGA,oncho
+49777,UGA,oncho
+49778,UGA,oncho
+49780,UGA,oncho
+49783,UGA,oncho
+49785,UGA,oncho
+49786,UGA,oncho
+49787,UGA,oncho
+49788,UGA,oncho
+49789,UGA,oncho
+49790,UGA,oncho
+49791,UGA,oncho
+49795,UGA,oncho
+49800,UGA,oncho
+49806,UGA,oncho
+49807,UGA,oncho
+49808,UGA,oncho
+49809,UGA,oncho
+49811,UGA,oncho
+49813,UGA,oncho
+49815,UGA,oncho
+49819,UGA,oncho
+49820,UGA,oncho
+49821,UGA,oncho
+49823,UGA,oncho
+49828,UGA,oncho
+49829,UGA,oncho
+49830,UGA,oncho
+49834,UGA,oncho
+49839,UGA,oncho
+49840,UGA,oncho
+49841,UGA,oncho
+49842,UGA,oncho
