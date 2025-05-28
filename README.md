@@ -65,7 +65,7 @@ Load all necessary function found in the [Compiling_oncho_histories_APOC_functio
 To create the final HISTONCHO database, we need to combine the OCP and APOC intervention histories dataframes. First run the [Combining_cleaning_HISTONCHO_function](/Combining_cleaning_HISTONCHO_function.R) script to call all of the function neccessary, then run the [Combining_cleaning_HISTONCHO_script](/Combining_cleaning_HISTONCHO_script.R).
 
 ### Step 6: Plot figures 
-We now have the final HISTONCHO database compiled, we are able to plot the figures (1, 5, 6, 7 & 8) associated with the pre-print [Dixon et al.][https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1] highlighted above. Call the plotting functions in [Figures_code_HISTONCHO_functions](/Figures_code_HISTONCHO_functions.R) script and then plot using [Figures_code_HISTONCHO](/Figures_code_HISTONCHO.R) script. The plots will be saved in the [plots](/plots) folder.
+We now have the final HISTONCHO database compiled, we are able to plot the figures (1, 5, 6, 7 & 8) associated with the pre-print [Dixon et al.](https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1) highlighted above. Call the plotting functions in [Figures_code_HISTONCHO_functions](/Figures_code_HISTONCHO_functions.R) script and then plot using [Figures_code_HISTONCHO](/Figures_code_HISTONCHO.R) script. The plots will be saved in the [plots](/plots) folder.
 
 ---
 
