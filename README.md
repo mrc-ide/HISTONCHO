@@ -69,6 +69,11 @@ We now have the final HISTONCHO database compiled, we are able to plot the figur
 
 ---
 
+## R Notebook
+Examples of working with HISTONCHO, using the variables co-endemicty ("Co_endemicity") and treatment status in 2022 ("Trt_Status_2022") are available in [R Notebook: HISTONCHO Notebook - examples using the HISTONCHO dataframe and plotting Figures](/notebook_HISTONCHO_examples.Rmd), with a HTML including generated plots at [RPubs html page](https://rpubs.com/mad206/HISTONCHO_examples).
+
+---
+
 ## Contributing
 
 Code for the aligning the IUs in ESPEN has been provided by Paul Bessel. Data inputs (adapted) have been provided by Jorge Cano (ESPEN), the Federal Ministry of Health & Social Welfare (Federal Republic of Nigeria) and Republic of the Sudan Federal Ministry of Health, supported by The Carter Center and Sightsavers. Wilma A. Stolk, Raiha Browning and Claudio Fronterrè have also provided data which have been further proceesed to include as data inputs in the [input data](/input data) folder.
