@@ -1,0 +1,155 @@
+---
+title: 'HISTONCHO Notebook: examples using the HISTONCHO dataframe and plotting Figures'
+output:
+  html_document:
+    self_contained: true
+  pdf_document: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook, demonstrating how to use the HISTONCHO dataframe. When you execute code within the notebook, the results appear beneath the code. This notebook will show how to plot figures associated with the variable i) Co-endemicity and ii) Ivermectin mass drug administration (MDA) treatment status in 2022 from HISTONCHO. 
+
+First, we need to load in the HISTONCHO dataframe, downloading from the Zenodo repository, saving locally and loading as:
+
+```{r load-zenodo-data}
+zenodo_url <- "https://zenodo.org/records/15390119/files/HISTONCHO_database_120525.csv"
+local_file <- "data/histoncho_data.csv"
+
+if (!file.exists(local_file)) {
+  dir.create("data", showWarnings = FALSE)
+  download.file(zenodo_url, local_file, mode = "wb")
+}
+
+histoncho <- read.csv(local_file, stringsAsFactors = FALSE)
+```
+Next, we need to load in the function associated with analysing the variables and plotting figures (this will load functions to plot all figures associated with the HISTONCHO paper):
+
+
+```{r load-histoncho-functions, message=FALSE}
+source("https://raw.githubusercontent.com/mrc-ide/HISTONCHO/main/Figures_code_HISTONCHO_functions.R")
+
+```
+Load relevant libraries:
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+```
+
+## Setting up maps
+To plot maps associated with the variables, we need to extract the relevant shapefiles as follows (by downloading & unzipping the data directly from the GitHub repo):
+
+```{r load-shapefiles, message=FALSE}
+repo_zip <- "https://github.com/mrc-ide/HISTONCHO/archive/refs/heads/main.zip"
+data_dir <- "input_data"
+zip_file <- tempfile(fileext = ".zip")
+
+if (!dir.exists(data_dir)) {
+  download.file(repo_zip, zip_file, quiet = TRUE)
+  unzip(zip_file)
+  
+  # suppress return value
+  invisible(
+    file.rename("HISTONCHO-main/input data", data_dir)
+  )
+}
+
+shapefile_input <- file.path(data_dir, "African countries", "Africa_Boundaries.shp")
+oceans_shp_input <- file.path(data_dir, "oceans_shapefile", "ne_10m_ocean.shp")
+ESPEN_IUs_shape_input <- file.path(data_dir, "ESPEN_IU_shapefile", "ESPEN_IU_2021.shp")
+
+africa_sf <- st_read(shapefile_input, quiet = TRUE)
+oceans_sf <- st_read(oceans_shp_input, quiet = TRUE)
+espen_ius_sf <- st_read(ESPEN_IUs_shape_input, quiet = TRUE)
+
+cat("✔ Shapefiles successfully imported\n")
+```
+We now have everything to set up the map figures, so we can run the main function to first merge HISTONCHO with the ESPEN shapefiles, in addition to processing the other shapefiles to help with plotting maps (this will take a little time to run): 
+
+```{r process-shapefiles-merge}
+# Base path expected by HISTONCHO functions
+base_path <- ""
+
+# Countries to include
+countries_toinclude <- c(
+  "Angola", "Burundi", "Benin", "Burkina Faso", "Central African Republic",
+  "Côte d'Ivoire", "Cameroon", "Democratic Republic of the Congo",
+  "Republic of Congo", "Ethiopia", "Gabon", "Ghana", "Guinea",
+  "Guinea-Bissau", "Liberia", "Mali", "Malawi", "Niger", "Nigeria",
+  "Sudan", "Senegal", "Sierra Leone", "South Sudan", "Chad",
+  "Togo", "Tanzania", "Uganda"
+)
+
+# Run processing function
+processed_out <- processing_shapefiles_merge(
+  histoncho,
+  africa_sf,
+  oceans_sf,
+  countries_toinclude,
+  espen_ius_sf
+)
+
+# Unpack outputs
+african_countries        <- processed_out[[1]]
+oceans_shp               <- processed_out[[2]]
+african_centroids_oncho  <- processed_out[[3]]
+ESPEN_IUs_ALL             <- processed_out[[4]]
+HISTONCHO_shape           <- processed_out[[5]]
+HISTONCHO_2022            <- processed_out[[6]]
+
+cat("✔ Shapefiles processed and merged successfully\n")
+```
+
+## Example 1: Co-endemicity variable
+
+HISTONCHO is now merged with the ESPEN shapefiles (IU-level), and the other shapefiles have been prepared for plotting maps. 
+
+We will now call a function to plot maps at the IU-level. In this first example, we will plot the co-endemicity variable ("Co_endemicity") in HISTONCHO, to show the distribution of co-endemicity (onchocerciasis, lymphatic filariasis and loiasis) across IUs: 
+
+```{r run-expfig1, message=FALSE}
+expFig1_out <- process_and_plot_fig7(
+  african_countries,
+  oceans_shp,
+  african_centroids_oncho,
+  ESPEN_IUs_ALL,
+  HISTONCHO_shape,
+  HISTONCHO_2022
+)
+
+cat("✔ Example figure 1 objects created\n")
+
+expFig1_out[[1]] # plot the map!
+```
+
+Alongside the map, we can plot the i) frequency distribution of across all IUs and ii) frequency distribution of IUs within each country for the variable of interest, in this case, the Co-endemicity variable. These relate to panels B and C in the figures found in Dixon et al.
+
+
+```{r plot_expfig1bc, message=FALSE}
+expFig1_out[[2]] # plot the frequency distributions!
+```
+## Example 2: Ivermectin mass drug administration (MDA) treatment status in 2022
+
+We will now call a function to plot maps at the IU-level, this time for the variable assigning the IVM MDA treatment status in 2022 ("Trt_Status_2022") from HISTONCHO across IUs: 
+
+```{r run-expfig2, message=FALSE}
+expFig2_out <- process_and_plot_fig8(
+  african_countries,
+  oceans_shp,
+  african_centroids_oncho,
+  ESPEN_IUs_ALL,
+  HISTONCHO_shape,
+  HISTONCHO_2022
+)
+
+cat("✔ Example figure 2 objects created\n")
+
+expFig2_out[[1]] # plot the map!
+```
+As for example 1, we can plot the i) frequency distribution of across all IUs and ii) frequency distribution of IUs within each country for the variable of interest, in this case, the Trt_Status_2022 variable. These relate to panels B and C in the figures found in Dixon et al.
+
+```{r plot_expfig2bc, message=FALSE}
+expFig2_out[[2]] # plot the frequency distributions!
+```
+
+This concludes the notebook, focusing on two example variables from HISTONCHO. The other variables plotted in Dixon et al. can be replicated using the same code chunks (modifying the figure number). Variables not analysed in Dixon et al. will need to be analysed separately, with new functions created, however the code contained here, with the underlying functions can be used to develop this new code.
