@@ -11,16 +11,18 @@ processing_shapefiles_merge <- function(df_input, shapefile_input, oceans_shp_in
   
   df <- subset(df_input, Year == 2022) # subset HISTONCHO for Year = 2022
   
-  # Read the African countries shapefile
-  shapefile_path <- file.path(base_path, shapefile_input)
-  african_countries <- st_read(dsn = shapefile_path)
+  ## Read the African countries shapefile (if required unhash the code below)
+  #shapefile_path <- file.path(base_path, shapefile_input)
+  #african_countries <- st_read(dsn = shapefile_path)
+  african_countries <- africa_sf
   
   # View the attributes and structure of the shapefile (optional)
   summary(african_countries)
   
-  # Read the oceans shapefile
-  oceans_shp_path <- file.path(base_path, oceans_shp_input)
-  oceans_shp <- st_read(oceans_shp_path)
+  ## Read the oceans shapefile (if required unhash the code below)
+  #oceans_shp_path <- file.path(base_path, oceans_shp_input)
+  #oceans_shp <- st_read(oceans_shp_path)
+  oceans_shp <- oceans_sf
   
   # Calculate the centroids for the african_countries shapefile
   # Step 1: Validate and repair the geometry of african_countries
@@ -39,8 +41,12 @@ processing_shapefiles_merge <- function(df_input, shapefile_input, oceans_shp_in
     ))
   
   # maps & frequency distributions ~ country #
-  ESPEN_IUs_shape_path <- file.path(base_path, ESPEN_IUs_shape_input)
-  ESPEN_IUs <- st_read(ESPEN_IUs_shape_path )
+  
+  ## Read the ESPEN shapefile (if required unhash the code below)
+  #ESPEN_IUs_shape_path <- file.path(base_path, ESPEN_IUs_shape_input)
+  #ESPEN_IUs <- st_read(ESPEN_IUs_shape_path )
+  ESPEN_IUs <- espen_ius_sf
+  
   all_countries <- unique(df$ADMIN0ISO3)
   ESPEN_IUs_ALL <- ESPEN_IUs[which((ESPEN_IUs$ADMIN0ISO3 %in% all_countries)),]
   st_geometry_type(ESPEN_IUs_ALL)
