@@ -34,7 +34,7 @@ This Readme provides guidance for using this repository for compiling the HISTON
 preparing figures in support of the pre-print publication:
 
 
-[Dixon MA, Walker M, Ramani A, Coalson JE, Griswold E, Noland GS, Tata A, Makata E, Ali AMA, Bessell P, Fronterrè C, Browning R, Stolk WA, Basáñez M-G. HISTONCHO: A database of intervention histories for onchocerciasis control & elimination in sub-Saharan Africa. MedRxiv. 2025. Preprint available at: https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1](https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1)
+[Dixon MA, Walker M, Ramani A, Coalson JE, Griswold E, Noland GS, Tata A, Makata E, Ali AMA, Bessell P, Fronterrè C, Browning R, Stolk WA, Basáñez M-G. HISTONCHO: A dataset of intervention histories for onchocerciasis control & elimination in sub-Saharan Africa. Sci Data (2026). Preprint available at: https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1](https://www.medrxiv.org/content/10.1101/2025.05.19.25327763v1)
 
 ---
 
