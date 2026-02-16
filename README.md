@@ -29,7 +29,7 @@ output: html_document
 
 ## Overview
 
-A database of intervention histories for onchocerciasis control and elimination in sub-Saharan Africa. 
+A dataset of intervention histories for onchocerciasis control and elimination in sub-Saharan Africa. 
 This Readme provides guidance for using this repository for compiling the HISTONCHO dataframe and 
 preparing figures in support of the pre-print publication:
 
